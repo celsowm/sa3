@@ -198,3 +198,33 @@ fingerprints are in [SA2_MATH_C_DECOMP_BATCH.md](SA2_MATH_C_DECOMP_BATCH.md).
 `NONMATCH`; therefore **14 C recoveries are not 14 matching conversions**.
 Historical ~77.97% matching code remains unmodified. Only a pinned agbcc
 build and full `make compare` may promote individual functions.
+
+
+## Source-level math completion — 18/18 recovered, runtime relocation corrected
+
+**2026-10-10 milestone:** All 18 `src/game/math.c` mathematical `NONMATCH`
+fallbacks now have non-empty, typed, source-level C implementations.
+The last four recovered functions are cubic Bezier (`80832FC`), cubic
+Hermite (`808343C`), Rodrigues axis/angle rotation (`8084A24`), and
+look-at 3D matrix basis (`8084C70`). They retain the ASM fallback
+because full agbcc ROM matching has not run.
+
+A local GCC native mirror of these four routines passed 22,000
+deterministic sample comparisons; equivalent ARMv4T Thumb source
+compiled with Clang. The repository's extraction-based native tests
+now include all 18 bodies but have not run on GitHub Actions.
+
+**Critical ROM audit correction:** function suffixes `808xxxxx` are
+inherited from SA2, not actual SA3 European ROM addresses. Four
+independently verified unique Thumb entry signatures established
+a constant relocation of `+0x2BAD8`. A metadata-only validator and
+18 corrected ROM reference fingerprints are documented in
+[SA2_MATH_ROM_RELOCATION.md](SA2_MATH_ROM_RELOCATION.md). Earlier
+unrelocated addresses/hashes in the math batch report have been
+corrected. The upper-bound intervals total 6,640 bytes, not yet
+matched C.
+
+**Next priority:** obtain the pinned original agbcc build, reproduce
+`make compare`, then match the smallest of these 18 routines first
+while verifying exact function layout and whole-ROM SHA. The historical
+77.97% figure has **not** improved until that succeeds.
