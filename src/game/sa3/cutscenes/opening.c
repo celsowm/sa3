@@ -47,8 +47,15 @@ void sub_80A2700(void);
 void sub_80A217C(GameIntro *intro);
 void sub_80A22E0(GameIntro *intro);
 void sub_80A23A4(void);
+void sub_80A2774(void);
+void sub_80A27EC(void);
+void sub_80A2978(s16 arg0);
+void sub_80A2A40(s16 arg0);
+void sub_80A2D80(void);
+s16 sub_80A2DD8(void);
 
 extern ColorRaw sub_80C4C0C(ColorRaw color);
+extern const u16 Palette_unknown_424[];
 void TaskDestructor_GameIntro(struct Task *t);
 
 void CreateGameIntroState(s16 state)
@@ -323,30 +330,108 @@ void Task_170_GameIntroInit(void)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2700.inc", void sub_80A2700(void))
+void sub_80A2700(void)
 {
-}
-END_NONMATCH
+    GameIntro *intro = TASK_DATA(gCurTask);
+    s32 res;
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2774.inc", void sub_80A2774(void))
-{
+    gDispCnt = 0x1641;
+
+    res = sub_80A2DD8();
+    if (res == 0) {
+        sub_80A2978(intro->unk13E);
+        sub_80A2A40(0);
+        sub_80A2D80();
+        sub_80A23A4();
+
+        if (intro->unk13C > 0) {
+            intro->unk13C--;
+        } else {
+            intro->unk13C = res;
+            gCurTask->main = sub_80A2774;
+        }
+    }
 }
-END_NONMATCH
+
+void sub_80A2774(void)
+{
+    GameIntro *intro = TASK_DATA(gCurTask);
+
+    if (sub_80A2DD8() == 0) {
+        sub_80A2978(intro->unk13E >> 1);
+        sub_80A2A40(intro->unk13C >> 3);
+        sub_80A2D80();
+        sub_80A23A4();
+
+        if (++intro->unk13C < 64) {
+            if (intro->unk13C > 32) {
+                intro->unk13E++;
+            }
+        } else {
+            intro->unk13E++;
+            sub_80A2A40(7);
+            gCurTask->main = sub_80A27EC;
+        }
+    }
+}
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A27EC.inc", void sub_80A27EC(void))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2978.inc", void sub_80A2978(void))
+NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2978.inc", void sub_80A2978(s16 arg0))
 {
+    GameIntro *intro = TASK_DATA(gCurTask);
+    s32 half;
+    s32 sum;
+    s16 t;
+
+    if (arg0 < 256) {
+        s32 off = ((arg0 + 32) >> 4) - 4;
+        intro->sub[0].unk8 = intro->s.y = intro->unk136 - off;
+        off = (arg0 >> 4) - 4;
+        intro->sub[1].unk8 = intro->s2.y = intro->unk136 - off;
+        half = arg0 >> 1;
+        intro->sub[0].unk6 = intro->s.x = arg0 + (half + 130);
+
+        sum = half + arg0;
+        t = 224 - sum;
+        if (t > 0) {
+            intro->sub[0].unk2 = -t;
+            intro->sub[0].unk4 = t;
+        }
+
+        off = (arg0 >> 2) - 100;
+        intro->sub[1].unk6 = intro->s2.x = arg0 * 2 - off;
+
+        t = 256 - sum;
+        if (t > 0) {
+            intro->sub[1].unk2 = -t;
+            intro->sub[1].unk4 = t;
+        }
+    }
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2A40.inc", void sub_80A2A40(void))
+void sub_80A2A40(s16 arg0)
 {
+    const u16 *pal;
+    s16 i;
+
+    if (arg0 < 0) {
+        arg0 = 0;
+    } else if (arg0 > 7) {
+        arg0 = 7;
+    }
+
+    pal = &Palette_unknown_424[arg0 * 32];
+    for (i = 0; i < 32; i++) {
+        gBgPalette[i] = sub_80C4C0C(pal[i]);
+    }
+
+    gFlags |= FLAGS_UPDATE_BACKGROUND_PALETTES;
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_170_80A2A9C.inc", void Task_170_80A2A9C(void))
 {
@@ -378,7 +463,7 @@ NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2D80.inc", void su
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2DD8.inc", void sub_80A2DD8(void))
+NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2DD8.inc", s16 sub_80A2DD8(void))
 {
 }
 END_NONMATCH
