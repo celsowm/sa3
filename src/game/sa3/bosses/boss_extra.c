@@ -6,6 +6,7 @@
 #include "game/shared/stage/camera.h"
 #include "game/shared/stage/player.h"
 #include "game/shared/stage/player_callbacks.h"
+#include "constants/move_states.h"
 #include "game/sa3/bosses/eggman_escape.h" // SetFixedRandomIfTimeAttackMode
 
 typedef struct {
@@ -20,7 +21,7 @@ typedef struct {
     /* 0x001 */ u8 unk1;
     /* 0x002 */ u8 filler2[0x2];
     /* 0x004 */ s16 unk4;
-    /* 0x006 */ u16 unk6;
+    /* 0x006 */ s16 unk6;
     /* 0x008 */ s16 unk8;
     /* 0x00A */ u8 unkA;
     /* 0x00B */ u8 fillerB[0x1];
@@ -48,22 +49,34 @@ typedef struct {
     /* 0x048 */ s32 unk48;
     /* 0x04C */ s32 unk4C;
     /* 0x050 */ u8 filler50[0x8];
-    /* 0x058 */ PlayerUnk148_A unk58;
+    /* 0x058 */ u8 unk58[7];
+    /* 0x05F */ u8 unk5F;
+    /* 0x060 */ u8 filler60[0x8];
     /* 0x068 */ u8 unk68[4];
     /* 0x06C */ void *tiles6C;
     /* 0x070 */ u32 unk70;
     /* 0x074 */ void *tiles74;
-    /* 0x078 */ u8 filler78[0x2C];
+    /* 0x078 */ u8 filler78[0x24];
+    /* 0x09C */ s32 qX;
+    /* 0x0A0 */ s32 qY;
     /* 0x0A4 */ s32 unkA4;
     /* 0x0A8 */ s32 unkA8;
     /* 0x0AC */ u8 fillerAC[0x4];
     /* 0x0B0 */ s32 unkB0;
     /* 0x0B4 */ s32 unkB4;
-    /* 0x0B8 */ u8 fillerB8[0x35];
+    /* 0x0B8 */ u16 unkB8;
+    /* 0x0BA */ u8 fillerBA[0x33];
     /* 0x0ED */ u8 unkED;
-    /* 0x0EE */ u8 fillerEE[0x1];
-    /* 0x0EF */ s8 unkEF;
-    /* 0x0F0 */ u8 fillerF0[0x1C];
+    /* 0x0EE */ u8 unkEE;
+    /* 0x0EF */ u8 unkEF;
+    /* 0x0F0 */ s16 unkF0;
+    /* 0x0F2 */ u8 fillerF2[0x2];
+    /* 0x0F4 */ s32 unkF4;
+    /* 0x0F8 */ s32 unkF8;
+    /* 0x0FC */ s32 unkFC;
+    /* 0x100 */ u8 filler100[0x8];
+    /* 0x108 */ u8 unk108;
+    /* 0x109 */ u8 filler109[0x3];
     /* 0x10C */ ExtraBossPart parts[4];
     /* 0x16C */ u8 filler16C[0x220];
     /* 0x38C */ Sprite s38C;
@@ -71,7 +84,8 @@ typedef struct {
     /* 0x454 */ Sprite s454;
     /* 0x47C */ u8 filler47C[0x398];
     /* 0x814 */ Sprite s814;
-    /* 0x83C */ u8 filler83C[0x3C];
+    /* 0x83C */ SpriteTransform tf83C;
+    /* 0x848 */ u8 filler848[0x30];
 } ExtraBoss; /* 0x878 */
 /* STRUCT:ExtraBoss END */
 
@@ -94,6 +108,7 @@ void sub_80862D8(ExtraBoss *boss);
 void sub_8084EB4(ExtraBoss *boss);
 void sub_8081EFC(ExtraBoss *boss);
 void sub_8087174(ExtraBoss *boss);
+void sub_8086FF8(ExtraBoss *boss, u8 arg1);
 
 extern void (*const gUnknown_08E2ED50[])(ExtraBoss *);
 extern const u16 gUnknown_080D5D0C[][2];
@@ -139,7 +154,7 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8081C80.inc", void sub_80
     SetFixedRandomIfTimeAttackMode();
     boss->p28 = &gPlayers[PLAYER_1];
     boss->p2C = &gPlayers[PLAYER_2];
-    gPlayers[PLAYER_1].unk148.ptr = (PlayerUnk148 *)&boss->unk58;
+    gPlayers[PLAYER_1].unk148.ptr = (PlayerUnk148 *)boss->unk58;
     boss->p2C->unk148.ptr = (PlayerUnk148 *)&boss->unk68;
     boss->unk70 = 0;
     sub_80853D8(boss);
@@ -226,11 +241,108 @@ void Task_878_2_8081E74(void)
 
 NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8081EFC.inc", void sub_8081EFC(ExtraBoss *boss))
 {
+    Player *p;
+
+    if (gStageData.rings == 0) {
+        if (gStageData.unk4 != 7) {
+            p = boss->p28;
+            if (!(p->moveState & MOVESTATE_DEAD)) {
+                SetPlayerCallback(p, sub_80105F0);
+            }
+
+            p = boss->p2C;
+            if (!(p->moveState & MOVESTATE_DEAD)) {
+                SetPlayerCallback(p, sub_80105F0);
+            }
+        }
+
+        if (boss->unk5F == 1) {
+            boss->unk5F++;
+            boss->unk4 = 1;
+            boss->unk8 = 0;
+            boss->unk1 = 7;
+            boss->unkD = boss->unkC;
+        }
+    } else if (boss->unk0 != 0) {
+        if (gStageData.unk4 == 7) {
+            boss->unk1 = gStageData.unk4;
+            return;
+        }
+
+        p = boss->p28;
+        if (!(p->moveState & MOVESTATE_DEAD)) {
+            if (--boss->unk6 == 0) {
+                boss->unk6 = 60;
+                if (--gStageData.rings == 0) {
+                    SetPlayerCallback(p, sub_80105F0);
+                    SetPlayerCallback(boss->p2C, sub_80105F0);
+                }
+            }
+        }
+    }
 }
 END_NONMATCH
 
 NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8081FBC.inc", void sub_8081FBC(ExtraBoss *boss))
 {
+    Sprite *s;
+    SpriteTransform *tf;
+
+    if (boss->unk1 != 6) {
+        boss->qX = Q(gCamera.x + 200);
+        boss->qY = Q(120);
+        boss->unkF4 = Q(gCamera.x + 120);
+        boss->unkF8 = Q(120);
+        boss->unkB0 = Q(120);
+        boss->unkB4 = 0;
+        boss->unk108 = 1;
+    } else {
+        s32 x = Q(gCamera.x + 120);
+        s32 y;
+        boss->qX = x;
+        y = Q(gCamera.y + 80);
+        boss->qY = y;
+        boss->unkF4 = x;
+        boss->unkF8 = y;
+        boss->unkB0 = 0;
+        boss->unkB4 = 0;
+        boss->unk108 = 2;
+    }
+
+    boss->unkFC = 0;
+    boss->unkB8 = 0;
+    boss->unkA4 = Q(4);
+    boss->unkEE = 0;
+    boss->unkEF = 0;
+    boss->unkF0 = 0;
+    sub_8086FF8(boss, 0);
+
+    s = &boss->s38C;
+    tf = &boss->tf83C;
+    s->tiles = VramMalloc(128);
+    s->anim = 1277;
+    s->variant = 0;
+    s->oamFlags = SPRITE_OAM_ORDER(10);
+    s->animCursor = 0;
+    s->qAnimDelay = 0;
+    s->prevVariant = -1;
+    s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+    s->palId = 0;
+    s->hitboxes[0].index = -1;
+    s->frameFlags = 0x1000;
+
+    if (boss->unk1 != 6) {
+        s->frameFlags |= 0x2A;
+    }
+
+    s->x = I(boss->qX) - gCamera.x;
+    s->y = I(boss->qY) - gCamera.y;
+    tf->rotation = boss->unkB8;
+    tf->x = s->x;
+    tf->y = s->y;
+    tf->qScaleX = Q(1);
+    tf->qScaleY = Q(1);
+    UpdateSpriteAnimation(s);
 }
 END_NONMATCH
 
@@ -239,13 +351,83 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_808211C.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082388.inc", void sub_8082388(ExtraBoss *boss))
+void sub_8082388(ExtraBoss *boss)
 {
+    Sprite *s = &boss->s38C;
+    SpriteTransform *tf = &boss->tf83C;
+
+    switch (boss->unk108) {
+        case 1:
+            s->x = I(boss->qX) - gCamera.x;
+            s->y = I(boss->qY) - gCamera.y;
+            tf->rotation = boss->unkB8;
+            tf->x = s->x;
+            tf->y = s->y;
+            TransformSprite(s, tf);
+            UpdateSpriteAnimation(s);
+            DisplaySprite(s);
+            break;
+
+        case 2:
+            s->x = I(boss->qX) - gCamera.x;
+            s->y = I(boss->qY) - gCamera.y;
+            UpdateSpriteAnimation(s);
+            DisplaySprite(s);
+            break;
+    }
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082428.inc", void sub_8082428(ExtraBoss *boss))
 {
+    Sprite *s = &boss->s38C;
+
+    switch (boss->unkEF) {
+        case 50:
+            boss->unkF0 = 6;
+            s->anim = 1277;
+            s->variant = 1;
+            boss->unkEF++;
+            break;
+
+        case 51:
+            if (--boss->unkF0 == 0) {
+                s->anim = 1277;
+                s->variant = 2;
+                boss->unkEF++;
+            }
+            break;
+
+        case 52:
+            break;
+
+        case 100:
+            boss->unkF0 = 6;
+            s->anim = 1277;
+            s->variant = 1;
+            boss->unkEF++;
+            break;
+
+        case 101:
+            if (--boss->unkF0 == 0) {
+                s->anim = 1277;
+                s->variant = 0;
+                boss->unkEF++;
+            }
+            break;
+
+        case 102:
+            boss->unkEF = 0;
+            break;
+
+        case 150:
+            boss->unk108 = 2;
+            s->anim = 1287;
+            s->variant = 0;
+            s->oamFlags = SPRITE_OAM_ORDER(19);
+            s->frameFlags = 0x1000;
+            boss->unkEF++;
+            break;
+    }
 }
 END_NONMATCH
 
