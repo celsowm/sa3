@@ -111,3 +111,60 @@ All six range hashes were computed privately on the verified original European R
 - For `sa2__sub_808477C`, the depth divisor is a **wrapped 32-bit dot product** followed by signed arithmetic right shift and division; the projected coordinates use **signed 64-bit intermediate products**. Division by zero is an original precondition; do not silently invent different behavior.
 
 The recommended next match attempts, once `agbcc` is available, are the smaller isolated `sa2__sub_80842E4`, `sa2__sub_808442C` and `sa2__sub_80851E0`, then the heavier in-place and perspective routines. Promote each C implementation individually only after full ROM compare passes.
+
+
+## Third source-level batch — two original-ASM edge cases (2026-10-10)
+
+`src/game/math.c` now has **14 non-empty C implementations among 18
+`NONMATCH` math functions**, verified by inspecting the fork's actual
+`NONMATCH` macro bodies. The exact European ROM remains the oracle;
+its SHA-1 is `685af3a2dc0f1b3f8922e73ec42c1dc92e210e39`.
+
+| Source symbol | Algorithm / important original behavior | EU original ROM interval | SHA-256 of original interval |
+|---|---|---|---|
+| `sa2__sub_8084EE0` | Q6.10 inverse/adjugate; **three 16-bit writes at offsets 0x14, 0x16, 0x18**, despite the current type declaring 32-bit translation members | `0x08084EE0..0x080851E0` (768 bytes) | `1f08506cb704f549f8f8ecc63cf59c3dbb3228c59baecacc5abde1fba8cf318f` |
+| `sa2__sub_808458C` | Signed 64-bit quotient/projection; the **last product `z*unk1C` is the numerator**, while the accumulated dot product plus `0x100000`, shifted by 10, forms the divisor; input is re-read per output component to respect aliasing | `0x0808458C..0x0808477C` (496 bytes) | `d00a2a00a260548c87137ad273509188d52a184179f6dadf579582c91f879535` |
+
+The original ROM intervals total **1,264 bytes**, including possible
+literal-pool data and alignment. They are **NOT newly matching C bytes**.
+
+### What was tested
+
+- Both source-level bodies were implemented in their real
+  `NONMATCH` blocks in `src/game/math.c`. No original `.inc` ASM
+  fallback or symbol was removed, so the default EU matching build is
+  protected from an unverified C-codegen change.
+- The inverse's equivalent C code compiled on x86-64 GCC with
+  `-O2 -fwrapv -Werror` and as an ARMv4T/Thumb ELF object with Clang 17.
+  A local mirror passed **8,000 independent signed-integer formula cases**,
+  comparing the **complete 32-byte matrix memory image** after all stores.
+- The projection's equivalent C code likewise compiled on x86-64 GCC and
+  ARMv4T/Thumb Clang 17. A local mirror passed **20,000 independent cases**,
+  including `output == input` aliasing and 32-bit result truncation.
+- The committed `scripts/tests/test_math_c_fallbacks.py` extracts the
+  **real source C bodies** and adds two deterministic native tests
+  (3,000 inverse + 6,000 projection attempts). These latest committed tests
+  **have not been run in GitHub Actions** here. Local mirror testing is
+  additional evidence, not a claimed compiled `agbcc` match.
+- The fixed-point projection revealed an important test-only pitfall:
+  Python's unbounded integer arithmetic must explicitly sign-truncate
+  both the row result and shifted intermediate to ARM **32-bit values**.
+  Without that, otherwise correct aliased outputs can appear wrong.
+
+### Remaining empty mathematical C fallbacks
+
+1. `sa2__sub_80832FC` — fixed-point 64-bit polynomial interpolation; current
+   signature in C is a placeholder, needs exact parameters and return type.
+2. `sa2__sub_808343C` — related 64-bit interpolation; ABI still unknown.
+3. `sa2__sub_8084A24` — axis/angle matrix initializer with an unusual
+   zeroing loop and additional writes **beyond the first 32 bytes** of its
+   pointer; map the true destination capacity before reconstructing.
+4. `sa2__sub_8084C70` — basis construction from two positions and direction,
+   with conditional normalization; recover complete ABI and threshold cases.
+
+This brings the source work to **14/18 mathematical `NONMATCH` bodies
+implemented in C**. The original **~77.97% ROM matching percentage has not
+changed**, since `agbcc` and a verified end-to-end `make compare` are
+still missing here. The next priority is either independently recovering
+these final four routines or running the pinned toolchain to promote
+individual existing fallbacks to verified C matches.
