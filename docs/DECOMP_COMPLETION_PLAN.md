@@ -246,10 +246,11 @@ tool and three offline tests are committed:
 - `scripts/rom_region_compare.py`
 - `scripts/tests/test_rom_region_compare.py`
 
-**M0 remains BLOCKED solely at the build/hash verification gate** in this
+**M0 remains INCOMPLETE; build/hash verification is currently BLOCKED** in this
 sandbox: compatible agbcc and ARM binutils are not installed, and direct
 network access from the build container is restricted. The input ROM itself
-is now **verified and available**, so it is no longer the blocker. No
+is now **verified and available**, so the ROM itself is no longer the blocker.
+The remaining M0 inventory and CI gates also still need verification. No
 claim of successful compilation, 100% match, increased matching percentage,
 or emulator runtime validation has been made. Next work: provision exact
 toolchain, reproduce `make compare`, measure the current map, then start
