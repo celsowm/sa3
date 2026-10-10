@@ -109,7 +109,7 @@ static int check_queue_reset(void) {
         }
         for (i = 0; i < 4; ++i) {
             CHECK(gPlayers[i].bytes[0x2C] ==
-                  (((u8)(frame + 19 * i) & (u8)~0x39) | 0x20));
+                  (((u8)(frame + 19 * i) & (u8)-0x39) | 0x20));
             for (j = 0; j < sizeof gPlayers[i].bytes; ++j) {
                 if (j != 0x2C) CHECK(gPlayers[i].bytes[j] == 0xB9);
             }
