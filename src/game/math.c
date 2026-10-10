@@ -362,7 +362,23 @@ NONMATCH("asm/non_matching/game/math/sa2__unused_sub_80842E4.inc",
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808442C.inc", void sa2__sub_808442C()) { }
+// Apply an affine transform to a Q6.10 vector in place.
+// The ASM deliberately feeds its newly written x into y, then new x/y
+// into z. A temporary three-vector would change the original semantics.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808442C.inc",
+         void sa2__sub_808442C(s32 *vector, struct UNK_8085F1C_1 *matrix))
+{
+    s32 x = vector[0];
+    s32 y = vector[1];
+    s32 z = vector[2];
+
+    vector[0] = (((s64)x * matrix->unk2[0]) + ((s64)y * matrix->unk2[3])
+                 + ((s64)z * matrix->unk2[6]) + matrix->unk14) >> 10;
+    vector[1] = (((s64)vector[0] * matrix->unk2[1]) + ((s64)y * matrix->unk2[4])
+                 + ((s64)z * matrix->unk2[7]) + matrix->unk18) >> 10;
+    vector[2] = (((s64)vector[0] * matrix->unk2[2]) + ((s64)vector[1] * matrix->unk2[5])
+                 + ((s64)z * matrix->unk2[8]) + matrix->unk1C) >> 10;
+}
 END_NONMATCH
 
 NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808458C.inc", void sa2__sub_808458C()) { }
