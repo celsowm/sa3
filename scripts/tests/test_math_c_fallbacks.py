@@ -534,7 +534,9 @@ class MathFallbackNativeTests(unittest.TestCase):
                 for row in range(3):
                     dot = sum(expected_input[k] * matrix.unk2[row * 3 + k]
                               for k in range(3))
-                    result = ((dot >> 10) * quotient) >> 10
+                    scaled_dot = ((dot >> 10) + (1 << 31)) % (1 << 32) - (1 << 31)
+                    raw = (scaled_dot * quotient) >> 10
+                    result = (raw + (1 << 31)) % (1 << 32) - (1 << 31)
                     expected.append(result)
                     if alias:
                         expected_input[row] = result
