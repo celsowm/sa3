@@ -66,7 +66,6 @@ void sub_802789C() { }
 void sub_80275B8(u32 level, u8 param1, u8 param2) { }
 void sub_8027538() { }
 
-void CreateCharacterSelectMultiplayer() { }
 void MultiSio_SendPlayerName() { }
 void sub_8023A88() { }
 void sub_8023BB0() { }
