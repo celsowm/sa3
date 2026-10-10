@@ -247,13 +247,13 @@ void Task_80380FC(void)
 // (98.00%) https://decomp.me/scratch/qgAUG
 // Result
 // - TRUE: Picked up
-NONMATCH("asm/non_matching/game/interactables/omochao__OmochaoPickUp.inc", bool32 OmochaoPickUp(void))
+bool32 OmochaoPickUp(void)
 {
+    Player *p = NULL;
     u8 sb = 0;
     Omochao *omochao = TASK_DATA(gCurTask);
     Sprite *s = &omochao->s;
     MapEntity *me = omochao->base.me;
-    Player *p;
     s16 worldX, worldY;
     u8 i;
 
@@ -307,7 +307,6 @@ NONMATCH("asm/non_matching/game/interactables/omochao__OmochaoPickUp.inc", bool3
 
     return FALSE;
 }
-END_NONMATCH
 
 void sub_80384B0(Sprite *s, Sprite *s2)
 {
