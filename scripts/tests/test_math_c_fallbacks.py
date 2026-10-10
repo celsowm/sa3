@@ -29,6 +29,7 @@ FUNCTIONS = (
     "sa2__unused_sub_8084090",
     "sa2__unused_sub_80842E4",
     "sa2__unused_sub_808442C",
+    "sa2__unused_sub_808477C",
     "sa2__unused_sub_80851E0",
 )
 C_HEADER = r"""
@@ -179,6 +180,9 @@ class MathFallbackNativeTests(unittest.TestCase):
         in_place_vector_fn.argtypes = [ctypes.POINTER(ctypes.c_int32),
                                         ctypes.POINTER(Matrix)]
         in_place_vector_fn.restype = None
+        project_fn = cls.library.sa2__sub_808477C
+        project_fn.argtypes = [ctypes.POINTER(Matrix), ctypes.POINTER(ctypes.c_int32)]
+        project_fn.restype = None
 
     @classmethod
     def tearDownClass(cls):
@@ -403,6 +407,36 @@ class MathFallbackNativeTests(unittest.TestCase):
                            + expected_y * matrix.unk2[5]
                            + original_z * matrix.unk2[8] + matrix.unk1C) >> 10)
             self.assertEqual(list(values), [expected_x, expected_y, expected_z])
+
+
+    def test_project_vector_700_cases(self):
+        """808477C: 32-bit wrapped depth and signed 64-bit row dot-products."""
+        rng = random.Random(0x477C)
+        done = 0
+        for _ in range(800):
+            xyz = [rng.randrange(-100000, 100001) for _ in range(3)]
+            mat = Matrix()
+            for k in range(9):
+                mat.unk2[k] = rng.randrange(-1000, 1001)
+            for name in ("unk14", "unk18", "unk1C"):
+                setattr(mat, name, rng.randrange(-10000, 10001))
+            t = (mat.unk14, mat.unk18, mat.unk1C)
+            raw_depth = (sum(xyz[i] * t[i] for i in range(3)) + 0x100000)
+            wrapped = ((raw_depth + 0x80000000) & 0xFFFFFFFF) - 0x80000000
+            depth = wrapped >> 10
+            if depth == 0:
+                continue  # Original Thumb routine would divide by zero.
+            scale = (0x100000 // abs(depth)) * (1 if depth > 0 else -1)
+            expect = [
+                ((sum(xyz[k] * mat.unk2[row * 3 + k] for k in range(3)) >> 10)
+                 * scale) >> 10
+                for row in range(3)
+            ]
+            actual = (ctypes.c_int32 * 3)(*xyz)
+            self.library.sa2__sub_808477C(ctypes.byref(mat), actual)
+            self.assertEqual(list(actual), expect)
+            done += 1
+        self.assertGreaterEqual(done, 700)
 
 
 if __name__ == "__main__":
