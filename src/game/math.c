@@ -384,7 +384,26 @@ END_NONMATCH
 NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808458C.inc", void sa2__sub_808458C()) { }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808477C.inc", void sa2__sub_808477C()) { }
+// Perspective-like Q6.10 projection of a 3D vector in place.
+// This routine uses 32-bit wrapped multiplication for the depth divisor,
+// but signed 64-bit products for each basis dot product (as in Thumb).
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808477C.inc",
+         void sa2__sub_808477C(struct UNK_8085F1C_1 *matrix, s32 *vector))
+{
+    s32 x = vector[0];
+    s32 y = vector[1];
+    s32 z = vector[2];
+    s32 depth = ((matrix->unk14 * x) + (matrix->unk18 * y)
+                 + (matrix->unk1C * z) + 0x100000) >> 10;
+    s32 scale = 0x100000 / depth;
+
+    vector[0] = (((((s64)x * matrix->unk2[0]) + ((s64)y * matrix->unk2[1])
+                   + ((s64)z * matrix->unk2[2])) >> 10) * scale) >> 10;
+    vector[1] = (((((s64)x * matrix->unk2[3]) + ((s64)y * matrix->unk2[4])
+                   + ((s64)z * matrix->unk2[5])) >> 10) * scale) >> 10;
+    vector[2] = (((((s64)x * matrix->unk2[6]) + ((s64)y * matrix->unk2[7])
+                   + ((s64)z * matrix->unk2[8])) >> 10) * scale) >> 10;
+}
 END_NONMATCH
 
 void SA2_LABEL(sub_8084904)(UNK_8085D14 *arg0, u16 arg1)
