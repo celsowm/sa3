@@ -56,80 +56,11 @@ u16 sub_80241AC(u8 param0) { return 0; }
 s16 sub_8024208(void) { return 0; }
 void sub_80258D4(void) { }
 s16 sub_802610C() { return 0; }
-void sub_802613C() { }
-void sub_802616C() { }
-void sub_80274F4() { }
 void sub_8027578(MapEntity *me) { }
-void sub_80276A8() { }
-void sub_80276F4() { }
-void sub_802789C() { }
 void sub_80275B8(u32 level, u8 param1, u8 param2) { }
-void sub_8027538() { }
 
-void MultiSio_SendPlayerName() { }
-void sub_8023A88() { }
-void sub_8023BB0() { }
-void sub_8023C5C() { }
-void sub_8024040() { }
-void sub_802440C() { }
-void sub_8024584() { }
-void sub_80244E4() { }
-void sub_80246B4() { }
-void sub_80258FC() { }
-void sub_8025908() { }
-void sub_80259EC() { }
-void sub_8024A4C() { }
-void sub_8024AC0() { }
-void sub_8024984() { }
-void sub_8024C68() { }
-void sub_8025948() { }
-void sub_8024B84() { }
-void sub_8024E1C() { }
-void sub_8024F84() { }
-void sub_8025024() { }
-void sub_8023D60() { }
-void sub_80250EC() { }
-void sub_8024F1C() { }
-void sub_80251F8() { }
-void sub_8025360() { }
-void sub_8025998() { }
-void sub_80259F8() { }
-void sub_8025AFC() { }
-void sub_80253CC() { }
-void sub_8025460() { }
-void sub_8025A90() { }
-void sub_8025AA8() { }
-void sub_80254CC() { }
-void sub_80255B0() { }
-void sub_8025534() { }
-void sub_8025614() { }
-void sub_8025674() { }
-void sub_8025A38() { }
-void sub_8025B48() { }
 
-void sub_80260F0() { }
-void sub_80261B0() { }
-void sub_8026254() { }
-void sub_8026478() { }
-void sub_80264F0() { }
-void sub_80268B8() { }
-void sub_8026720() { }
-void sub_80267E8() { }
-void sub_80274AC() { }
-void sub_80275F0() { }
 void sub_8027620(s16 screenX, s16 screenY) { }
-void sub_8027674() { }
-void sub_8027658() { }
-void sub_802773C() { }
-void sub_8027768() { }
-void sub_80277AC() { }
-void sub_80277F0() { }
-void sub_8027834() { }
-void sub_802785C() { }
-void sub_8027878() { }
-void sub_80278DC() { }
-void sub_8027960() { }
-void sub_8028850() { }
 void sub_8029990() { }
 
 void sub_8052D8C() { }
