@@ -16765,18 +16765,13 @@ void Task_80191C8(void)
 }
 
 // (68.24%) https://decomp.me/scratch/ukmtA
-NONMATCH("asm/non_matching/game/stage/player__Task_8019240.inc", void Task_8019240(void))
+void Task_8019240(void)
 {
-    s8 sp[2][4];
+    s8 sp[8][2];
     Player *p;
     Sprite *s;
-    s16 temp_r4_3;
-    s16 temp_r6;
     s16 i;
-    s32 temp_r1;
-    u16 temp_r0;
-    u16 temp_r4;
-    u16 temp_r4_2;
+    s16 timer;
     Strc_PlayerStrc30 *strc;
 
     memcpy(sp, gUnknown_080CE7C8, sizeof(sp));
@@ -16788,19 +16783,18 @@ NONMATCH("asm/non_matching/game/stage/player__Task_8019240.inc", void Task_80192
         TaskDestroy(gCurTask);
         return;
     }
-    temp_r4 = strc->someY;
+    timer = strc->someY;
     UpdateSpriteAnimation(s);
 
     for (i = 0; i < 4; i++) {
-        struct Camera *cam = &gCamera;
-        s8 v = (temp_r4 * sp[1 & temp_r4][i]) >> 2;
-
-        s->x = v + (I(p->qWorldX) - cam->x);
-        s->y = v + (I(p->qWorldY) - cam->y) + 8;
+        s32 idx = i + (timer & 1) * 4;
+        s32 dx = sp[idx][0] * timer;
+        s32 dy = sp[idx][1] * timer;
+        s->x = (I(p->qWorldX) - gCamera.x) + (s8)(dx >> 2);
+        s->y = (I(p->qWorldY) - gCamera.y) + (s8)(dy >> 2) + 8;
         DisplaySprite(s);
     }
 }
-END_NONMATCH
 
 void TaskDestructor_8019318(Task *t)
 {
