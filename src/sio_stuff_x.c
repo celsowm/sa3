@@ -1203,13 +1203,35 @@ NONMATCH("asm/non_matching/sio/sio__sub_80274F4.inc", void sub_80274F4(u8 flags,
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8027538.inc", void sub_8027538(void))
+// Serialize 32-bit entity-relative offsets in original Thumb wire order.
+// The five-byte queue consumes every initialized byte of these packets.
+NONMATCH("asm/non_matching/sio/sio__sub_8027538.inc", void sub_8027538(s32 position))
 {
+    u32 reference = *(u32 *)((u8 *)TASK_DATA(gStageData.taskEntitiesManager) + 4);
+    u32 offset = (u32)position - reference;
+    u8 packet[5];
+    packet[0] = 0x18;
+    packet[1] = offset;
+    packet[2] = offset >> 8;
+    packet[3] = offset >> 16;
+    packet[4] = offset >> 24;
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8027578.inc", void sub_8027578(void))
+// Serialize 32-bit entity-relative offsets in original Thumb wire order.
+// The five-byte queue consumes every initialized byte of these packets.
+NONMATCH("asm/non_matching/sio/sio__sub_8027578.inc", void sub_8027578(s32 position))
 {
+    u32 reference = *(u32 *)((u8 *)TASK_DATA(gStageData.taskEntitiesManager) + 8);
+    u32 offset = (u32)position - reference;
+    u8 packet[5];
+    packet[0] = 0x20;
+    packet[1] = offset;
+    packet[2] = offset >> 8;
+    packet[3] = offset >> 16;
+    packet[4] = offset >> 24;
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
