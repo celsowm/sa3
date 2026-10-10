@@ -42,7 +42,7 @@ typedef struct {
     /* 0x018 */ u8 *unk18;
     /* 0x01C */ s8 *unk1C[4];
     /* 0x02C */ s8 *unk2C;
-    /* 0x030 */ u8 *unk30;
+    /* 0x030 */ s8 *unk30;
     /* 0x034 */ s32 unk34;
     /* 0x038 */ s32 unk38;
     /* 0x03C */ s32 unk3C;
@@ -91,6 +91,23 @@ void sub_80A10B0(MpCharSelect *mcs);
 void sub_80A1110(MpCharSelect *mcs);
 void sub_80A11B8(MpCharSelect *mcs);
 void sub_80A19C0(MpCharSelect *mcs);
+void sub_80A0080(void);
+void sub_80A010C(void);
+void sub_80A0198(void);
+void sub_80A021C(void);
+void sub_80A0DC8(MpCharSelect *mcs);
+void Task_80A1430(void);
+bool32 sub_80A14E4(MpCharSelect *mcs);
+bool32 sub_80A1540(MpCharSelect *mcs);
+bool32 sub_80A1598(MpCharSelect *mcs);
+bool32 sub_80A15E8(MpCharSelect *mcs);
+bool32 sub_80A1694(MpCharSelect *mcs);
+bool32 sub_80A1740(MpCharSelect *mcs, s32 arg1);
+bool32 sub_80A1888(MpCharSelect *mcs);
+void sub_80A18B8(MpCharSelect *mcs);
+void sub_80A18E0(MpCharSelect *mcs);
+void sub_80A1A04(MpCharSelect *mcs);
+void sub_80A1A28(MpCharSelect *mcs);
 extern void *CreateSomeTask_809BF3C(void *param0, void *param1, void *param2, void *param3, void *tiles);
 extern const u16 gUnknown_080D8CDC[];
 
@@ -115,7 +132,7 @@ void CreateCharacterSelectMultiplayer(SDC_EC *ec)
         mcs->unk1C[i] = &ec->unkE[i];
     }
 
-    mcs->unk30 = &ec->unk12;
+    mcs->unk30 = (s8 *)&ec->unk12;
     mcs->unk2C = &ec->unk14;
     mcs->unk18 = &ec->unk17;
     mcs->unk3 = ec->unk17;
@@ -428,20 +445,88 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__Task_809FEB0.inc", void Ta
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0080.inc", void sub_80A0080(void))
+void sub_80A0080(void)
 {
-}
-END_NONMATCH
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+    bool32 res;
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A010C.inc", void sub_80A010C(void))
-{
-}
-END_NONMATCH
+    if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+        return;
+    }
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0198.inc", void sub_80A0198(void))
-{
+    sub_80A19C0(mcs);
+    sub_80A10B0(mcs);
+    sub_80A1110(mcs);
+
+    if ((sub_80A15E8(mcs) == TRUE) && ((res = sub_80A1888(mcs)) == TRUE)) {
+        *mcs->unk14 = res;
+        gCurTask->main = Task_809FEB0;
+    } else if (*mcs->unk18 == 35) {
+        *mcs->unk18 = 29;
+        mcs->unk3 = *mcs->unk18;
+        mcs->unk4C = Q(310);
+        mcs->unk54 = Q(310);
+        gCurTask->main = Task_80A13F4;
+    }
 }
-END_NONMATCH
+
+void sub_80A010C(void)
+{
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+    bool32 res;
+
+    if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+        return;
+    }
+
+    sub_80A19C0(mcs);
+    sub_80A10B0(mcs);
+    sub_80A1110(mcs);
+
+    if ((sub_80A1598(mcs) == TRUE) && ((res = sub_80A1888(mcs)) == TRUE)) {
+        *mcs->unk14 = res;
+        gCurTask->main = Task_809FEB0;
+    } else if (*mcs->unk18 == 35) {
+        *mcs->unk18 = 29;
+        mcs->unk3 = *mcs->unk18;
+        mcs->unk4C = Q(310);
+        mcs->unk54 = Q(310);
+        gCurTask->main = Task_80A13F4;
+    }
+}
+
+void sub_80A0198(void)
+{
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+    u8 count = 0;
+
+    if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+        return;
+    }
+
+    sub_80A19C0(mcs);
+    sub_80A1A04(mcs);
+    sub_80A10B0(mcs);
+    sub_80A1110(mcs);
+    sub_80A11B8(mcs);
+
+    if (sub_80A1694(mcs) == TRUE) {
+        count = 1;
+    }
+
+    if (sub_80A1740(mcs, 120) == TRUE) {
+        count++;
+    }
+
+    if (count == 2) {
+        mcs->unk3 = 29;
+        mcs->unk54 = Q(310);
+        gCurTask->main = Task_80A1430;
+    }
+}
 
 NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A021C.inc", void sub_80A021C(void))
 {
@@ -513,7 +598,7 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0D20.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0DC8.inc", void sub_80A0DC8(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0DC8.inc", void sub_80A0DC8(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
@@ -583,22 +668,22 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__Task_80A14AC.inc", void Ta
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A14E4.inc", void sub_80A14E4(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A14E4.inc", bool32 sub_80A14E4(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1540.inc", void sub_80A1540(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1540.inc", bool32 sub_80A1540(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1598.inc", void sub_80A1598(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1598.inc", bool32 sub_80A1598(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A15E8.inc", void sub_80A15E8(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A15E8.inc", bool32 sub_80A15E8(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
@@ -613,7 +698,7 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1668.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1694.inc", void sub_80A1694(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1694.inc", bool32 sub_80A1694(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
@@ -623,7 +708,7 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A16EC.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1740.inc", void sub_80A1740(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1740.inc", bool32 sub_80A1740(MpCharSelect *mcs, s32 arg1))
 {
 }
 END_NONMATCH
@@ -653,17 +738,17 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A185C.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1888.inc", void sub_80A1888(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1888.inc", bool32 sub_80A1888(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A18B8.inc", void sub_80A18B8(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A18B8.inc", void sub_80A18B8(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A18E0.inc", void sub_80A18E0(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A18E0.inc", void sub_80A18E0(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
@@ -688,12 +773,12 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A19C0.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1A04.inc", void sub_80A1A04(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1A04.inc", void sub_80A1A04(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1A28.inc", void sub_80A1A28(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1A28.inc", void sub_80A1A28(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
