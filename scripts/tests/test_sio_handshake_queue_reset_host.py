@@ -49,7 +49,7 @@ void sub_8025770(void) { ++resetCalls; }
 """
 DRIVER = r"""
 static void prepare(unsigned id, s16 status, u32 flags, u16 type) {
-    mockSioControl = (id << 6) | 0x2C000000;
+    mockSioControl = (id << 4) | 0x2C000000;
     gStageData.playerIndex = 0xFF;
     gMultiSioStatusFlags = flags;
     statusResult = status;
