@@ -1461,12 +1461,13 @@ NONMATCH("asm/non_matching/game/sa3/options/nes__sub_80933B0.inc", void sub_8093
     u8 temp_r2;
     u8 temp_r5;
     winreg_t *ptr;
+    u32 unkC = (u16)nes->unkC >> 8;
 
     gFlags |= FLAGS_EXECUTE_HBLANK_COPY;
 
     temp_r5 = (u8)((s32)nes->unk30 >> 8);
-    temp_r2 = temp_r5 + ((u16)nes->unkC >> 8);
-    sp0 = (temp_r2 + 0xE8);
+    temp_r2 = temp_r5 + unkC;
+    sp0 = (u8)(temp_r2 + 0xE8);
     temp_r2_2 = (u32)(nes->unk2C << 8) >> 0x10;
     gHBlankCopyTarget = (void *)&REG_WIN0H;
     gHBlankCopySize = sizeof(winreg_t);
