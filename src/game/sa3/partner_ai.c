@@ -1433,7 +1433,7 @@ skip:
 }
 
 // (70.68%) https://decomp.me/scratch/Cznjy
-NONMATCH("asm/non_matching/game/cx__sub_80B8FB8.inc", bool32 sub_80B8FB8(Struc_3001150_1C *strc, Player *partner, Player *p))
+bool32 sub_80B8FB8(Struc_3001150_1C *strc, Player *partner, Player *p)
 {
     s16 temp_r0;
     s32 temp_r0_2;
@@ -1442,14 +1442,16 @@ NONMATCH("asm/non_matching/game/cx__sub_80B8FB8.inc", bool32 sub_80B8FB8(Struc_3
     s32 anim0 = p->charFlags.anim0;
 
     if (anim0 == 1) {
-        var_r3 = 0x20;
+        goto a;
     } else if (anim0 == 0) {
+    a:
         var_r3 = 0x20;
     } else if (anim0 == 2) {
         var_r3 = 0x1000;
     } else {
+        temp_r0 = anim0;
         var_r3 = 0x20;
-        if (anim0 == 6) {
+        if (temp_r0 == 6) {
             var_r3 = 0x10;
         }
     }
@@ -1461,7 +1463,6 @@ NONMATCH("asm/non_matching/game/cx__sub_80B8FB8.inc", bool32 sub_80B8FB8(Struc_3
     }
     return var_r1;
 }
-END_NONMATCH
 
 /* ----- */
 
