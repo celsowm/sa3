@@ -378,20 +378,17 @@ NONMATCH("asm/non_matching/game/sa3/c21__Task_270_809B8C8.inc", void Task_270_80
         out = strc->unk4;
         unk10 = strc->unk10;
         if (a > b) {
-            switch (*out) {
-                case 29:
-                    *out = 36;
-                    TaskDestroy(gCurTask);
-                    return;
-
-                case 36:
+            if (*out == 29 || *out > 35) {
+                if (*out == 36) {
                     *out = 37;
-                    TaskDestroy(gCurTask);
-                    return;
-
-                case 4:
-                    gCurTask->main = Task_270_809BF9C;
-                    return;
+                } else {
+                    *out = 36;
+                }
+                TaskDestroy(gCurTask);
+                return;
+            } else if (*out == 4) {
+                gCurTask->main = Task_270_809BF9C;
+                return;
             }
         }
         {
