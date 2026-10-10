@@ -528,7 +528,45 @@ void SA2_LABEL(sub_80849C4)(UNK_8085D14 *arg0, u16 arg1)
     arg0->unkA = temp_r0;
 }
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084A24.inc", void sa2__sub_8084A24()) { }
+// Rodrigues' rotation matrix (Q6.10), followed by identity diagonal
+// entries in three additional 16-bit slots. The Thumb source zeros 32
+// bytes then explicitly writes offsets 0x22, 0x2A and 0x32: the destination
+// therefore needs at least 52 bytes, NOT merely a 32-byte matrix struct.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084A24.inc",
+         void sa2__sub_8084A24(s16 *out, u16 angle, s16 *axis))
+{
+    s32 a, b, c, sine, cosine, complement;
+    s32 ab, ac, bc;
+    u32 i;
+
+    for (i = 0; i < 8; i++) {
+        ((u32 *)out)[i] = 0;
+    }
+    out[17] = 0x400;
+    out[21] = 0x400;
+    out[25] = 0x400;
+
+    sine = SIN(angle) >> 4;
+    cosine = COS(angle) >> 4;
+    complement = 0x400 - cosine;
+    a = axis[0];
+    b = axis[1];
+    c = axis[2];
+
+    ab = (((a * b) >> 10) * complement) >> 10;
+    ac = (((a * c) >> 10) * complement) >> 10;
+    bc = (((b * c) >> 10) * complement) >> 10;
+
+    out[1] = cosine + ((((a * a) >> 10) * complement) >> 10);
+    out[2] = ab + ((c * sine) >> 10);
+    out[3] = ac - ((b * sine) >> 10);
+    out[4] = ab - ((c * sine) >> 10);
+    out[5] = cosine + ((((b * b) >> 10) * complement) >> 10);
+    out[6] = bc + ((a * sine) >> 10);
+    out[7] = ac + ((b * sine) >> 10);
+    out[8] = bc - ((a * sine) >> 10);
+    out[9] = cosine + ((((c * c) >> 10) * complement) >> 10);
+}
 END_NONMATCH
 
 void SA2_LABEL(sub_8084B54)(struct UNK_8085F1C_1 *matrix, u16 anglez, u16 angley, u16 anglex)
@@ -555,7 +593,78 @@ void SA2_LABEL(sub_8084B54)(struct UNK_8085F1C_1 *matrix, u16 anglez, u16 angley
     matrix->unk14 = 0;
 }
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084C70.inc", void sa2__sub_8084C70()) { }
+// Build a 3x3 orthonormal basis from two positions and a reference axis.
+// Thumb uses abs(x+y+z)>32 as its normalization heuristic, NOT vector
+// magnitude>32; keep the degenerate-axis fallbacks in their original order.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084C70.inc",
+         void sa2__sub_8084C70(struct UNK_8085F1C_1 *out,
+                               s32 *origin, s32 *target, s16 *direction))
+{
+    s32 x, y, z, sum, factor;
+    s32 a, b, c, d, e, f;
+
+    out->unk14 = origin[0];
+    out->unk18 = origin[1];
+    out->unk1C = origin[2];
+    out->unk2[6] = target[0] - origin[0];
+    out->unk2[7] = target[1] - origin[1];
+    out->unk2[8] = target[2] - origin[2];
+
+    x = out->unk2[6];
+    y = out->unk2[7];
+    z = out->unk2[8];
+    sum = x + y + z;
+    if (sum < 0) {
+        sum = -sum;
+    }
+    if (sum > 0x20) {
+        u16 magnitude = Sqrt(x * x + y * y + z * z);
+        factor = 0x100000 / magnitude;
+        out->unk2[6] = (factor * x) >> 10;
+        out->unk2[7] = (factor * y) >> 10;
+        out->unk2[8] = (factor * z) >> 10;
+    } else {
+        out->unk2[6] = 0;
+        out->unk2[7] = 0;
+        out->unk2[8] = 0x400;
+    }
+
+    a = out->unk2[6];
+    b = out->unk2[7];
+    c = out->unk2[8];
+    d = direction[0];
+    e = direction[1];
+    f = direction[2];
+
+    out->unk2[0] = ((e * c) - (f * b)) >> 10;
+    out->unk2[1] = ((f * a) - (d * c)) >> 10;
+    out->unk2[2] = ((d * b) - (e * a)) >> 10;
+    x = out->unk2[0];
+    y = out->unk2[1];
+    z = out->unk2[2];
+    sum = x + y + z;
+    if (sum < 0) {
+        sum = -sum;
+    }
+    if (sum > 0x20) {
+        u16 magnitude = Sqrt(x * x + y * y + z * z);
+        factor = 0x100000 / magnitude;
+        out->unk2[0] = (factor * x) >> 10;
+        out->unk2[1] = (factor * y) >> 10;
+        out->unk2[2] = (factor * z) >> 10;
+    } else {
+        out->unk2[0] = 0x400;
+        out->unk2[1] = 0;
+        out->unk2[2] = 0;
+    }
+
+    x = out->unk2[0];
+    y = out->unk2[1];
+    z = out->unk2[2];
+    out->unk2[3] = ((b * z) - (c * y)) >> 10;
+    out->unk2[4] = ((c * x) - (a * z)) >> 10;
+    out->unk2[5] = ((a * y) - (b * x)) >> 10;
+}
 END_NONMATCH
 
 // Swap the three off-diagonal pairs of a Q6.10 3x3 matrix in place.
