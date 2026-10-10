@@ -1241,23 +1241,21 @@ void Task_TimeOver_Update()
     }
 }
 
-NONMATCH("asm/non_matching/game/shared/go__sub_8003BD8.inc", void sub_8003BD8(void))
+void sub_8003BD8(void)
 {
     GameOver *temp_r2;
     ScreenFade *fade;
 
     temp_r2 = TASK_DATA(gCurTask);
-    fade = &temp_r2->fade;
-    fade->window = 0;
-    fade->flags = 1;
-    fade->brightness = 0;
-    fade->speed = Q(0.5);
-    fade->bldCnt = 0xBF;
-    fade->bldAlpha = 0;
-    ScreenFadeUpdateValues(fade);
+    temp_r2->fade.window = 0;
+    temp_r2->fade.flags = 1;
+    temp_r2->fade.brightness = 0;
+    temp_r2->fade.speed = Q(0.5);
+    temp_r2->fade.bldCnt = 0xBF;
+    temp_r2->fade.bldAlpha = 0;
+    ScreenFadeUpdateValues(&temp_r2->fade);
     gCurTask->main = Task_8003C38;
 }
-END_NONMATCH
 
 void Task_8003C38(void)
 {
@@ -1275,23 +1273,21 @@ void Task_8003C38(void)
     TaskDestroy(gCurTask);
 }
 
-NONMATCH("asm/non_matching/game/shared/go__sub_8003CA4.inc", void sub_8003CA4(void))
+void sub_8003CA4(void)
 {
     GameOver *temp_r2;
     ScreenFade *fade;
 
     temp_r2 = TASK_DATA(gCurTask);
-    fade = &temp_r2->fade;
-    fade->window = 0;
-    fade->flags = 1;
-    fade->brightness = 0;
-    fade->speed = Q(0.5);
-    fade->bldCnt = 0xBF;
-    fade->bldAlpha = 0;
-    ScreenFadeUpdateValues(fade);
+    temp_r2->fade.window = 0;
+    temp_r2->fade.flags = 1;
+    temp_r2->fade.brightness = 0;
+    temp_r2->fade.speed = Q(0.5);
+    temp_r2->fade.bldCnt = 0xBF;
+    temp_r2->fade.bldAlpha = 0;
+    ScreenFadeUpdateValues(&temp_r2->fade);
     gCurTask->main = Task_8004058;
 }
-END_NONMATCH
 
 void sub_8003D04(u8 zone)
 {
