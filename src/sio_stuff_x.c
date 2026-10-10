@@ -1106,7 +1106,7 @@ END_NONMATCH
 // Reconstructed from ROM Thumb; matching builds retain original ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8027658.inc", void sub_8027658(void))
 {
-    u8 packet[4];
+    u8 packet[5]; // The queue reads five bytes; the Thumb caller only initializes its first fields.
     packet[0] = 0x38;
     packet[1] = 5;
     sub_8026AB8(packet);
@@ -1131,7 +1131,7 @@ END_NONMATCH
 // Reconstructed from ROM Thumb; matching builds retain original ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_802773C.inc", void sub_802773C(u16 player, u16 value))
 {
-    u8 packet[4];
+    u8 packet[5]; // The queue reads five bytes; the Thumb caller only initializes its first fields.
     packet[0] = 0x38;
     packet[1] = 7;
     packet[2] = (u8)(1 << player);
@@ -1163,7 +1163,7 @@ END_NONMATCH
 // Reconstructed from ROM Thumb; matching builds retain original ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_802785C.inc", void sub_802785C(void))
 {
-    u8 packet[4];
+    u8 packet[5]; // The queue reads five bytes; the Thumb caller only initializes its first fields.
     packet[0] = 0x38;
     packet[1] = 0x21;
     sub_8026AB8(packet);
@@ -1188,7 +1188,7 @@ END_NONMATCH
 // Reconstructed from ROM Thumb; matching builds retain original ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_80278DC.inc", void sub_80278DC(void))
 {
-    u8 packet[4];
+    u8 packet[5]; // The queue reads five bytes; the Thumb caller only initializes its first fields.
     packet[0] = 0x38;
     packet[1] = 3;
     sub_8026AB8(packet);
