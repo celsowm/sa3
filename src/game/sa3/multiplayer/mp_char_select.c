@@ -1,16 +1,303 @@
 #include "global.h"
+#include "core.h"
+#include "flags.h"
+#include "lib/m4a/m4a.h"
+#include "game/save.h"
+#include "game/screen_fade.h"
+#include "game/stage.h" // gStageData
+#include "constants/songs.h"
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__CreateCharacterSelectMultiplayer.inc", void CreateCharacterSelectMultiplayer(void))
+// Same layout as SDC_EC in sio_debug_code_maybe.c
+typedef struct {
+    /* 0x00 */ ScreenFade fade;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ s8 unkE[4];
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ s8 unk13;
+    /* 0x14 */ s8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1C */ Background bg1C;
+    /* 0x5C */ Background bg5C;
+    /* 0x9C */ Sprite spr9C;
+    /* 0xC4 */ Sprite sprC4;
+} SDC_EC; /* 0xEC */
+
+typedef struct {
+    /* 0x000 */ u8 language;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u8 unk2;
+    /* 0x003 */ u8 unk3;
+    /* 0x004 */ u16 unk4;
+    /* 0x006 */ u16 unk6;
+    /* 0x008 */ u16 unk8;
+    /* 0x00A */ u16 unkA;
+    /* 0x00C */ u16 unkC;
+    /* 0x010 */ u32 unk10;
+    /* 0x014 */ u8 *unk14;
+    /* 0x018 */ u8 *unk18;
+    /* 0x01C */ s8 *unk1C[4];
+    /* 0x02C */ s8 *unk2C;
+    /* 0x030 */ u8 *unk30;
+    /* 0x034 */ s32 unk34;
+    /* 0x038 */ s32 unk38;
+    /* 0x03C */ s32 unk3C;
+    /* 0x040 */ s32 unk40;
+    /* 0x044 */ s32 unk44;
+    /* 0x048 */ s32 unk48;
+    /* 0x04C */ s32 unk4C;
+    /* 0x050 */ s32 unk50;
+    /* 0x054 */ s32 unk54;
+    /* 0x058 */ s32 unk58;
+    /* 0x05C */ s32 unk5C;
+    /* 0x060 */ s32 unk60;
+    /* 0x064 */ s32 unk64;
+    /* 0x068 */ s32 unk68;
+    /* 0x06C */ s32 unk6C;
+    /* 0x070 */ s32 unk70;
+    /* 0x074 */ s32 unk74;
+    /* 0x078 */ s32 unk78;
+    /* 0x07C */ s32 unk7C;
+    /* 0x080 */ s32 unk80;
+    /* 0x084 */ u8 *tiles;
+    /* 0x088 */ u32 unk88;
+    /* 0x08C */ Sprite s8C;
+    /* 0x0B4 */ Sprite sB4;
+    /* 0x0DC */ Sprite sDC;
+    /* 0x104 */ Sprite s104;
+    /* 0x12C */ Sprite s12C;
+    /* 0x154 */ Sprite s154;
+    /* 0x17C */ Sprite s17C;
+    /* 0x1A4 */ Sprite s1A4;
+    /* 0x1CC */ Sprite s1CC;
+    /* 0x1F4 */ Background bg1F4;
+    /* 0x234 */ Background bg234;
+    /* 0x274 */ Background bg274;
+} MpCharSelect; /* 0x2B4 */
+
+void Task_809FCFC(void);
+void TaskDestructor_80A13B0(struct Task *t);
+void sub_809F964(MpCharSelect *mcs);
+void sub_809FBD0(MpCharSelect *mcs);
+
+extern const TileInfo2 gUnknown_080D8D00;
+extern const TileInfo2 gUnknown_080D8D08[][8];
+extern const TileInfo2 gUnknown_080D8E80[];
+extern const TileInfo2 gUnknown_080D8EF8;
+extern const TileInfo2 gUnknown_080D8F08;
+extern const TileInfo2 gUnknown_080D8F10;
+extern const u8 gUnknown_080D8F18[];
+
+void CreateCharacterSelectMultiplayer(SDC_EC *ec)
 {
+    MpCharSelect *mcs;
+    u8 i;
+
+    gDispCnt = 0x1541;
+    mcs = TASK_DATA(TaskCreate(Task_809FCFC, sizeof(MpCharSelect), 0x100, 0, TaskDestructor_80A13B0));
+    mcs->language = LOADED_SAVE->language;
+
+    for (i = 0; i < 4; i++) {
+        mcs->unk1C[i] = &ec->unkE[i];
+    }
+
+    mcs->unk30 = &ec->unk12;
+    mcs->unk2C = &ec->unk14;
+    mcs->unk18 = &ec->unk17;
+    mcs->unk3 = ec->unk17;
+    mcs->unk14 = &ec->unk16;
+    *mcs->unk14 = 1;
+    mcs->unk1 = ec->unk12;
+    mcs->unk6 = 1;
+    mcs->unk8 = 0;
+    mcs->unk4 = 0;
+    mcs->unkA = 0;
+    mcs->unkC = 0x1000;
+    mcs->unk4C = Q(120);
+    mcs->unk50 = Q(80);
+    mcs->unk54 = Q(120);
+    mcs->unk58 = Q(80);
+    mcs->unk34 = Q(120);
+    mcs->unk38 = Q(17);
+    mcs->unk3C = Q(120);
+    mcs->unk40 = Q(17);
+    mcs->unk44 = 0;
+    mcs->unk48 = 0;
+    mcs->unk7C = 0;
+    mcs->unk80 = 0;
+    mcs->unk6C = Q(120);
+    mcs->unk70 = Q(85);
+    mcs->unk74 = Q(201);
+    mcs->unk78 = Q(22);
+    mcs->unk5C = Q(120);
+    mcs->unk60 = Q(145);
+    mcs->unk64 = Q(300);
+    mcs->unk68 = Q(145);
+    mcs->tiles = OBJ_VRAM0;
+    sub_809F964(mcs);
+    sub_809FBD0(mcs);
+    m4aMPlayAllStop();
+    m4aSongNumStart(MUS_CHARACTER_SELECT);
+}
+
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_809F964.inc", void sub_809F964(MpCharSelect *mcs))
+{
+    u8 *tiles = OBJ_VRAM0;
+
+    {
+        Sprite *s = &mcs->sDC;
+        s->tiles = tiles;
+        tiles += 45 * TILE_SIZE_4BPP;
+        s->anim = gUnknown_080D8D00.anim;
+        s->variant = gUnknown_080D8D00.variant;
+        s->prevVariant = -1;
+        s->x = I(mcs->unk3C);
+        s->y = I(mcs->unk40);
+        s->oamFlags = SPRITE_OAM_ORDER(1);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
+
+    {
+        Sprite *s = &mcs->sB4;
+        s->tiles = tiles;
+        tiles += 50 * TILE_SIZE_4BPP;
+        s->anim = gUnknown_080D8D08[mcs->language][0].anim;
+        s->variant = gUnknown_080D8D08[mcs->language][0].variant;
+        s->prevVariant = -1;
+        s->x = I(mcs->unk34);
+        s->y = I(mcs->unk38);
+        s->oamFlags = SPRITE_OAM_ORDER(0);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
+
+    {
+        Sprite *s = &mcs->s1A4;
+        s->tiles = tiles;
+        tiles += 4 * TILE_SIZE_4BPP;
+        s->anim = 1396;
+        s->variant = 5;
+        s->prevVariant = -1;
+        s->x = 120;
+        s->y = I(mcs->unk60);
+        s->oamFlags = SPRITE_OAM_ORDER(0);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
+
+    {
+        Sprite *s = &mcs->s8C;
+        s->tiles = tiles;
+        tiles += 16 * TILE_SIZE_4BPP;
+        s->anim = gUnknown_080D8F08.anim;
+        s->variant = gUnknown_080D8F08.variant;
+        s->prevVariant = -1;
+        s->x = I(mcs->unk44);
+        s->y = I(mcs->unk48);
+        s->oamFlags = -SPRITE_OAM_ORDER(1);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
+
+    {
+        Sprite *s = &mcs->s104;
+        u32 idx = gUnknown_080D8F18[mcs->unk1] + (mcs->language != 0) * 8;
+        s->tiles = tiles;
+        tiles += 14 * TILE_SIZE_4BPP;
+        s->anim = gUnknown_080D8E80[idx].anim;
+        s->variant = gUnknown_080D8E80[idx].variant;
+        s->prevVariant = -1;
+        s->x = I(mcs->unk5C);
+        s->y = I(mcs->unk60);
+        s->oamFlags = SPRITE_OAM_ORDER(0);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
+
+    {
+        Sprite *s = &mcs->s154;
+        u32 idx = gUnknown_080D8F18[mcs->unk1] + (mcs->language != 0) * 8;
+        s->tiles = tiles;
+        tiles += 14 * TILE_SIZE_4BPP;
+        s->anim = gUnknown_080D8E80[idx].anim;
+        s->variant = gUnknown_080D8E80[idx].variant;
+        s->prevVariant = -1;
+        s->x = I(mcs->unk64);
+        s->y = I(mcs->unk68);
+        s->oamFlags = SPRITE_OAM_ORDER(0);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
+
+    {
+        Sprite *s = &mcs->s12C;
+        s->tiles = tiles;
+        tiles += 24 * TILE_SIZE_4BPP;
+        s->anim = gUnknown_080D8EF8.anim;
+        s->variant = gUnknown_080D8EF8.variant;
+        s->prevVariant = -1;
+        s->x = I(mcs->unk5C);
+        s->y = I(mcs->unk60);
+        s->oamFlags = SPRITE_OAM_ORDER(1);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
+
+    {
+        Sprite *s = &mcs->s1CC;
+        s->tiles = tiles;
+        tiles += 16 * TILE_SIZE_4BPP;
+        s->anim = gUnknown_080D8F10.anim;
+        s->variant = gUnknown_080D8F10.variant;
+        s->prevVariant = -1;
+        s->x = I(mcs->unk4C);
+        s->y = I(mcs->unk50);
+        s->oamFlags = SPRITE_OAM_ORDER(0);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
+
+    mcs->tiles = tiles;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_809F964.inc", void sub_809F964(void))
-{
-}
-END_NONMATCH
-
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_809FBD0.inc", void sub_809FBD0(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_809FBD0.inc", void sub_809FBD0(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
@@ -150,7 +437,7 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A137C.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__TaskDestructor_80A13B0.inc", void TaskDestructor_80A13B0(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__TaskDestructor_80A13B0.inc", void TaskDestructor_80A13B0(struct Task *t))
 {
 }
 END_NONMATCH
