@@ -668,29 +668,20 @@ NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084C70.inc",
 END_NONMATCH
 
 // Swap the three off-diagonal pairs of a Q6.10 3x3 matrix in place.
-// The reference Thumb routine stores the upper index BEFORE the lower
-// index for each pair (it uses an XOR-swap register sequence).
-// Preserve that observable store order for a future agbcc matching attempt.
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084EAC.inc", void sa2__sub_8084EAC(struct UNK_8085F1C_1 *matrix))
+void sa2__sub_8084EAC(struct UNK_8085F1C_1 *matrix)
 {
-    s16 first, second;
+    matrix->unk2[1] ^= matrix->unk2[3];
+    matrix->unk2[3] ^= matrix->unk2[1];
+    matrix->unk2[1] ^= matrix->unk2[3];
 
-    first = matrix->unk2[1];
-    second = matrix->unk2[3];
-    matrix->unk2[3] = first;
-    matrix->unk2[1] = second;
+    matrix->unk2[2] ^= matrix->unk2[6];
+    matrix->unk2[6] ^= matrix->unk2[2];
+    matrix->unk2[2] ^= matrix->unk2[6];
 
-    first = matrix->unk2[2];
-    second = matrix->unk2[6];
-    matrix->unk2[6] = first;
-    matrix->unk2[2] = second;
-
-    first = matrix->unk2[5];
-    second = matrix->unk2[7];
-    matrix->unk2[7] = first;
-    matrix->unk2[5] = second;
+    matrix->unk2[5] ^= matrix->unk2[7];
+    matrix->unk2[7] ^= matrix->unk2[5];
+    matrix->unk2[5] ^= matrix->unk2[7];
 }
-END_NONMATCH
 
 // Calculate the inverse of a Q6.10 3x3 basis through its adjugate.
 // This preserves the original Thumb routine's unusual three HALFWORD

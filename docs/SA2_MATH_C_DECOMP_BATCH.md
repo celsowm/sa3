@@ -261,3 +261,11 @@ math recovery effort, and it explains why functionally equivalent C is
 insufficient to update the matching percentage. The only acceptance
 gate remains original `agbcc`, linker placement, and full
 `make compare` against the exact Europe ROM.
+
+## Superseded (2026-10-10)
+
+The host-compiler tests and the Thumb codegen probe described above were
+removed once the real agbcc toolchain and `make compare` became available:
+they validated behaviour, not matching, and broke as soon as a math
+function was promoted to plain C. Progress on these functions is now
+tracked only by `scripts/nonmatch_triage.py` and `make compare`.
