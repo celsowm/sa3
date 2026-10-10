@@ -28,6 +28,7 @@ FUNCTIONS = (
     "sa2__unused_sub_8083E44",
     "sa2__unused_sub_8084090",
     "sa2__unused_sub_80842E4",
+    "sa2__unused_sub_808442C",
     "sa2__unused_sub_80851E0",
 )
 C_HEADER = r"""
@@ -174,6 +175,10 @@ class MathFallbackNativeTests(unittest.TestCase):
         vector_fn.argtypes = [ctypes.POINTER(ctypes.c_int32), ctypes.POINTER(Matrix),
                               ctypes.POINTER(ctypes.c_int32)]
         vector_fn.restype = None
+        in_place_vector_fn = cls.library.sa2__sub_808442C
+        in_place_vector_fn.argtypes = [ctypes.POINTER(ctypes.c_int32),
+                                        ctypes.POINTER(Matrix)]
+        in_place_vector_fn.restype = None
 
     @classmethod
     def tearDownClass(cls):
@@ -372,6 +377,32 @@ class MathFallbackNativeTests(unittest.TestCase):
                 for col in range(3)
             ]
             self.assertEqual((mat.unk14, mat.unk18, mat.unk1C), tuple(expected_t))
+
+
+    def test_in_place_vector_transform_600_cases(self):
+        """808442C uses newly updated X for Y and updated X/Y for Z."""
+        rng = random.Random(0x442C)
+        for _ in range(600):
+            vector = [rng.randrange(-50000, 50001) for _ in range(3)]
+            matrix = Matrix()
+            for index in range(9):
+                matrix.unk2[index] = rng.randrange(-1100, 1101)
+            for field in ("unk14", "unk18", "unk1C"):
+                setattr(matrix, field, rng.randrange(-150000, 150001))
+
+            values = (ctypes.c_int32 * 3)(*vector)
+            self.library.sa2__sub_808442C(values, ctypes.byref(matrix))
+            original_x, original_y, original_z = vector
+            expected_x = ((original_x * matrix.unk2[0]
+                           + original_y * matrix.unk2[3]
+                           + original_z * matrix.unk2[6] + matrix.unk14) >> 10)
+            expected_y = ((expected_x * matrix.unk2[1]
+                           + original_y * matrix.unk2[4]
+                           + original_z * matrix.unk2[7] + matrix.unk18) >> 10)
+            expected_z = ((expected_x * matrix.unk2[2]
+                           + expected_y * matrix.unk2[5]
+                           + original_z * matrix.unk2[8] + matrix.unk1C) >> 10)
+            self.assertEqual(list(values), [expected_x, expected_y, expected_z])
 
 
 if __name__ == "__main__":
