@@ -1596,14 +1596,13 @@ NONMATCH("asm/non_matching/game/stage/cam__sub_8050EE4.inc", void sub_8050EE4(vo
     var_r3 = gBgOffsetsHBlankPrimary;
 
     for (var_r1 = 0; var_r1 < DISPLAY_HEIGHT; var_r1++) {
-        s16 index = (oldScrollY + var_r1);
-        index >>= 3;
-        if (sp[index] == 0) {
-            *var_r3 = 0;
-        } else if (sp[index] == -1) {
-            *var_r3 = gCamera.x >> 6;
+        s8 v = sp[(s16)(oldScrollY + var_r1) >> 3];
+        if (v == 0) {
+            *var_r3 = v;
+        } else if (v == -1) {
+            *var_r3 = (gCamera.x >> 6) & 0xFF;
         } else {
-            *var_r3 = (temp_r6 >> (4 - sp[index])) & 0xFF;
+            *var_r3 = (temp_r6 >> (4 - v)) & 0xFF;
         }
 
         var_r3++;
