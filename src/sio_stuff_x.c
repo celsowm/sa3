@@ -9,6 +9,7 @@ void TaskDestructor_8029774(Task *t);
 
 // Raw IWRAM buffers referenced by the original SIO Thumb routines.
 extern u8 gUnknown_03001060[];
+extern u8 gUnknown_030010AC[];
 extern u8 gUnknown_03001CC0[];
 
 void sub_8024334(void);
@@ -354,23 +355,67 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025714.inc", void sub_8025714(void))
 }
 END_NONMATCH
 
+// C reconstruction of packet assembly; binary matching not yet established.
 NONMATCH("asm/non_matching/sio/sio__sub_8025770.inc", void sub_8025770(void))
 {
+    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    *((u8 *)&gStageData + 6) = id;
+    gMultiSioSend.raw[3] = id;
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6606;
+    gMultiSioSend.raw[15] = gUnknown_03001060[0x4C];
+    gMultiSioSend.raw[16] = gUnknown_03001060[0x4D];
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80257AC.inc", void sub_80257AC(void))
+// C reconstruction of packet assembly; binary matching not yet established.
+NONMATCH("asm/non_matching/sio/sio__sub_80257AC.inc", void sub_80257AC(u8 value))
 {
+    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    *((u8 *)&gStageData + 6) = id;
+    gMultiSioSend.raw[15] = gUnknown_03001060[0x4C];
+    gMultiSioSend.raw[16] = gUnknown_03001060[0x4D];
+    if (id <= 1) {
+        id += 2;
+    }
+    gMultiSioSend.raw[15 + id] = 0xFF;
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6607;
+    gMultiSioSend.raw[3] = id;
+    gMultiSioSend.raw[4] = value;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025808.inc", void sub_8025808(void))
+// C reconstruction of packet assembly; binary matching not yet established.
+NONMATCH("asm/non_matching/sio/sio__sub_8025808.inc", void sub_8025808(u8 value))
 {
+    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    u8 i;
+    *((u8 *)&gStageData + 6) = id;
+    if (id <= 1 && !(gUnknown_03001060[7] & (4 << id))) {
+        id += 2;
+    }
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6607;
+    gMultiSioSend.raw[3] = id;
+    for (i = 0; i < 4; i++) {
+        gMultiSioSend.raw[15 + i] = gUnknown_030010AC[i];
+    }
+    gMultiSioSend.raw[4] = value;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025874.inc", void sub_8025874(void))
+// C reconstruction of packet assembly; binary matching not yet established.
+NONMATCH("asm/non_matching/sio/sio__sub_8025874.inc", void sub_8025874(u8 value))
 {
+    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    *((u8 *)&gStageData + 6) = id;
+    if (id <= 1 && !(gUnknown_03001060[7] & (4 << id))) {
+        id += 2;
+    }
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6608;
+    gMultiSioSend.raw[3] = id;
+    if (id > 1) {
+        gMultiSioSend.raw[15 + id] = gUnknown_03001060[0x4C + id];
+    }
+    gMultiSioSend.raw[4] = value;
 }
 END_NONMATCH
 
