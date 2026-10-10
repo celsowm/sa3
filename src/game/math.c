@@ -245,10 +245,31 @@ NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083B10.inc", void sa2__sub
 }
 END_NONMATCH
 
-// TODO: match this
+// Compose the Q6.10 3x3 basis and its translated origin.
+// The original routine reads row-major basis values from a and columns
+// from b, using signed 64-bit intermediate products for translation.
+// Source and destination are expected to be separate matrices.
 NONMATCH("asm/non_matching/game/math/sa2__sub_8083B88.inc",
          void sa2__sub_8083B88(struct UNK_8085F1C_1 *a, struct UNK_8085F1C_1 *b, struct UNK_8085F1C_1 *c))
 {
+    s32 row;
+
+    for (row = 0; row < 3; row++) {
+        s32 a0 = a->unk2[row * 3];
+        s32 a1 = a->unk2[row * 3 + 1];
+        s32 a2 = a->unk2[row * 3 + 2];
+
+        c->unk2[row * 3] = ((a0 * b->unk2[0]) + (a1 * b->unk2[3]) + (a2 * b->unk2[6])) >> 10;
+        c->unk2[row * 3 + 1] = ((a0 * b->unk2[1]) + (a1 * b->unk2[4]) + (a2 * b->unk2[7])) >> 10;
+        c->unk2[row * 3 + 2] = ((a0 * b->unk2[2]) + (a1 * b->unk2[5]) + (a2 * b->unk2[8])) >> 10;
+    }
+
+    c->unk14 = (((s64)a->unk14 * b->unk2[0]) + ((s64)a->unk18 * b->unk2[3])
+                + ((s64)a->unk1C * b->unk2[6]) + b->unk14) >> 10;
+    c->unk18 = (((s64)a->unk14 * b->unk2[1]) + ((s64)a->unk18 * b->unk2[4])
+                + ((s64)a->unk1C * b->unk2[7]) + b->unk18) >> 10;
+    c->unk1C = (((s64)a->unk14 * b->unk2[2]) + ((s64)a->unk18 * b->unk2[5])
+                + ((s64)a->unk1C * b->unk2[8]) + b->unk1C) >> 10;
 }
 END_NONMATCH
 
