@@ -222,3 +222,42 @@ individually when the complete ROM remains byte-identical. Historical
 ~77.97% ROM matching progress is still the last verified value. For
 non-matching compilation, prioritize runtime functionality smoke tests of
 the newly restored transforms as well.
+
+
+## First direct isolated codegen comparison — 2026-10-10
+
+The next stage started auditing **compiled instructions**, not just sampled
+mathematical outputs. The first probe is `sa2__sub_8084EAC` (Q6.10
+matrix transpose, `asm/non_matching/game/math/sa2__unused_sub_8084EAC.inc`).
+
+- Correct relocated Europe ROM address: **`0x080B0984`** (legacy suffix
+  `0x08084EAC + 0x2BAD8`); original interval ends `0x080B09B8`.
+- Original 52-byte ROM interval SHA-256:
+  `ea1419346318229f9310e1f0ba87ada94f100b056c3200d38027db4eb1675dca`.
+- The original Thumb disassembly uses a three-pair XOR-swap sequence,
+  which writes the **upper index before the lower index**.
+- Changed `src/game/math.c` C body to preserve that original store
+  order and keep typed C semantics. The ASM fallback remains intact.
+- An equivalent extracted-body-style standalone C probe compiled with
+  **Clang ARMv4T Thumb -O2**: **26 bytes**, SHA-256
+  `30e3467bdef917aa8fef42a1b4125439823ecb13071f3856e74df4c1e41f6f40`.
+  The emitted bytes already differ at offset 0 from the 52-byte original
+  ROM interval. Clang folds away the XOR-swap pattern.
+- Added reproducible `scripts/math_thumb_codegen_probe.py`, which
+  extracts the **actual repo C body**, compiles it with Clang, reads the
+  object `.text` and compares it against the verified original ROM;
+  added `scripts/tests/test_math_thumb_codegen_probe.py` for offline
+  source selection and runtime address guards.
+- **Important qualification:** The offline Clang sample above used an
+  **equivalent isolated source**. The newly committed extraction-based
+  runner and its new repo tests have **not yet been run in GitHub Actions
+  or against a complete local checkout**. Output can differ by Clang
+  version. Clang is not agbcc; neither a matching nor a nonmatching
+  isolated Clang result conclusively establishes what pinned agbcc
+  would emit in the full game.
+
+This is the first concrete instruction-level mismatch baseline in the
+math recovery effort, and it explains why functionally equivalent C is
+insufficient to update the matching percentage. The only acceptance
+gate remains original `agbcc`, linker placement, and full
+`make compare` against the exact Europe ROM.
