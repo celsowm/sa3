@@ -11772,7 +11772,7 @@ NONMATCH("asm/non_matching/game/stage/player__sub_8012550.inc", s32 sub_8012550(
     qSpeedAirX = p->qSpeedAirX;
     qSpeedAirY = p->qSpeedAirY;
 
-    worldY = I(qWorldY) - 3 - p->spriteOffsetY;
+    worldY = -3 - p->spriteOffsetY + I(qWorldY);
     worldX = I(qWorldX);
     flags = layer;
     if (p->qSpeedAirY < Q(3)) {
