@@ -74,7 +74,25 @@ typedef struct {
     /* 0x124 */ Sprite s124[2];
 } Intro174; /* 0x174 */
 
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x02 */ u16 unk2;
+    /* 0x04 */ u16 unk4;
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ Background bg14;
+    /* 0x54 */ Background bg54;
+} Intro94A; /* 0x94 */
+
 void Task_170_GameIntroInit(void);
+void Task_94_A_80A39FC(void);
+void TaskDestructor_94_A_80A3F10(struct Task *t);
+void sub_80A398C(Intro94A *strc);
+void sub_80A3A7C(void);
+void sub_80A3B64(void);
+void sub_80A3BFC(u8 arg0);
 void Task_174_80A3444(void);
 void TaskDestructor_174_80A3E38(struct Task *t);
 void sub_80A3228(Intro174 *strc);
@@ -1172,32 +1190,156 @@ void Task_174_80A3844(void)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A38C0.inc", void sub_80A38C0(u8 arg0))
+void sub_80A38C0(u8 arg0)
 {
-}
-END_NONMATCH
+    Intro94A *strc;
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A398C.inc", void sub_80A398C(void))
+    gDispCnt = 0x1040;
+    strc = TASK_DATA(TaskCreate(Task_94_A_80A39FC, sizeof(Intro94A), 0x100, 0, TaskDestructor_94_A_80A3F10));
+    strc->unk0 = arg0;
+    strc->unk10 = Q(48);
+    strc->unk8 = Q(64);
+    strc->unk2 = 0;
+
+    DmaFill32(3, 0, BG_CHAR_ADDR_FROM_BGCNT(0), 0x40);
+
+    gBgSprites_Unknown1[1] = 0;
+    gBgSprites_Unknown2[1][0] = 0;
+    gBgSprites_Unknown2[1][1] = 0;
+    gBgSprites_Unknown2[1][2] = 0xFF;
+    gBgSprites_Unknown2[1][3] = 0x40;
+    gBgSprites_Unknown1[2] = 0;
+    gBgSprites_Unknown2[2][0] = 0;
+    gBgSprites_Unknown2[2][1] = 0;
+    gBgSprites_Unknown2[2][2] = -1;
+    gBgSprites_Unknown2[2][3] = 0x40;
+
+    sub_80A398C(strc);
+
+    gBgPalette[0] = sub_80C4C0C(RGB_BLACK);
+    gFlags |= FLAGS_UPDATE_BACKGROUND_PALETTES;
+}
+
+void sub_80A398C(Intro94A *strc)
 {
-}
-END_NONMATCH
+    gDispCnt |= DISPCNT_BG1_ON;
+    gBgCntRegs[1] = 0xD81;
+    gBgScrollRegs[1][0] = 0;
+    gBgScrollRegs[1][1] = 0;
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_94_A_80A39FC.inc", void Task_94_A_80A39FC(void))
+    {
+        Background *bg = &strc->bg54;
+        bg->graphics.dest = BG_CHAR_ADDR(0);
+        bg->graphics.anim = 0;
+        bg->layoutVram = BG_SCREEN_ADDR(13);
+        bg->unk18 = 0;
+        bg->unk1A = 0;
+        bg->tilemapId = TM_UNKNOWN_302;
+        bg->unk1E = 0;
+        bg->unk20 = 0;
+        bg->unk22 = 0;
+        bg->unk24 = 0;
+        bg->targetTilesX = 32;
+        bg->targetTilesY = 32;
+        strc->bg54.paletteOffset = 0;
+        bg->flags = 5;
+        DrawBackground(bg);
+    }
+}
+
+void Task_94_A_80A39FC(void)
 {
-}
-END_NONMATCH
+    struct Task *t = gCurTask;
+    Intro94A *strc = TASK_DATA(t);
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3A7C.inc", void sub_80A3A7C(void))
+    gBldRegs.bldCnt = 0x3FFF;
+    gDispCnt |= (DISPCNT_WIN0_ON | DISPCNT_WIN1_ON);
+    gWinRegs[WINREG_WIN0H] = 0xFF;
+    gWinRegs[WINREG_WIN1H] = 0xFF;
+    gWinRegs[WINREG_WIN1V] = 0xFF;
+    gWinRegs[WINREG_WININ] = 0x3117;
+    gWinRegs[WINREG_WINOUT] = 0;
+    gBldRegs.bldY = 16;
+    strc->unk4 = 0x1000;
+    strc->unk6 = 1;
+    gWinRegs[WINREG_WIN0V] = (I(strc->unk10) << 8) + I(strc->unk10) + I(strc->unk8);
+    gBldRegs.bldAlpha = 0x1F;
+    gBldRegs.bldY = 16;
+    t->main = sub_80A3A7C;
+}
+
+void sub_80A3A7C(void)
 {
-}
-END_NONMATCH
+    Intro94A *strc = TASK_DATA(gCurTask);
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3B64.inc", void sub_80A3B64(void))
+    gWinRegs[WINREG_WIN0V] = (I(strc->unk10) << 8) + I(strc->unk10) + I(strc->unk8);
+
+    if (++strc->unk2 == 4) {
+        gDispCnt |= DISPCNT_BG2_ON;
+    }
+
+    if (strc->unk2 == 5) {
+        gBgCntRegs[2] = 0x5D88;
+        gBgScrollRegs[2][0] = 0;
+        gBgScrollRegs[2][1] = 0;
+
+        {
+            Background *bg = &strc->bg14;
+            bg->graphics.dest = BG_CHAR_ADDR(2);
+            bg->graphics.anim = 0;
+            bg->layoutVram = BG_SCREEN_ADDR(29);
+            bg->unk18 = 0;
+            bg->unk1A = 0;
+            bg->tilemapId = TM_UNKNOWN_304;
+            bg->unk1E = 0;
+            bg->unk20 = 0;
+            bg->unk22 = 0;
+            bg->unk24 = 0;
+            bg->targetTilesX = 32;
+            bg->targetTilesY = 32;
+            strc->bg14.paletteOffset = 0;
+            bg->flags = 6;
+            DrawBackground(bg);
+        }
+    }
+
+    if (strc->unk2 > 10) {
+        strc->unk6 = 0;
+        gCurTask->main = sub_80A3B64;
+    } else if (strc->unk0 == 0 && (gPressedKeys & START_BUTTON)) {
+        sub_808ADF0(2);
+    }
+}
+
+void sub_80A3B64(void)
 {
-}
-END_NONMATCH
+    Intro94A *strc = TASK_DATA(gCurTask);
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3BFC.inc", void sub_80A3BFC(void))
+    gWinRegs[WINREG_WIN0V] = (I(strc->unk10) << 8) + I(strc->unk10) + I(strc->unk8);
+
+    if (strc->unk6 == 0) {
+        gBldRegs.bldCnt = 0x3FBF;
+        gDispCnt |= (DISPCNT_WIN0_ON | DISPCNT_WIN1_ON);
+        gWinRegs[WINREG_WIN0H] = 0xFF;
+        gWinRegs[WINREG_WIN1H] = 0xFF;
+        gWinRegs[WINREG_WIN1V] = 0xFF;
+        gWinRegs[WINREG_WININ] = 0x24;
+        gWinRegs[WINREG_WINOUT] = 0;
+        strc->unk4 = 0;
+        strc->unk6 = 1;
+        gBldRegs.bldY = 0;
+    }
+
+    if (gBldRegs.bldY < 15) {
+        strc->unk4 += 0x30;
+        gBldRegs.bldY = strc->unk4 >> 8;
+    } else {
+        sub_80A3BFC(strc->unk0);
+        TaskDestroy(gCurTask);
+    }
+}
+
+NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3BFC.inc", void sub_80A3BFC(u8 arg0))
 {
 }
 END_NONMATCH
