@@ -238,23 +238,25 @@ void SA2_LABEL(sub_808399C)(UNK_8085D14 *arg0, UNK_8085D14 *arg1)
 
 // Multiply two Q6.10 four-component rotations, updating the second.
 // Snapshot the destination first: the ASM reads all four old components.
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083A48.inc", void sa2__sub_8083A48(UNK_8085D14 *lhs, UNK_8085D14 *rhs))
+void sa2__sub_8083A48(UNK_8085D14 *lhs, UNK_8085D14 *rhs)
 {
-    s32 a0 = lhs->unk0;
-    s32 a1 = lhs->unk2;
-    s32 a2 = lhs->unk4;
-    s32 a3 = lhs->unk6;
-    s32 b0 = rhs->unk0;
-    s32 b1 = rhs->unk2;
-    s32 b2 = rhs->unk4;
-    s32 b3 = rhs->unk6;
+    // Ported from SAT-R/sa2 (sub_8083A48)
+    s16 temp_r8 = rhs->unk0;
+    s16 temp_r5;
+    s16 temp_r6;
+    s32 temp;
 
-    rhs->unk0 = ((a3 * b0) + (a0 * b3) + (a1 * b2) - (a2 * b1)) >> 10;
-    rhs->unk2 = ((a3 * b1) - (a0 * b2) + (a1 * b3) + (a2 * b0)) >> 10;
-    rhs->unk4 = ((a3 * b2) + (a0 * b1) - (a1 * b0) + (a2 * b3)) >> 10;
-    rhs->unk6 = ((a3 * b3) - (a0 * b0) - (a1 * b1) - (a2 * b2)) >> 10;
+    temp = lhs->unk6 * temp_r8 + lhs->unk0 * rhs->unk6;
+    temp_r6 = rhs->unk4;
+    temp += lhs->unk2 * temp_r6;
+    temp_r5 = rhs->unk2;
+    temp -= lhs->unk4 * temp_r5;
+
+    rhs->unk0 = temp >> 10;
+    rhs->unk2 = (lhs->unk6 * temp_r5 - lhs->unk0 * temp_r6 + lhs->unk2 * rhs->unk6 + lhs->unk4 * temp_r8) >> 10;
+    rhs->unk4 = (lhs->unk6 * temp_r6 + lhs->unk0 * temp_r5 - lhs->unk2 * temp_r8 + lhs->unk4 * rhs->unk6) >> 10;
+    rhs->unk6 = (lhs->unk6 * rhs->unk6 - lhs->unk0 * temp_r8 - lhs->unk2 * temp_r5 - lhs->unk4 * temp_r6) >> 10;
 }
-END_NONMATCH
 
 // Normalize and conjugate the first three Q6.10 rotation components.
 void sa2__sub_8083B10(UNK_8085D14 *rotation)
@@ -524,42 +526,45 @@ void SA2_LABEL(sub_80849C4)(UNK_8085D14 *arg0, u16 arg1)
 // entries in three additional 16-bit slots. The Thumb source zeros 32
 // bytes then explicitly writes offsets 0x22, 0x2A and 0x32: the destination
 // therefore needs at least 52 bytes, NOT merely a 32-byte matrix struct.
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084A24.inc",
-         void sa2__sub_8084A24(s16 *out, u16 angle, s16 *axis))
+void sa2__sub_8084A24(UNK_8085D14 *arg0, u16 arg1, UNK_8085D14 *arg2)
 {
-    s32 a, b, c, sine, cosine, complement;
-    s32 ab, ac, bc;
-    u32 i;
+    // Ported from SAT-R/sa2 (sub_8084A24)
+    s16 temp_r1;
+    s16 temp_r2;
+    s16 temp_r4;
+    s16 temp_r5;
+    s32 temp_r6;
+    s32 *r1;
+    u8 i;
 
-    for (i = 0; i < 8; i++) {
-        ((u32 *)out)[i] = 0;
-    }
-    out[17] = 0x400;
-    out[21] = 0x400;
-    out[25] = 0x400;
+    r1 = (s32 *)arg0;
+    for (i = 0; i < sizeof(UNK_8085D14); i += 4) {
+        *r1++ = 0;
+    };
 
-    sine = SIN(angle) >> 4;
-    cosine = COS(angle) >> 4;
-    complement = 0x400 - cosine;
-    a = axis[0];
-    b = axis[1];
-    c = axis[2];
+    ((UNK_8085D14 *)r1)->unk12 = 0x400;
+    ((UNK_8085D14 *)r1)->unkA = 0x400;
+    ((UNK_8085D14 *)r1)->unk2 = 0x400;
 
-    ab = (((a * b) >> 10) * complement) >> 10;
-    ac = (((a * c) >> 10) * complement) >> 10;
-    bc = (((b * c) >> 10) * complement) >> 10;
+    temp_r5 = SIN(arg1) >> 4;
+    temp_r6 = COS(arg1) >> 4;
 
-    out[1] = cosine + ((((a * a) >> 10) * complement) >> 10);
-    out[2] = ab + ((c * sine) >> 10);
-    out[3] = ac - ((b * sine) >> 10);
-    out[4] = ab - ((c * sine) >> 10);
-    out[5] = cosine + ((((b * b) >> 10) * complement) >> 10);
-    out[6] = bc + ((a * sine) >> 10);
-    out[7] = ac + ((b * sine) >> 10);
-    out[8] = bc - ((a * sine) >> 10);
-    out[9] = cosine + ((((c * c) >> 10) * complement) >> 10);
+    temp_r1 = (((((arg2->unk0 * arg2->unk2) >> 10)) * (0x400 - temp_r6)) << 6) >> 0x10;
+    temp_r4 = (((((arg2->unk2 * arg2->unk4) >> 10)) * (0x400 - temp_r6)) << 6) >> 0x10;
+    temp_r2 = (((((arg2->unk0 * arg2->unk4) >> 10)) * (0x400 - temp_r6)) << 6) >> 0x10;
+
+    arg0->unk2 = temp_r6 + (((((arg2->unk0 * arg2->unk0) >> 10)) * (0x400 - temp_r6)) >> 10);
+    arg0->unk4 = temp_r1 + ((arg2->unk4 * temp_r5) >> 10);
+    arg0->unk6 = temp_r2 - ((arg2->unk2 * temp_r5) >> 10);
+    arg0->unk8 = temp_r1 - ((arg2->unk4 * temp_r5) >> 10);
+
+    arg0->unkA = temp_r6 + (((((arg2->unk2 * arg2->unk2) >> 10)) * (0x400 - temp_r6)) >> 10);
+    arg0->unkC = temp_r4 + ((arg2->unk0 * temp_r5) >> 10);
+    arg0->unkE = temp_r2 + ((arg2->unk2 * temp_r5) >> 10);
+    arg0->unk10 = temp_r4 - ((arg2->unk0 * temp_r5) >> 10);
+
+    arg0->unk12 = temp_r6 + (((((arg2->unk4 * arg2->unk4) >> 10)) * (0x400 - temp_r6)) >> 10);
 }
-END_NONMATCH
 
 void SA2_LABEL(sub_8084B54)(struct UNK_8085F1C_1 *matrix, u16 anglez, u16 angley, u16 anglex)
 {
