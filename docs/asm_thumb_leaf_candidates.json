@@ -1,0 +1,154 @@
+{
+  "baseline": {
+    "commit": "937a94e6492ddc9e561f1510314ce717ec7f6aca",
+    "rom_region": "EUROPE",
+    "rom_sha1": "685af3a2dc0f1b3f8922e73ec42c1dc92e210e39"
+  },
+  "methods": [
+    "Extract next-entry-label four-byte intervals from the six original standalone asm sources",
+    "Verify the bytes in those exact intervals in the private SHA-matching European ROM",
+    "Only report metadata, not original ROM or game code"
+  ],
+  "total_standalone_labels": 448,
+  "four_byte_rom_checked": 17,
+  "verified_thumb_bx_lr_returns": 17,
+  "note": "The 2 bytes after bx lr are likely alignment, not executable code. No agbcc build was run. All candidates still need ABI/linker matching proof.",
+  "candidates": [
+    {
+      "asm_path": "asm/sio_stuff_x.s",
+      "source_symbol": "sub_8027904",
+      "europe_address": "0x08027904",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/sio_stuff_x.s",
+      "source_symbol": "sub_8027908",
+      "europe_address": "0x08027908",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/boss_final.s",
+      "source_symbol": "sub_808183C",
+      "europe_address": "0x0808183C",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/boss_final.s",
+      "source_symbol": "PlayerCB_8081894",
+      "europe_address": "0x08081894",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/boss_final.s",
+      "source_symbol": "PlayerCB_80819BC",
+      "europe_address": "0x08081A3C",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/boss_final.s",
+      "source_symbol": "sub_8081B18",
+      "europe_address": "0x08081B18",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/boss_final.s",
+      "source_symbol": "sub_8081B1C",
+      "europe_address": "0x08081B1C",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/boss_final.s",
+      "source_symbol": "sub_8081B20",
+      "europe_address": "0x08081B20",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/boss_extra.s",
+      "source_symbol": "sub_8087040",
+      "europe_address": "0x08087040",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/boss_extra.s",
+      "source_symbol": "TaskDestructor_50_80870AC",
+      "europe_address": "0x080870AC",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/boss_extra.s",
+      "source_symbol": "TaskDestructor_38_8087234",
+      "europe_address": "0x08087234",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/game__mp_char_select.s",
+      "source_symbol": "TaskDestructor_80A13B0",
+      "europe_address": "0x080A13B0",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/game__opening.s",
+      "source_symbol": "TaskDestructor_A0_80A3E34",
+      "europe_address": "0x080A3E34",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/game__opening.s",
+      "source_symbol": "TaskDestructor_174_80A3E38",
+      "europe_address": "0x080A3E38",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/game__opening.s",
+      "source_symbol": "TaskDestructor_94_A_80A3F10",
+      "europe_address": "0x080A3F10",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/game__opening.s",
+      "source_symbol": "TaskDestructor_54_80A3F14",
+      "europe_address": "0x080A3F14",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    },
+    {
+      "asm_path": "asm/game__opening.s",
+      "source_symbol": "TaskDestructor_94_B_80A43DC",
+      "europe_address": "0x080A43DC",
+      "rom_bytes_kind": "THUMB BX LR + 2-byte padding",
+      "source_interval_bytes": 4,
+      "status": "rom_verified_pending_matching_c"
+    }
+  ]
+}
