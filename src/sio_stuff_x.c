@@ -2,6 +2,7 @@
 #include "core.h"
 #include "game/stage.h"
 #include "game/game_over.h"
+#include "multi_boot.h"
 #include "constants/songs.h"
 
 void Task_8029648(void);
@@ -1469,8 +1470,16 @@ NONMATCH("asm/non_matching/sio/sio__sub_80284E8.inc", void sub_80284E8(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8028530.inc", void sub_8028530(void))
+// ARM MultiBoot sends four successful completion codes.
+// Preserve all other responses as false, with no transition side effect.
+NONMATCH("asm/non_matching/sio/sio__sub_8028530.inc", bool32 sub_8028530(void))
 {
+    s32 result = MultiBootMain(&gMultiBootParam);
+    if (result == 0x50 || result == 0x60 || result == 0x70 || result == 0x71) {
+        sub_802613C();
+        return TRUE;
+    }
+    return FALSE;
 }
 END_NONMATCH
 
