@@ -75,6 +75,12 @@ class ROMAuditTests(unittest.TestCase):
         self.assertEqual(matches[-1]["file_offset"], "0x0000200")
         self.assertEqual(matches[-1]["decoded_bytes"], 64)
         self.assertEqual(matches[-1]["stored_bytes"], len(stream))
+        with_pointer = bytearray(original + stream)
+        with_pointer[0x1E0:0x1E4] = (rom_audit.ROM_BASE + 0x200).to_bytes(4, "little")
+        audited = rom_audit.audit_rom(bytes(with_pointer), scan_lz=True)
+        found = audited["lz10"]["candidates"]
+        self.assertEqual(found[-1]["pointer_sites"], ["0x080001E0"])
+        self.assertEqual(found[-1]["pointer_site_count"], 1)
 
 
 if __name__ == "__main__":
