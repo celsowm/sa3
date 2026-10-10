@@ -197,3 +197,31 @@ Prioritize **verified matched ROM bytes**, not number of commits, lines of C or 
 5. Recompute matching/decomp/data metrics and choose the next batch by actual ROM-byte contribution.
 
 Do not start a mass conversion of `asm/sio_stuff_x.s` or the final-boss assembly before the baseline and per-function verification loop are reliable.
+
+## 9. ROM audit addendum — 2026-10-10
+
+The first real ROM artifact supplied for this fork was a **USA rev-0** image,
+SHA-1 `30db467effa5014806d42db57e2299398a51355b`, GBA ID `B3SE`.
+It is **not** the European `B3SP` / `685af3a2dc0f1b3f8922e73ec42c1dc92e210e39`
+ROM targeted by the existing matching source and progress metrics.
+
+**Completed first ROM-backed work:**
+- Added `scripts/rom_audit.py`, which validates ROM fingerprints, header and
+  ARM branch entrypoint, and scans structurally valid LZ10 candidates.
+- Added 9 passing offline unit tests in `scripts/tests/test_rom_audit.py`.
+- Identified 28 candidate LZ10 streams in the USA ROM; 12 have directly
+  observable aligned pointer-shaped references. Full details are in
+  [USA_ROM_BASELINE.md](USA_ROM_BASELINE.md).
+- Verified that `--require-region USA` succeeds and
+  `--require-region EUROPE` fails as designed.
+
+**M0 status: partial / not passed.** The uploaded USA ROM can support static
+reverse engineering and a future *separate* USA matching target. It cannot
+satisfy the existing European bit-identical compare. No compiler-backed ROM
+build or emulator test has yet been run; the upstream 77.97% matching baseline
+must not be advanced based only on this metadata analysis.
+
+**Next priority:** identify owners/decompression callers for the 12
+pointer-backed USA streams, build a verified USA↔Europe cross-reference map
+only with independently established correspondence, and obtain a local
+European source of reference bytes before declaring any Europe matching win.
