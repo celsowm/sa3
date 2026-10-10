@@ -15,6 +15,15 @@ extern u8 gUnknown_03001CC0[];
 void sub_8024334(void);
 void sub_8025BC0(void);
 void sub_80287CC(void);
+s16 sub_8025E24(u8 id);
+s16 sub_802610C(void);
+s16 sub_8025D58(void);
+void sub_8024304(void);
+void sub_8024394(u8 player, u8 value);
+void sub_80243C4(u8 player, u8 value);
+void sub_80243B4(void);
+void sub_80243E4(u8 value);
+void MultiSio_SendPlayerName(void);
 
 NONMATCH("asm/non_matching/sio/sio__sub_8023A88.inc", void sub_8023A88(void))
 {
@@ -61,8 +70,13 @@ NONMATCH("asm/non_matching/sio/sio__sub_8023FE0.inc", void sub_8023FE0(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024040.inc", void sub_8024040(void))
+// Thumb-to-C reconstruction; the reference ASM remains the default matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_8024040.inc", s16 sub_8024040(void))
 {
+    s16 result = (u16)sub_8025D58();
+    sub_8024304();
+    gUnknown_03001060[7] = 0;
+    return result;
 }
 END_NONMATCH
 
@@ -93,23 +107,75 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024130.inc", void sub_8024130(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024188.inc", void sub_8024188(void))
+// Thumb-to-C reconstruction; the reference ASM remains the default matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_8024188.inc", s16 sub_8024188(u8 value))
 {
+    s16 result = sub_802610C();
+    if (result >= 0) {
+        sub_8024394(1, value);
+        return 0;
+    }
+    return result;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80241AC.inc", void sub_80241AC(void))
+// Thumb-to-C reconstruction; the reference ASM remains the default matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_80241AC.inc", s16 sub_80241AC(u8 value))
 {
+    s16 result = sub_802610C();
+    s16 response = 0;
+    u16 type;
+
+    if (result < 0) {
+        return result;
+    }
+    if (gMultiSioStatusFlags & 0x0C0C) {
+        return -4;
+    }
+
+    type = *(u16 *)&gMultiSioRecv[0].raw[0];
+    if (type == 0x6C08 || type == 0x6C0B) {
+        response = 0x10;
+    }
+    sub_80243C4(1, value);
+    return response;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024208.inc", void sub_8024208(void))
+// Thumb-to-C reconstruction; the reference ASM remains the default matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_8024208.inc", s16 sub_8024208(void))
 {
+    s16 result = sub_802610C();
+    s16 response = 0;
+
+    if (result < 0) {
+        return result;
+    }
+    if (gMultiSioStatusFlags & 0x0C0C) {
+        return -4;
+    }
+    if (*(u16 *)&gMultiSioRecv[0].raw[0] == 0x6C0A) {
+        response = 0x10;
+    }
+    sub_80243B4();
+    return response;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024254.inc", void sub_8024254(void))
+// Thumb-to-C reconstruction; the reference ASM remains the default matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_8024254.inc", s16 sub_8024254(u8 value))
 {
+    s16 result = sub_802610C();
+    if (result < 0) {
+        return result;
+    }
+    if (gMultiSioStatusFlags & 0x0C0C) {
+        return -4;
+    }
+    if (gMultiSioStatusFlags & 2) {
+        sub_80243E4(value);
+    }
+    return 0;
 }
 END_NONMATCH
 
@@ -419,8 +485,13 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025874.inc", void sub_8025874(u8 value)
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80258D4.inc", void sub_80258D4(void))
+// Thumb-to-C reconstruction; the reference ASM remains the default matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_80258D4.inc", s16 sub_80258D4(void))
 {
+    s16 result = (u16)sub_8025D58();
+    MultiSio_SendPlayerName();
+    gUnknown_03001060[7] = 0;
+    return result;
 }
 END_NONMATCH
 
@@ -610,8 +681,48 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025D58.inc", void sub_8025D58(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025E24.inc", void sub_8025E24(void))
+// Thumb-to-C reconstruction; the reference ASM remains the default matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_8025E24.inc", s16 sub_8025E24(u8 id))
 {
+    u8 *state = gUnknown_03001060;
+    u32 flags = gMultiSioStatusFlags;
+    bool8 active = FALSE;
+    u8 mismatch;
+
+    if (flags & 0x81) {
+        if (!(flags & (1 << id))) {
+            state[id]++;
+            if (state[id] > 180) {
+                return -2;
+            }
+        } else {
+            state[id] = 0;
+        }
+    }
+
+    flags = gMultiSioStatusFlags;
+    if (flags & 0x100) {
+        active = TRUE;
+    }
+
+    mismatch = state[7];
+    if ((flags & 0x1000)
+        || (active && !(flags & 1) && *(u16 *)&gMultiSioRecv[0].raw[0] != 0)
+        || (mismatch != 0 && mismatch != (flags & 0xF))) {
+        state[6]++;
+        if (state[6] >= (s8)state[4] + 8) {
+            return -1;
+        }
+    } else {
+        state[6] = 0;
+    }
+
+    if ((s8)state[4] > 0) {
+        state[4]--;
+    } else if ((s8)state[4] < 0) {
+        state[4]++;
+    }
+    return 0;
 }
 END_NONMATCH
 
@@ -634,8 +745,14 @@ NONMATCH("asm/non_matching/sio/sio__sub_80260F0.inc", void sub_80260F0(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_802610C.inc", void sub_802610C(void))
+// Thumb-to-C reconstruction; the reference ASM remains the default matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_802610C.inc", s16 sub_802610C(void))
 {
+    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    if (*((u8 *)&gStageData + 6) != id) {
+        return -1;
+    }
+    return sub_8025E24(id);
 }
 END_NONMATCH
 
