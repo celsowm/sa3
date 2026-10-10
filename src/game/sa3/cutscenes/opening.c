@@ -86,7 +86,22 @@ typedef struct {
     /* 0x54 */ Background bg54;
 } Intro94A; /* 0x94 */
 
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x02 */ u16 unk2;
+    /* 0x04 */ u16 unk4;
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ Background bg14;
+} Intro54; /* 0x54 */
+
 void Task_170_GameIntroInit(void);
+void Task_54_80A3D3C(void);
+void Task_54_80A3DAC(void);
+void TaskDestructor_54_80A3F14(struct Task *t);
+void sub_80A3CC8(Intro54 *strc);
 void Task_94_A_80A39FC(void);
 void TaskDestructor_94_A_80A3F10(struct Task *t);
 void sub_80A398C(Intro94A *strc);
@@ -1339,25 +1354,106 @@ void sub_80A3B64(void)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3BFC.inc", void sub_80A3BFC(u8 arg0))
+void sub_80A3BFC(u8 arg0)
 {
-}
-END_NONMATCH
+    Intro54 *strc;
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3CC8.inc", void sub_80A3CC8(void))
-{
-}
-END_NONMATCH
+    gDispCnt = 0x7040;
+    strc = TASK_DATA(TaskCreate(Task_54_80A3D3C, sizeof(Intro54), 0x100, 0, TaskDestructor_54_80A3F14));
+    strc->unk0 = arg0;
+    strc->unk10 = Q(48);
+    strc->unk8 = Q(64);
+    strc->unk2 = 0;
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_54_80A3D3C.inc", void Task_54_80A3D3C(void))
-{
-}
-END_NONMATCH
+    DmaFill32(3, 0, BG_CHAR_ADDR_FROM_BGCNT(0), 0x40);
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_54_80A3DAC.inc", void Task_54_80A3DAC(void))
-{
+    gBgSprites_Unknown1[1] = 0;
+    gBgSprites_Unknown2[1][0] = 0;
+    gBgSprites_Unknown2[1][1] = 0;
+    gBgSprites_Unknown2[1][2] = 0xFF;
+    gBgSprites_Unknown2[1][3] = 0x40;
+    gBgSprites_Unknown1[2] = 0;
+    gBgSprites_Unknown2[2][0] = 0;
+    gBgSprites_Unknown2[2][1] = 0;
+    gBgSprites_Unknown2[2][2] = -1;
+    gBgSprites_Unknown2[2][3] = 0x40;
+
+    sub_80A3CC8(strc);
+
+    gBgPalette[0] = sub_80C4C0C(RGB_BLACK);
+    gFlags |= FLAGS_UPDATE_BACKGROUND_PALETTES;
 }
-END_NONMATCH
+
+void sub_80A3CC8(Intro54 *strc)
+{
+    gDispCnt |= DISPCNT_BG0_ON;
+    gBgCntRegs[0] = 0x5888;
+    gBgScrollRegs[0][0] = 0;
+    gBgScrollRegs[0][1] = 0;
+
+    {
+        Background *bg = &strc->bg14;
+        bg->graphics.dest = BG_CHAR_ADDR(2);
+        bg->graphics.anim = 0;
+        bg->layoutVram = BG_SCREEN_ADDR(24);
+        bg->unk18 = 0;
+        bg->unk1A = 0;
+        bg->tilemapId = TM_UNKNOWN_303;
+        bg->unk1E = 0;
+        bg->unk20 = 0;
+        bg->unk22 = 0;
+        bg->unk24 = 0;
+        bg->targetTilesX = 32;
+        bg->targetTilesY = 32;
+        strc->bg14.paletteOffset = 0;
+        bg->flags = 4;
+        DrawBackground(bg);
+    }
+}
+
+void Task_54_80A3D3C(void)
+{
+    struct Task *t = gCurTask;
+    Intro54 *strc = TASK_DATA(t);
+
+    gBldRegs.bldCnt = 0x3FBF;
+    gDispCnt |= (DISPCNT_WIN0_ON | DISPCNT_WIN1_ON);
+    gWinRegs[WINREG_WIN0H] = 0xFF;
+    gWinRegs[WINREG_WIN1H] = 0xFF;
+    gWinRegs[WINREG_WIN1V] = 0xFF;
+    gWinRegs[WINREG_WININ] = 0x21;
+    gWinRegs[WINREG_WINOUT] = 0;
+    gBldRegs.bldY = 0;
+    strc->unk4 = 0;
+    strc->unk6 = 1;
+    gWinRegs[WINREG_WIN0V] = (I(strc->unk10) << 8) + I(strc->unk10) + I(strc->unk8);
+    t->main = Task_54_80A3DAC;
+}
+
+void Task_54_80A3DAC(void)
+{
+    Intro54 *strc = TASK_DATA(gCurTask);
+
+    gWinRegs[WINREG_WIN0V] = (I(strc->unk10) << 8) + I(strc->unk10) + I(strc->unk8);
+
+    if (gBldRegs.bldY < 15) {
+        strc->unk4 += 0x30;
+        gBldRegs.bldY = strc->unk4 >> 8;
+
+    } else {
+        if (strc->unk0 != 0) {
+            CreateGameIntroState(5);
+        } else {
+            CreateGameIntroState(3);
+        }
+        TaskDestroy(gCurTask);
+        return;
+    }
+
+    if (strc->unk0 == 0 && (gPressedKeys & START_BUTTON)) {
+        sub_808ADF0(2);
+    }
+}
 
 void TaskDestructor_A0_80A3E34(struct Task *t)
 {
@@ -1425,15 +1521,13 @@ void sub_80A3EDC(Intro174 *strc)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__TaskDestructor_94_A_80A3F10.inc", void TaskDestructor_94_A_80A3F10(struct Task *t))
+void TaskDestructor_94_A_80A3F10(struct Task *t)
 {
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__TaskDestructor_54_80A3F14.inc", void TaskDestructor_54_80A3F14(struct Task *t))
+void TaskDestructor_54_80A3F14(struct Task *t)
 {
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3F18.inc", void sub_80A3F18(void))
 {
