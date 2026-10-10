@@ -36,6 +36,7 @@ void sub_8025CD8(void);
 void sub_8026AB8(const u8 *packet);
 void sub_8025D10(void);
 void sub_802613C(void);
+void sub_80296F8(u8 value);
 
 NONMATCH("asm/non_matching/sio/sio__sub_8023A88.inc", void sub_8023A88(void))
 {
@@ -1465,8 +1466,22 @@ void sub_8027908(void)
 {
 }
 
-NONMATCH("asm/non_matching/sio/sio__sub_802790C.inc", void sub_802790C(void))
+// Apply a received multiplayer event to a player, preserving original
+// halfword write at +0x66 and signed-trigger dispatch for event 0x20.
+NONMATCH("asm/non_matching/sio/sio__sub_802790C.inc", void sub_802790C(u16 event, u16 player))
 {
+    u8 value = event;
+    u8 *playerState = (u8 *)&gPlayers[player];
+
+    playerState[0x69] = value;
+    ((u8 *)&gStageData)[0x8F] = 1;
+    if ((value & 0xF0) == 0x10) {
+        // THUMB mov 0xE1 << 2; only this halfword changes.
+        playerState[0x66] = 0x84;
+        playerState[0x67] = 0x03;
+    } else if ((value & 0xF0) == 0x20) {
+        sub_80296F8(value);
+    }
 }
 END_NONMATCH
 
