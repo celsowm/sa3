@@ -7,6 +7,14 @@
 void Task_8029648(void);
 void TaskDestructor_8029774(Task *t);
 
+// Raw IWRAM buffers referenced by the original SIO Thumb routines.
+extern u8 gUnknown_03001060[];
+extern u8 gUnknown_03001CC0[];
+
+void sub_8024334(void);
+void sub_8025BC0(void);
+void sub_80287CC(void);
+
 NONMATCH("asm/non_matching/sio/sio__sub_8023A88.inc", void sub_8023A88(void))
 {
 }
@@ -57,8 +65,10 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024040.inc", void sub_8024040(void))
 }
 END_NONMATCH
 
+// Reconstructed from Thumb; leave original instructions in matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_8024068.inc", void sub_8024068(void))
 {
+    sub_8024334();
 }
 END_NONMATCH
 
@@ -369,8 +379,10 @@ NONMATCH("asm/non_matching/sio/sio__sub_80258D4.inc", void sub_80258D4(void))
 }
 END_NONMATCH
 
+// Reconstructed from Thumb; leave original instructions in matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_80258FC.inc", void sub_80258FC(void))
 {
+    sub_8025BC0();
 }
 END_NONMATCH
 
@@ -389,8 +401,10 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025998.inc", void sub_8025998(void))
 }
 END_NONMATCH
 
+// Reconstructed from Thumb; leave original instructions in matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_80259EC.inc", void sub_80259EC(void))
 {
+    sub_8025BC0();
 }
 END_NONMATCH
 
@@ -471,8 +485,15 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025BEC.inc", void sub_8025BEC(u8 value)
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025C20.inc", void sub_8025C20(void))
+// Reconstructed from Thumb; leave original instructions in matching builds.
+NONMATCH("asm/non_matching/sio/sio__sub_8025C20.inc", void sub_8025C20(u8 value))
 {
+    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    *((u8 *)&gStageData + 6) = id;
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6603;
+    gMultiSioSend.raw[3] = id;
+    gMultiSioSend.raw[15 + id] = gUnknown_03001060[0x4C + id];
+    gMultiSioSend.raw[4] = value;
 }
 END_NONMATCH
 
@@ -559,8 +580,12 @@ NONMATCH("asm/non_matching/sio/sio__sub_8026080.inc", void sub_8026080(void))
 }
 END_NONMATCH
 
+// Reconstructed from Thumb; leave original instructions in matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_80260F0.inc", void sub_80260F0(void))
 {
+    gMultiSioEnabled = FALSE;
+    MultiSioStop();
+    MultiSioInit(0);
 }
 END_NONMATCH
 
@@ -574,8 +599,10 @@ NONMATCH("asm/non_matching/sio/sio__sub_802613C.inc", void sub_802613C(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_802616C.inc", void sub_802616C(void))
+// Reconstructed from Thumb; leave original instructions in matching builds.
+NONMATCH("asm/non_matching/sio/sio__sub_802616C.inc", void sub_802616C(u8 value))
 {
+    gUnknown_03001060[4] = value;
 }
 END_NONMATCH
 
@@ -629,8 +656,21 @@ NONMATCH("asm/non_matching/sio/sio__sub_80268B8.inc", void sub_80268B8(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8026AB8.inc", void sub_8026AB8(void))
+// Reconstructed from Thumb; leave original instructions in matching builds.
+NONMATCH("asm/non_matching/sio/sio__sub_8026AB8.inc", void sub_8026AB8(const u8 *packet))
 {
+    s16 i;
+    for (i = 0; i < 8; i++) {
+        u8 *slot = &gUnknown_03001CC0[2 + 5 * i];
+        if (slot[0] == 0xFF) {
+            slot[0] = packet[0];
+            slot[1] = packet[1];
+            slot[2] = packet[2];
+            slot[3] = packet[3];
+            slot[4] = packet[4];
+            break;
+        }
+    }
 }
 END_NONMATCH
 
@@ -886,8 +926,11 @@ NONMATCH("asm/non_matching/sio/sio__sub_8028770.inc", void sub_8028770(void))
 }
 END_NONMATCH
 
+// Reconstructed from Thumb; leave original instructions in matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_80287B8.inc", void sub_80287B8(void))
 {
+    gUnknown_03001060[7] = 0;
+    sub_80287CC();
 }
 END_NONMATCH
 
