@@ -63,7 +63,7 @@ DRIVER = r"""
 static void init(unsigned id, s16 status, unsigned connected,
                  u16 type, u16 ack, unsigned input) {
     int i;
-    mockControl = id << 6;
+    mockControl = id << 4;
     gStageData.playerIndex = 0xDD;
     mockStatus = status;
     gMultiSioStatusFlags = connected;
