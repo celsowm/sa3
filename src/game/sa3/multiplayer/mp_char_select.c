@@ -2,6 +2,8 @@
 #include "core.h"
 #include "flags.h"
 #include "lib/m4a/m4a.h"
+#include "code_z_1.h"
+#include "multi_sio_stuff.h"
 #include "game/save.h"
 #include "game/screen_fade.h"
 #include "game/stage.h" // gStageData
@@ -128,6 +130,9 @@ extern u8 gUnknown_030010AC[4];
 extern const u8 gCharacterSelectOrderLUT[];
 extern const u16 gAnnouncerSelect1st[];
 extern const u16 gAnnouncerSelect2nd[];
+extern const u16 gUnknown_08E2EE50[10][16];
+extern const u8 gUnknown_080D8F1D[5][8][3];
+extern const u8 gUnknown_080D8F95[5][8][3];
 bool32 sub_80A1768(MpCharSelect *mcs);
 bool32 sub_80A182C(MpCharSelect *mcs);
 bool32 sub_80A185C(MpCharSelect *mcs);
@@ -1070,11 +1075,109 @@ END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0DC8.inc", void sub_80A0DC8(MpCharSelect *mcs))
 {
+    u8 character;
+    s32 palId;
+
+    {
+        Background *bg = &mcs->bg274;
+        character = gUnknown_080D8F18[mcs->unk1];
+        bg->graphics.dest = BG_CHAR_ADDR(2);
+        bg->graphics.anim = 0;
+        bg->layoutVram = BG_SCREEN_ADDR(27);
+        bg->unk18 = 0;
+        bg->unk1A = 0;
+        bg->tilemapId = gUnknown_080D8CDC[character + 5];
+        bg->unk1E = 0;
+        bg->unk20 = 0;
+        bg->unk22 = 0;
+        bg->unk24 = 0;
+        bg->targetTilesX = 16;
+        bg->targetTilesY = 16;
+        mcs->bg274.paletteOffset = 0;
+        bg->flags = 6;
+        DrawBackground(bg);
+    }
+
+    mcs->unk50 = Q(80);
+
+    palId = 7;
+    if (*mcs->unk18 <= 11) {
+        palId = 6;
+    }
+
+    if (FLAGS_20000 & gFlags) {
+        CopyObjPaletteMasked(&gUnknown_08E2EE50[character][0], palId * 16, 16);
+    } else {
+        DmaCopy16(3, &gUnknown_08E2EE50[character][0], &gObjPalette[palId * 16], 32);
+        gFlags |= FLAGS_UPDATE_SPRITE_PALETTES;
+    }
+    gFlags |= FLAGS_UPDATE_SPRITE_PALETTES;
 }
 END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0EA8.inc", void sub_80A0EA8(MpCharSelect *mcs))
 {
+    u8 character = gUnknown_080D8F18[mcs->unk1];
+
+    if (FLAGS_20000 & gFlags) {
+        CopyObjPaletteMasked(&gUnknown_08E2EE50[character][0], 0x70, 16);
+    } else {
+        DmaCopy16(3, &gUnknown_08E2EE50[character][0], &gObjPalette[0x70], 32);
+        gFlags |= FLAGS_UPDATE_SPRITE_PALETTES;
+    }
+    gFlags |= FLAGS_UPDATE_SPRITE_PALETTES;
+
+    gDispCnt = 0x1741;
+    gBgSprites_Unknown1[1] = 0;
+    gBgSprites_Unknown2[1][0] = 0;
+    gBgSprites_Unknown2[1][1] = 0;
+    gBgSprites_Unknown2[1][2] = 0xFF;
+    gBgSprites_Unknown2[1][3] = 0x40;
+    gBgCntRegs[1] = 0x30E;
+    gBgScrollRegs[1][0] = 0;
+    gBgScrollRegs[1][1] = 0;
+
+    {
+        Background *bg = &mcs->bg234;
+        bg->graphics.dest = BG_CHAR_ADDR(3);
+        bg->graphics.anim = 0;
+        bg->layoutVram = BG_SCREEN_ADDR(3);
+        bg->unk18 = 0;
+        bg->unk1A = 0;
+        bg->tilemapId = gUnknown_080D8CDC[gUnknown_080D8F18[mcs->unk2] + 10];
+        bg->unk1E = 0;
+        bg->unk20 = 0;
+        bg->unk22 = 0;
+        bg->unk24 = 0;
+        bg->targetTilesX = 16;
+        bg->targetTilesY = 16;
+        mcs->bg234.paletteOffset = 0;
+        bg->flags = 1;
+        DrawBackground(bg);
+    }
+
+    gBgCntRegs[2] = 0x1B89;
+    gBgScrollRegs[2][0] = 0;
+    gBgScrollRegs[2][1] = 0;
+
+    {
+        Background *bg = &mcs->bg274;
+        bg->graphics.dest = BG_CHAR_ADDR(2);
+        bg->graphics.anim = 0;
+        bg->layoutVram = BG_SCREEN_ADDR(27);
+        bg->unk18 = 0;
+        bg->unk1A = 0;
+        bg->tilemapId = gUnknown_080D8CDC[gUnknown_080D8F18[mcs->unk1] + 5];
+        bg->unk1E = 0;
+        bg->unk20 = 0;
+        bg->unk22 = 0;
+        bg->unk24 = 0;
+        bg->targetTilesX = 16;
+        bg->targetTilesY = 16;
+        mcs->bg274.paletteOffset = 0;
+        bg->flags = 6;
+        DrawBackground(bg);
+    }
 }
 END_NONMATCH
 
@@ -1200,10 +1303,69 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A11B8.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A124C.inc", void sub_80A124C(MpCharSelect *mcs))
+void sub_80A124C(MpCharSelect *mcs)
 {
+    const u8 *pos;
+    u8 i;
+    u8 c1 = mcs->unk1;
+
+    if (mcs->unk2 > 4 || c1 > 4) {
+        if (gStageData.playerIndex > 1) {
+            mcs->unk2 = gUnknown_03001060.unk4C[gStageData.playerIndex & 1];
+            mcs->unk1 = gUnknown_03001060.unk4C[gStageData.playerIndex];
+        } else {
+            mcs->unk2 = gUnknown_03001060.unk4C[gStageData.playerIndex];
+            mcs->unk1 = gUnknown_03001060.unk4C[(gStageData.playerIndex & 1) + 2];
+        }
+    }
+
+    if (mcs->language != 0) {
+        pos = &gUnknown_080D8F95[0][0][(mcs->unk2 * 8 + mcs->unk1) * 3];
+    } else {
+        pos = &gUnknown_080D8F1D[0][0][(mcs->unk2 * 8 + mcs->unk1) * 3];
+    }
+
+    if (pos[0] == 0 || pos[1] == 0 || pos[2] == 0) {
+        sub_802613C();
+    }
+
+    for (i = 0; i < 2; i++) {
+        Sprite *s = &mcs->s12C;
+        s->x = 120;
+        s->y = I(mcs->unk60);
+
+        if (i != 0) {
+            s->frameFlags |= SPRITE_FLAG_MASK_X_FLIP;
+        } else {
+            s->frameFlags &= ~SPRITE_FLAG_MASK_X_FLIP;
+        }
+        DisplaySprite(s);
+    }
+
+    {
+        Sprite *s = &mcs->s104;
+        s->x = pos[0];
+        s->y = I(mcs->unk60);
+        UpdateSpriteAnimation(s);
+        DisplaySprite(s);
+    }
+
+    {
+        Sprite *s = &mcs->s1A4;
+        s->x = pos[1];
+        s->y = I(mcs->unk60);
+        UpdateSpriteAnimation(s);
+        DisplaySprite(s);
+    }
+
+    {
+        Sprite *s = &mcs->s154;
+        s->x = pos[2];
+        s->y = I(mcs->unk68);
+        UpdateSpriteAnimation(s);
+        DisplaySprite(s);
+    }
 }
-END_NONMATCH
 
 void sub_80A137C(MpCharSelect *mcs)
 {
