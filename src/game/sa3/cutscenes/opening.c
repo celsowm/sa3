@@ -1068,30 +1068,63 @@ NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__TaskDestructor_174_80A3E3
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3E3C.inc", void sub_80A3E3C(void))
+bool32 sub_80A3E3C(Intro174 *strc)
 {
-}
-END_NONMATCH
+    if (strc->unk18 < 0) {
+        strc->unk18 += Q(strc->unk1);
+        if (strc->unk18 >= 0) {
+            strc->unk18 = 0;
+            return TRUE;
+        }
+    }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3E60.inc", void sub_80A3E60(void))
-{
+    return FALSE;
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3E90.inc", void sub_80A3E90(void))
+bool32 sub_80A3E60(Intro174 *strc)
 {
-}
-END_NONMATCH
+    if (strc->unk20 >= Q(112)) {
+        strc->unk20 -= Q(0.5) + (strc->unk1 << 7);
+        if (strc->unk20 <= Q(112)) {
+            strc->unk20 = Q(112);
+            return TRUE;
+        }
+    }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3EAC.inc", void sub_80A3EAC(void))
-{
+    return FALSE;
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3EDC.inc", void sub_80A3EDC(void))
+void sub_80A3E90(Intro174 *strc)
 {
+    Sprite *s = &strc->sAC;
+    s->x = I(strc->unk24);
+    s->y = I(strc->unk28);
+    DisplaySprite(s);
 }
-END_NONMATCH
+
+void sub_80A3EAC(Intro174 *strc)
+{
+    u8 i;
+
+    for (i = 0; i < ARRAY_COUNT(strc->sD4); i++) {
+        Sprite *s = &strc->sD4[i];
+        s->x = I(strc->unk1C);
+        s->y = I(strc->unk20);
+        DisplaySprite(s);
+    }
+}
+
+void sub_80A3EDC(Intro174 *strc)
+{
+    u8 i;
+
+    for (i = 0; i < ARRAY_COUNT(strc->s124); i++) {
+        Sprite *s = &strc->s124[i];
+        s->x = I(strc->unk1C);
+        s->y = I(strc->unk20);
+        DisplaySprite(s);
+    }
+}
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__TaskDestructor_94_A_80A3F10.inc", void TaskDestructor_94_A_80A3F10(struct Task *t))
 {
