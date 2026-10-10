@@ -169,3 +169,32 @@ This iteration advanced actual game source, not only tooling:
 3x3 basis multiplication plus 64-bit translation, then the normalization and
 matrix helpers. Return to Boss 2 `sub_806CFD4` and entity fallbacks after
 confirming the best matching-code bytes gained per function.
+
+
+## 2026-10-10 continuation: 14/18 mathematical `NONMATCH` C bodies recovered
+
+Production `src/game/math.c` now has 14 genuine C bodies for 18 original
+mathematical `NONMATCH` macros, up from 12 in the prior iteration. Added:
+
+- `sa2__sub_8084EE0`: adjugate inverse and exact original nonstandard
+  16-bit translation stores at 0x14/0x16/0x18; locally validated with 8,000
+  native C cases against a full-structure byte oracle.
+- `sa2__sub_808458C`: signed 64-bit projection division and exact
+  alias-dependent ARM input reloads; 20,000 native C examples, including
+  32-bit overflow truncation, verified with independently written formulas.
+
+Both equivalent native C implementations also compiled into ARMv4T/Thumb
+relocatable objects with Clang 17. New deterministic tests were committed
+in `scripts/tests/test_math_c_fallbacks.py` that extract the **actual**
+C source; hosted workflow passing status has **not been confirmed**.
+
+Current empty C bodies are only `sa2__sub_80832FC`,
+`sa2__sub_808343C`, `sa2__sub_8084A24` and
+`sa2__sub_8084C70`. Their ABI and source-memory footprint need
+attention before conversion. Details and original EU ROM range
+fingerprints are in [SA2_MATH_C_DECOMP_BATCH.md](SA2_MATH_C_DECOMP_BATCH.md).
+
+**Gate unchanged:** the default GBA build still selects original ASM via
+`NONMATCH`; therefore **14 C recoveries are not 14 matching conversions**.
+Historical ~77.97% matching code remains unmodified. Only a pinned agbcc
+build and full `make compare` may promote individual functions.
