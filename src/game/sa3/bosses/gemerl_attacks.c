@@ -368,7 +368,7 @@ bool32 sub_807AC48(GemerlAttacks *strc10C)
 }
 
 // (93.86%) https://decomp.me/scratch/P8qmG
-NONMATCH("asm/non_matching/game/bosses/gatk__sub_807AD88.inc", bool32 sub_807AD88(GemerlAttacks *strc10C))
+bool32 sub_807AD88(GemerlAttacks *strc10C)
 {
     s16 sp0[10];
     s32 temp_r1;
@@ -393,10 +393,14 @@ NONMATCH("asm/non_matching/game/bosses/gatk__sub_807AD88.inc", bool32 sub_807AD8
     }
     strc10C->unk4 += strc10C->unk16;
     strc10C->unk8 += strc10C->unk18;
-    strc10C->tf60.rotation = (SA2_LABEL(sub_8004418)(I(strc10C->unk10 - strc10C->unk8), I(strc10C->unkC - strc10C->unk4)) - Q(1)) & 0x3FF;
+    {
+        s32 rotation = SA2_LABEL(sub_8004418)(I(strc10C->unk10 - strc10C->unk8), I(strc10C->unkC - strc10C->unk4));
+        SpriteTransform *tf = &strc10C->tf60;
+        rotation -= Q(1);
+        tf->rotation = rotation & 0x3FF;
+    }
     return var_r5;
 }
-END_NONMATCH
 
 // (92.36%) https://decomp.me/scratch/zZvFM
 NONMATCH("asm/non_matching/game/bosses/gatk__sub_807AE3C.inc", bool32 sub_807AE3C(GemerlAttacks *strc10C))
