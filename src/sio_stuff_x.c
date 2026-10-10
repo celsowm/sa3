@@ -28,6 +28,8 @@ void MultiSio_SendPlayerName(void);
 void sub_8025770(void);
 void sub_8025D00(void);
 void sub_8025D48(void);
+void sub_80243F8(u8 value);
+void sub_8025D34(u8 value);
 void sub_80260F0(void);
 void sub_8025BEC(u8 value);
 void sub_8025C64(u8 value);
@@ -84,8 +86,31 @@ NONMATCH("asm/non_matching/sio/sio__sub_8023F60.inc", void sub_8023F60(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8023FE0.inc", void sub_8023FE0(void))
+// Source-level reconstruction from Thumb; matching builds retain original ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_8023FE0.inc", s16 sub_8023FE0(void))
 {
+    s16 status = sub_802610C();
+    u16 type;
+    u8 value;
+    s16 result = 0;
+
+    if (status < 0) {
+        return status;
+    }
+    if (gMultiSioStatusFlags & 0x0C0C) {
+        return -4;
+    }
+    if (!(gMultiSioStatusFlags & 1)) {
+        return 0;
+    }
+
+    type = gMultiSioRecv[0].raw[0] | ((u16)gMultiSioRecv[0].raw[1] << 8);
+    value = gMultiSioRecv[0].raw[7];
+    if (type == 0x6C0C) {
+        result = 0x1000 | value;
+    }
+    sub_80243F8(value);
+    return result;
 }
 END_NONMATCH
 
@@ -671,8 +696,30 @@ NONMATCH("asm/non_matching/sio/sio__sub_80252E8.inc", void sub_80252E8(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025360.inc", void sub_8025360(void))
+// Source-level reconstruction from Thumb; matching builds retain original ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_8025360.inc", s16 sub_8025360(void))
 {
+    u8 participants = gUnknown_03001060[7];
+    s16 status = sub_802610C();
+    u8 i;
+
+    if (status < 0) {
+        return status;
+    }
+    sub_8025D10();
+    if (participants != 3 && participants != 7 && participants != 15) {
+        return 0;
+    }
+    for (i = 0; i < 4; i++) {
+        if (participants & (1 << i)) {
+            u16 type = gMultiSioRecv[i].raw[0]
+                       | ((u16)gMultiSioRecv[i].raw[1] << 8);
+            if (type != 0x660C) {
+                return 0;
+            }
+        }
+    }
+    return 1;
 }
 END_NONMATCH
 
@@ -686,8 +733,30 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025460.inc", void sub_8025460(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80254CC.inc", void sub_80254CC(void))
+// Source-level reconstruction from Thumb; matching builds retain original ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_80254CC.inc", s16 sub_80254CC(void))
 {
+    u8 participants = gUnknown_03001060[7];
+    s16 status = sub_802610C();
+    u8 i;
+
+    if (status < 0) {
+        return status;
+    }
+    gUnknown_03001060[0x50] = 0;
+    gUnknown_03001060[0x51] = 0;
+    sub_8025D20(0);
+
+    for (i = 0; i < 4; i++) {
+        if (participants & (1 << i)) {
+            u16 type = gMultiSioRecv[i].raw[0]
+                       | ((u16)gMultiSioRecv[i].raw[1] << 8);
+            if (type != 0x660D) {
+                return 0;
+            }
+        }
+    }
+    return 1;
 }
 END_NONMATCH
 
@@ -696,18 +765,80 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025534.inc", void sub_8025534(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80255B0.inc", void sub_80255B0(void))
+// Source-level reconstruction from Thumb; matching builds retain original ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_80255B0.inc", s16 sub_80255B0(void))
 {
+    s16 status = sub_802610C();
+    u16 type;
+    u8 value;
+
+    if (status < 0) {
+        return status;
+    }
+    sub_8025D20(gUnknown_03001060[0x50]);
+    if (!(gMultiSioStatusFlags & 1)) {
+        return 0;
+    }
+    type = gMultiSioRecv[0].raw[0] | ((u16)gMultiSioRecv[0].raw[1] << 8);
+    if (type != 0x660D && type != 0x660E) {
+        return 0;
+    }
+    value = gMultiSioRecv[0].raw[5];
+    gUnknown_03001060[0x50] = value;
+    gUnknown_03001060[0x51] = 0;
+    return (type == 0x660E) ? 1 : 0;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025614.inc", void sub_8025614(void))
+// Source-level reconstruction from Thumb; matching builds retain original ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_8025614.inc", s16 sub_8025614(void))
 {
+    s16 status = sub_802610C();
+    u16 type;
+    u8 value;
+
+    if (status < 0) {
+        return status;
+    }
+    sub_8025D34(gUnknown_03001060[0x50]);
+    if (!(gMultiSioStatusFlags & 1)) {
+        return 0;
+    }
+    type = gMultiSioRecv[0].raw[0] | ((u16)gMultiSioRecv[0].raw[1] << 8);
+    if (type != 0x660E && type <= 0x680F) {
+        return 0;
+    }
+    value = gMultiSioRecv[0].raw[5];
+    gUnknown_03001060[0x50] = value;
+    gUnknown_03001060[0x51] = 0;
+    return (type == 0x660E) ? 1 : 0;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025674.inc", void sub_8025674(void))
+// Source-level reconstruction from Thumb; matching builds retain original ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_8025674.inc", s16 sub_8025674(void))
 {
+    u8 participants = gUnknown_03001060[7];
+    s16 status = sub_802610C();
+    u8 i;
+
+    if (status < 0) {
+        return status;
+    }
+    sub_8025D48();
+    if (participants != 3 && participants != 7 && participants != 15) {
+        return 0;
+    }
+    for (i = 0; i < 4; i++) {
+        if (participants & (1 << i)) {
+            u16 type = gMultiSioRecv[i].raw[0]
+                       | ((u16)gMultiSioRecv[i].raw[1] << 8);
+            if (type != 0x660F) {
+                return 0;
+            }
+        }
+    }
+    return 1;
 }
 END_NONMATCH
 
@@ -716,8 +847,23 @@ NONMATCH("asm/non_matching/sio/sio__MultiSio_SendPlayerName.inc", void MultiSio_
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025714.inc", void sub_8025714(void))
+// Source-level reconstruction from Thumb; matching builds retain original ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_8025714.inc", void sub_8025714(u8 value))
 {
+    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    u8 slot;
+
+    gStageData.playerIndex = player;
+    gMultiSioSend.raw[0] = 4;
+    gMultiSioSend.raw[1] = 0x66;
+    gMultiSioSend.raw[3] = player;
+    slot = player;
+    if (slot <= 1) {
+        gMultiSioSend.raw[15 + slot] = gUnknown_03001060[0x4C + slot];
+    } else {
+        gMultiSioSend.raw[15 + slot] = 0xFF;
+    }
+    gMultiSioSend.raw[4] = value;
 }
 END_NONMATCH
 
