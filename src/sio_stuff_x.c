@@ -157,7 +157,8 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024130.inc", s16 sub_8024130(void))
         return 0;
     }
     {
-        s16 result = (*(u16 *)&gMultiSioRecv[1].raw[0] == 0x6C0A) ? 0x10 : 0;
+        u16 packetType = gMultiSioRecv[1].raw[0] | ((u16)gMultiSioRecv[1].raw[1] << 8);
+        s16 result = (packetType == 0x6C0A) ? 0x10 : 0;
         sub_80243B4();
         return result;
     }
