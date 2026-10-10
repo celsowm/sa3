@@ -1109,7 +1109,7 @@ void sub_80261B0(void))
     }
     for (i = 0; i < 4; i++) {
         u8 *state = (u8 *)&gPlayers[i];
-        state[0x2C] = (state[0x2C] & (u8)~0x39) | 0x20;
+        state[0x2C] = (state[0x2C] & (u8)-0x39) | 0x20;
     }
     gMultiSioSend.raw[0x12] = 0xFF;
     for (i = 0; i < 4; i++) {
