@@ -96,23 +96,71 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024068.inc", void sub_8024068(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024074.inc", void sub_8024074(void))
+// Recovered from Thumb SIO status/error paths; ASM remains matching fallback.
+NONMATCH("asm/non_matching/sio/sio__sub_8024074.inc", s16 sub_8024074(u8 value))
 {
+    s16 status = sub_802610C();
+    if (status < 0) {
+        return status;
+    }
+    if (gMultiSioStatusFlags & 0x0C0C) {
+        return -4;
+    }
+    sub_8024354(0, value);
+    return 0;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80240B4.inc", void sub_80240B4(void))
+// Recovered from Thumb SIO status/error paths; ASM remains matching fallback.
+NONMATCH("asm/non_matching/sio/sio__sub_80240B4.inc", s16 sub_80240B4(u8 value))
 {
+    s16 status = sub_802610C();
+    if (status < 0) {
+        return status;
+    }
+    if (gMultiSioStatusFlags & 0x0C0C) {
+        return -4;
+    }
+    sub_8024374(0, value);
+    return 0;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80240F4.inc", void sub_80240F4(void))
+// Recovered from Thumb SIO status/error paths; ASM remains matching fallback.
+NONMATCH("asm/non_matching/sio/sio__sub_80240F4.inc", s16 sub_80240F4(void))
 {
+    s16 status = sub_802610C();
+    if (status < 0) {
+        return status;
+    }
+    if (gMultiSioStatusFlags & 0x0C0C) {
+        return -4;
+    }
+    if (gMultiSioStatusFlags & 1) {
+        sub_8024374(1, 0xFF);
+    }
+    return 0;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024130.inc", void sub_8024130(void))
+// Recovered from Thumb SIO status/error paths; ASM remains matching fallback.
+NONMATCH("asm/non_matching/sio/sio__sub_8024130.inc", s16 sub_8024130(void))
 {
+    s16 status = sub_802610C();
+    if (status < 0) {
+        return status;
+    }
+    if (gMultiSioStatusFlags & 0x0C0C) {
+        return -4;
+    }
+    if (!(gMultiSioStatusFlags & 2)) {
+        return 0;
+    }
+    {
+        s16 result = (*(u16 *)&gMultiSioRecv[1].raw[0] == 0x6C0A) ? 0x10 : 0;
+        sub_80243B4();
+        return result;
+    }
 }
 END_NONMATCH
 
