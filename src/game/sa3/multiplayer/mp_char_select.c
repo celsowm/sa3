@@ -115,6 +115,16 @@ void sub_80A04D8(void);
 void sub_80A0644(void);
 void sub_80A06E8(void);
 void sub_80A07E0(void);
+void sub_80A087C(void);
+void sub_80A094C(void);
+void sub_80A0A08(MpCharSelect *mcs);
+void sub_80A0ADC(void);
+bool32 sub_80A1768(MpCharSelect *mcs);
+bool32 sub_80A182C(MpCharSelect *mcs);
+bool32 sub_80A185C(MpCharSelect *mcs);
+void sub_80A137C(MpCharSelect *mcs);
+extern void sub_802613C(void);
+extern const TileInfo2 gUnknown_080D8F00;
 bool32 sub_80A16EC(MpCharSelect *mcs);
 bool32 sub_80A1694(MpCharSelect *mcs);
 bool32 sub_80A1938(MpCharSelect *mcs);
@@ -762,23 +772,167 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A06E8.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A07E0.inc", void sub_80A07E0(void))
+void sub_80A07E0(void)
 {
-}
-END_NONMATCH
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+    u8 count = 0;
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A087C.inc", void sub_80A087C(void))
-{
-}
-END_NONMATCH
+    if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+        return;
+    }
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A094C.inc", void sub_80A094C(void))
-{
-}
-END_NONMATCH
+    sub_80A137C(mcs);
+    sub_80A10B0(mcs);
+    sub_80A1110(mcs);
+    sub_80A11B8(mcs);
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0A08.inc", void sub_80A0A08(void))
+    if (sub_80A1740(mcs, 90) == TRUE) {
+        count = 1;
+    }
+    if (sub_80A1768(mcs) == TRUE) {
+        count++;
+    }
+    if (sub_80A185C(mcs) == TRUE) {
+        count++;
+    }
+    if (sub_80A182C(mcs) == TRUE) {
+        count++;
+    }
+
+    mcs->unk5C = mcs->unk54;
+    mcs->unk64 = mcs->unk4C + 5;
+
+    if (count == 4) {
+        gCurTask->main = sub_80A087C;
+    }
+}
+
+void sub_80A087C(void)
 {
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+
+    if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+        return;
+    }
+
+    sub_80A19C0(mcs);
+    sub_80A1A04(mcs);
+    sub_80A10B0(mcs);
+    sub_80A1110(mcs);
+    sub_80A11B8(mcs);
+
+    if (mcs->unk6 != 0) {
+        gDispCnt |= DISPCNT_WIN0_ON;
+        gWinRegs[WINREG_WIN0H] = DISPLAY_WIDTH;
+        gWinRegs[WINREG_WIN0V] = DISPLAY_HEIGHT;
+        gWinRegs[WINREG_WININ] |= 0x3F;
+        gWinRegs[WINREG_WINOUT] |= 0x1F;
+        gBldRegs.bldCnt = 0x3FBF;
+        gBldRegs.bldY = 0;
+        mcs->unk6 = 0;
+        mcs->unk8 = 0;
+    }
+
+    if (gBldRegs.bldY < 16) {
+        gBldRegs.bldY = mcs->unk8 >> 8;
+        mcs->unk8 += Q(1);
+    } else {
+        gBldRegs.bldY = 16;
+        *mcs->unk18 = 22;
+        mcs->unk3 = *mcs->unk18;
+        mcs->unk6 = 1;
+        gCurTask->main = sub_80A094C;
+    }
+}
+
+void sub_80A094C(void)
+{
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+
+    if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+    } else {
+        gDispCnt = 0x1541;
+        gBgCntRegs[2] = 0x1B89;
+        gBgScrollRegs[2][0] = 0;
+        gBgScrollRegs[2][1] = 0;
+        mcs->unk6C = Q(120);
+        mcs->unk70 = Q(85);
+
+        {
+            Background *bg = &mcs->bg274;
+            bg->graphics.dest = BG_CHAR_ADDR(2);
+            bg->graphics.anim = 0;
+            bg->layoutVram = BG_SCREEN_ADDR(27);
+            bg->unk18 = 0;
+            bg->unk1A = 0;
+            bg->tilemapId = gUnknown_080D8CDC[15];
+            bg->unk1E = 0;
+            bg->unk20 = 0;
+            bg->unk22 = 0;
+            bg->unk24 = 0;
+            bg->targetTilesX = 16;
+            bg->targetTilesY = 16;
+            mcs->bg274.paletteOffset = 0;
+            bg->flags = 6;
+            DrawBackground(bg);
+        }
+
+        sub_80A0A08(mcs);
+        gCurTask->main = sub_80A0ADC;
+    }
+}
+
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0A08.inc", void sub_80A0A08(MpCharSelect *mcs))
+{
+    Sprite *s;
+    u32 a, b;
+
+    {
+        Sprite *s = &mcs->s12C;
+        s->anim = gUnknown_080D8F00.anim;
+        s->variant = gUnknown_080D8F00.variant;
+        s->prevVariant = -1;
+        s->x = I(mcs->unk5C);
+        s->y = I(mcs->unk60);
+        s->oamFlags = SPRITE_OAM_ORDER(1);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
+
+    s = &mcs->sB4;
+    a = gUnknown_080D8F18[mcs->unk2];
+    b = gUnknown_080D8F18[mcs->unk1];
+
+    if (a > 4 || b > 4) {
+        sub_802613C();
+    }
+
+    if (a == 0 || b == 0) {
+        if (a == 2 || b == 2) {
+            a = 4;
+        } else if (a == 3 || b == 3) {
+            a = 6;
+        } else if (a == 4 || b == 4) {
+            a = 3;
+        } else {
+            a = 2;
+        }
+    } else if ((a == 4 && b == 1) || (a == 1 && b == 4)) {
+        a = 5;
+    } else {
+        a = 2;
+    }
+
+    s->anim = gUnknown_080D8D08[0][a + mcs->language * 8].anim;
+    s->variant = gUnknown_080D8D08[0][a + mcs->language * 8].variant;
+    UpdateSpriteAnimation(s);
 }
 END_NONMATCH
 
