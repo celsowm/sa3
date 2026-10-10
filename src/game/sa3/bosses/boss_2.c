@@ -2155,15 +2155,14 @@ bool32 sub_806CF70(EggWheeler *boss)
 // (87.12%) https://decomp.me/scratch/kYVcQ
 NONMATCH("asm/non_matching/game/bosses/boss_2__sub_806CFD4.inc", bool32 sub_806CFD4(EggWheeler *boss))
 {
-    s32 y = (((s32)boss->unk4 >> 8) - gCamera.y);
+    s32 y = (((s32)boss->unk4 >> 8) - gCamera.y) << 8;
+    s32 y2;
 
-    y <<= 8;
-    if ((y <= -Q(120)) || (y = y - Q(4), (y < -Q(120)))) {
-        y = -Q(120);
-        boss->unk4 = Q(gCamera.y) + y;
+    if ((y <= -Q(120)) || (y2 = y - Q(4), (y2 < -Q(120)))) {
+        boss->unk4 = Q(gCamera.y) + -Q(120);
         return 1U;
     }
-    boss->unk4 = Q(gCamera.y) + y;
+    boss->unk4 = Q(gCamera.y) + y2;
     return 0U;
 }
 END_NONMATCH
