@@ -560,7 +560,7 @@ void Task_170_80A2B54(void)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_170_80A2C60.inc", void Task_170_80A2C60(void))
+void Task_170_80A2C60(void)
 {
     GameIntro *intro = TASK_DATA(gCurTask);
     s32 res;
@@ -596,18 +596,16 @@ NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_170_80A2C60.inc", vo
         }
     }
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__TaskDestructor_GameIntro.inc", void TaskDestructor_GameIntro(struct Task *t))
+void TaskDestructor_GameIntro(struct Task *t)
 {
     GameIntro *intro = TASK_DATA(t);
     EwramFree(intro->hblankBuf);
     EwramFree(intro->recipTable);
     gFlags &= ~FLAGS_EXECUTE_HBLANK_COPY;
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_80A2D34.inc", void Task_80A2D34(void))
+void Task_80A2D34(void)
 {
     GameIntro *intro = TASK_DATA(gCurTask);
 
@@ -622,9 +620,8 @@ NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_80A2D34.inc", void T
             break;
     }
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2D80.inc", void sub_80A2D80(void))
+void sub_80A2D80(void)
 {
     GameIntro *intro = TASK_DATA(gCurTask);
     Sprite *s = &intro->s;
@@ -638,9 +635,8 @@ NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2D80.inc", void su
     TransformSprite(s, &intro->transforms[1]);
     DisplaySprite(s);
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2DD8.inc", s16 sub_80A2DD8(void))
+s16 sub_80A2DD8(void)
 {
     GameIntro *intro = TASK_DATA(gCurTask);
 
@@ -652,7 +648,6 @@ NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2DD8.inc", s16 sub
 
     return FALSE;
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2E38.inc", void sub_80A2E38(u8 arg0))
 {
