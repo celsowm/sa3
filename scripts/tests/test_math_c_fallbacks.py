@@ -31,6 +31,7 @@ FUNCTIONS = (
     "sa2__unused_sub_808442C",
     "sa2__unused_sub_808477C",
     "sa2__unused_sub_8084EE0",
+    "sa2__unused_sub_808458C",
     "sa2__unused_sub_80851E0",
 )
 C_HEADER = r"""
@@ -186,6 +187,10 @@ class MathFallbackNativeTests(unittest.TestCase):
         project_fn = cls.library.sa2__sub_808477C
         project_fn.argtypes = [ctypes.POINTER(Matrix), ctypes.POINTER(ctypes.c_int32)]
         project_fn.restype = None
+        plane_fn = cls.library.sa2__sub_808458C
+        plane_fn.argtypes = [ctypes.POINTER(Matrix), ctypes.POINTER(ctypes.c_int32),
+                             ctypes.POINTER(ctypes.c_int32)]
+        plane_fn.restype = None
 
     @classmethod
     def tearDownClass(cls):
@@ -496,6 +501,48 @@ class MathFallbackNativeTests(unittest.TestCase):
             self.assertEqual(actual, bytes(expected))
             completed += 1
         self.assertGreaterEqual(completed, 2900)
+
+
+    def test_plane_projection_3000_cases_and_aliasing(self):
+        """808458C keeps the last 64-bit product as the division numerator."""
+        rng = random.Random(0x458C)
+        for alias in (False, True):
+            completed = 0
+            for _ in range(3000):
+                matrix = Matrix()
+                for j in range(9):
+                    matrix.unk2[j] = rng.randrange(-1100, 1101)
+                for field in ("unk14", "unk18", "unk1C"):
+                    setattr(matrix, field, rng.randrange(-11000, 11001))
+                xyz = [rng.randrange(-60000, 60001) for _ in range(3)]
+                last = xyz[2] * matrix.unk1C
+                denominator = ((xyz[0] * matrix.unk14
+                                + xyz[1] * matrix.unk18
+                                + last + 0x100000) >> 10)
+                if denominator == 0:
+                    continue
+                quotient = (abs(last) // abs(denominator)) * (
+                    -1 if (last < 0) != (denominator < 0) else 1)
+                if quotient < -(1 << 31) or quotient >= (1 << 31):
+                    continue
+                buffer = (ctypes.c_int32 * 3)(*xyz)
+                output = buffer if alias else (ctypes.c_int32 * 3)()
+                self.library.sa2__sub_808458C(ctypes.byref(matrix),
+                                                buffer, output)
+                expected_input = xyz[:]
+                expected = []
+                for row in range(3):
+                    dot = sum(expected_input[k] * matrix.unk2[row * 3 + k]
+                              for k in range(3))
+                    result = ((dot >> 10) * quotient) >> 10
+                    expected.append(result)
+                    if alias:
+                        expected_input[row] = result
+                self.assertEqual(list(output), expected)
+                if not alias:
+                    self.assertEqual(list(buffer), xyz)
+                completed += 1
+            self.assertGreaterEqual(completed, 2900)
 
 
 if __name__ == "__main__":
