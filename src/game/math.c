@@ -273,13 +273,93 @@ NONMATCH("asm/non_matching/game/math/sa2__sub_8083B88.inc",
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083E44.inc", void sa2__sub_8083E44()) { }
+// Multiply two Q6.10 affine matrices, writing the result over the first.
+// The ASM snapshots each row before overwriting it; translation is calculated
+// from the original first matrix and the unchanged second matrix.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083E44.inc",
+         void sa2__sub_8083E44(struct UNK_8085F1C_1 *lhs, struct UNK_8085F1C_1 *rhs))
+{
+    s32 row, column;
+
+    for (row = 0; row < 3; row++) {
+        s32 a = lhs->unk2[row * 3];
+        s32 b = lhs->unk2[row * 3 + 1];
+        s32 c = lhs->unk2[row * 3 + 2];
+
+        for (column = 0; column < 3; column++) {
+            lhs->unk2[row * 3 + column]
+                = ((a * rhs->unk2[column]) + (b * rhs->unk2[3 + column])
+                   + (c * rhs->unk2[6 + column])) >> 10;
+        }
+    }
+
+    {
+        s32 x = lhs->unk14;
+        s32 y = lhs->unk18;
+        s32 z = lhs->unk1C;
+
+        lhs->unk14 = (((s64)x * rhs->unk2[0]) + ((s64)y * rhs->unk2[3])
+                      + ((s64)z * rhs->unk2[6]) + rhs->unk14) >> 10;
+        lhs->unk18 = (((s64)x * rhs->unk2[1]) + ((s64)y * rhs->unk2[4])
+                      + ((s64)z * rhs->unk2[7]) + rhs->unk18) >> 10;
+        lhs->unk1C = (((s64)x * rhs->unk2[2]) + ((s64)y * rhs->unk2[5])
+                      + ((s64)z * rhs->unk2[8]) + rhs->unk1C) >> 10;
+    }
+}
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084090.inc", void sa2__sub_8084090()) { }
+// Compose two affine matrices in place, storing the result over rhs.
+// The original updates translation first and then rewrites one basis
+// column at a time while retaining the source column values in registers.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084090.inc",
+         void sa2__sub_8084090(struct UNK_8085F1C_1 *lhs, struct UNK_8085F1C_1 *rhs))
+{
+    s32 column;
+
+    {
+        s32 x = lhs->unk14;
+        s32 y = lhs->unk18;
+        s32 z = lhs->unk1C;
+
+        rhs->unk14 = (((s64)x * rhs->unk2[0]) + ((s64)y * rhs->unk2[3])
+                      + ((s64)z * rhs->unk2[6]) + rhs->unk14) >> 10;
+        rhs->unk18 = (((s64)x * rhs->unk2[1]) + ((s64)y * rhs->unk2[4])
+                      + ((s64)z * rhs->unk2[7]) + rhs->unk18) >> 10;
+        rhs->unk1C = (((s64)x * rhs->unk2[2]) + ((s64)y * rhs->unk2[5])
+                      + ((s64)z * rhs->unk2[8]) + rhs->unk1C) >> 10;
+    }
+
+    for (column = 0; column < 3; column++) {
+        s32 a = rhs->unk2[column];
+        s32 b = rhs->unk2[3 + column];
+        s32 c = rhs->unk2[6 + column];
+
+        rhs->unk2[column] = ((lhs->unk2[0] * a) + (lhs->unk2[1] * b)
+                             + (lhs->unk2[2] * c)) >> 10;
+        rhs->unk2[3 + column] = ((lhs->unk2[3] * a) + (lhs->unk2[4] * b)
+                                 + (lhs->unk2[5] * c)) >> 10;
+        rhs->unk2[6 + column] = ((lhs->unk2[6] * a) + (lhs->unk2[7] * b)
+                                 + (lhs->unk2[8] * c)) >> 10;
+    }
+}
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_80842E4.inc", void sa2__sub_80842E4()) { }
+// Transform a signed 32-bit Q6.10 vector by a 3x3 affine matrix.
+// Translation is accumulated BEFORE shifting right by ten, as in Thumb.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_80842E4.inc",
+         void sa2__sub_80842E4(s32 *source, struct UNK_8085F1C_1 *matrix, s32 *dest))
+{
+    s32 x = source[0];
+    s32 y = source[1];
+    s32 z = source[2];
+
+    dest[0] = (((s64)x * matrix->unk2[0]) + ((s64)y * matrix->unk2[3])
+               + ((s64)z * matrix->unk2[6]) + matrix->unk14) >> 10;
+    dest[1] = (((s64)x * matrix->unk2[1]) + ((s64)y * matrix->unk2[4])
+               + ((s64)z * matrix->unk2[7]) + matrix->unk18) >> 10;
+    dest[2] = (((s64)x * matrix->unk2[2]) + ((s64)y * matrix->unk2[5])
+               + ((s64)z * matrix->unk2[8]) + matrix->unk1C) >> 10;
+}
 END_NONMATCH
 
 NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808442C.inc", void sa2__sub_808442C()) { }
@@ -409,7 +489,25 @@ END_NONMATCH
 NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084EE0.inc", void sa2__sub_8084EE0()) { }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_80851E0.inc", void sa2__sub_80851E0()) { }
+// Invert a Q6.10 orthonormal affine transform in place.
+// The Thumb routine first transposes the basis, negates translation,
+// and then multiplies the negated original translation by that basis.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_80851E0.inc",
+         void sa2__sub_80851E0(struct UNK_8085F1C_1 *matrix))
+{
+    s32 x = -matrix->unk14;
+    s32 y = -matrix->unk18;
+    s32 z = -matrix->unk1C;
+
+    sa2__sub_8084EAC(matrix);
+
+    matrix->unk14 = (((s64)x * matrix->unk2[0]) + ((s64)y * matrix->unk2[3])
+                     + ((s64)z * matrix->unk2[6])) >> 10;
+    matrix->unk18 = (((s64)x * matrix->unk2[1]) + ((s64)y * matrix->unk2[4])
+                     + ((s64)z * matrix->unk2[7])) >> 10;
+    matrix->unk1C = (((s64)x * matrix->unk2[2]) + ((s64)y * matrix->unk2[5])
+                     + ((s64)z * matrix->unk2[8])) >> 10;
+}
 END_NONMATCH
 
 // Expand a Q6.10 rotation into its 3x3 matrix representation.
