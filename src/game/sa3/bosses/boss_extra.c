@@ -8,6 +8,12 @@
 #include "game/shared/stage/player_callbacks.h"
 #include "game/sa3/bosses/eggman_escape.h" // SetFixedRandomIfTimeAttackMode
 
+typedef struct {
+    /* 0x00 */ s32 qX;
+    /* 0x04 */ s32 qY;
+    /* 0x08 */ u8 unk8[0x10];
+} ExtraBossPart; /* 0x18 */
+
 /* STRUCT:ExtraBoss BEGIN */
 typedef struct {
     /* 0x000 */ u8 unk0;
@@ -32,7 +38,16 @@ typedef struct {
     /* 0x028 */ Player *p28;
     /* 0x02C */ Player *p2C;
     /* 0x030 */ s32 unk30;
-    /* 0x034 */ u8 filler34[0x24];
+    /* 0x034 */ u32 unk34;
+    /* 0x038 */ u8 filler38[0x4];
+    /* 0x03C */ s8 unk3C;
+    /* 0x03D */ s8 unk3D;
+    /* 0x03E */ s8 unk3E;
+    /* 0x03F */ s8 unk3F;
+    /* 0x040 */ u8 filler40[0x8];
+    /* 0x048 */ s32 unk48;
+    /* 0x04C */ s32 unk4C;
+    /* 0x050 */ u8 filler50[0x8];
     /* 0x058 */ PlayerUnk148_A unk58;
     /* 0x068 */ u8 unk68[4];
     /* 0x06C */ void *tiles6C;
@@ -48,7 +63,9 @@ typedef struct {
     /* 0x0ED */ u8 unkED;
     /* 0x0EE */ u8 fillerEE[0x1];
     /* 0x0EF */ s8 unkEF;
-    /* 0x0F0 */ u8 fillerF0[0x29C];
+    /* 0x0F0 */ u8 fillerF0[0x1C];
+    /* 0x10C */ ExtraBossPart parts[4];
+    /* 0x16C */ u8 filler16C[0x220];
     /* 0x38C */ Sprite s38C;
     /* 0x3B4 */ Sprite s3B4[4];
     /* 0x454 */ Sprite s454;
@@ -81,6 +98,7 @@ void sub_8087174(ExtraBoss *boss);
 extern void (*const gUnknown_08E2ED50[])(ExtraBoss *);
 extern const u16 gUnknown_080D5D0C[][2];
 extern const u8 gUnknown_080D5D18[];
+extern bool32 sub_8010184(Sprite *s, s32 offsetX, s32 offsetY, s16 hbIndex, Player *p);
 
 NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8081C80.inc", void sub_8081C80(void))
 {
@@ -512,42 +530,69 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_80870E0.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_80870E4.inc", void sub_80870E4(void))
+void sub_80870E4(u16 value)
 {
+    if (gBgOffsetsHBlankPrimary == gBgOffsetsBuffer) {
+        DmaFill16(3, value, gBgOffsetsBuffer[0], sizeof(gBgOffsetsBuffer[0]));
+    } else {
+        DmaFill16(3, value, gBgOffsetsBuffer[1], sizeof(gBgOffsetsBuffer[1]));
+    }
+}
+
+NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087140.inc", void sub_8087140(u16 value, u8 start, u8 end))
+{
+    u16 *offsets = &((u16 *)gBgOffsetsHBlankPrimary)[start];
+
+    for (; start < end; start++) {
+        *offsets = value;
+        offsets++;
+    }
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087140.inc", void sub_8087140(void))
+void sub_8087174(ExtraBoss *boss)
 {
+    boss->unk34 = 0;
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087174.inc", void sub_8087174(ExtraBoss *boss))
+void sub_808717C(ExtraBoss *boss)
 {
+    boss->unk34 |= 1;
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_808717C.inc", void sub_808717C(void))
+void sub_8087188(ExtraBoss *boss, s16 width, s16 arg2, u16 height)
 {
-}
-END_NONMATCH
+    s32 halfWidth;
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087188.inc", void sub_8087188(void))
-{
+    boss->unk34 |= 2;
+    halfWidth = width / 2;
+    boss->unk48 = halfWidth;
+    boss->unk4C = arg2;
+    boss->unk3C = -halfWidth;
+    boss->unk3D = -height;
+    boss->unk3E = halfWidth;
+    boss->unk3F = height;
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_80871CC.inc", void sub_80871CC(void))
+u8 sub_80871CC(ExtraBoss *boss, Player *p)
 {
-}
-END_NONMATCH
+    u8 result = 0;
+    u8 i;
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__TaskDestructor_38_8087234.inc", void TaskDestructor_38_8087234(void))
-{
-}
-END_NONMATCH
+    for (i = 0; i < ARRAY_COUNT(boss->s3B4); i++) {
+        if (sub_8010184(&boss->s3B4[i], I(boss->parts[i].qX), I(boss->parts[i].qY), 0, p) == TRUE) {
+            result = 1;
+            break;
+        }
+    }
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087238.inc", void sub_8087238(void))
+    return result;
+}
+
+void TaskDestructor_38_8087234(struct Task *t)
 {
 }
-END_NONMATCH
+
+void sub_8087238(void)
+{
+}
