@@ -481,10 +481,11 @@ END_NONMATCH
 NONMATCH("asm/non_matching/sio/sio__sub_8024AC0.inc", s16 sub_8024AC0(u16 value))
 {
     u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
-    s16 status = sub_802610C();
+    s16 status;
     s16 result = 0;
 
     gStageData.playerIndex = player;
+    status = sub_802610C();
     if (status < 0) {
         return status;
     }
@@ -569,6 +570,8 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024F1C.inc", s16 sub_8024F1C(u8 value))
     gMultiSioSend.raw[13] = 0;
     {
         u16 mask = sub_80247D4();
+        gMultiSioSend.raw[12] = (u8)mask;
+        gMultiSioSend.raw[13] = (u8)(mask >> 8);
         mask |= sub_80248F4();
         gMultiSioSend.raw[12] = (u8)mask;
         gMultiSioSend.raw[13] = (u8)(mask >> 8);
