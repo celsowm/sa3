@@ -23,6 +23,7 @@ typedef int8_t s8;
 typedef int16_t s16;
 typedef uint8_t bool8;
 #define FALSE 0
+#define TRUE 1
 
 union MultiSioData { u8 raw[0x18]; };
 u8 gUnknown_03001060[0x60];
@@ -31,6 +32,21 @@ union MultiSioData gMultiSioSend;
 u8 gUnknown_03001CC0[2 + 8 * 5];
 u32 gMultiSioStatusFlags;
 union MultiSioData gMultiSioRecv[4];
+typedef struct { u8 playerIndex; } HostStageData;
+HostStageData gStageData;
+bool8 gMultiSioEnabled;
+u32 mockSioCnt, mockSioMainResult;
+int mockResetCalls, mockInitCalls, mockStartCalls;
+void sub_80260F0(void) { mockResetCalls++; }
+void MultiSioInit(u32 flags) { (void)flags; mockInitCalls++; }
+u32 MultiSioMain(void *send, void *recv, u32 request) {
+    (void)send; (void)recv; (void)request;
+    return mockSioMainResult;
+}
+void MultiSioStart(void) { mockStartCalls++; }
+#define DmaFill32(channel, value, destination, count) \
+    (void)(channel), memset((destination), (value), (count))
+#define DmaWait(channel) ((void)(channel))
 """
 
 C_CHECKS = r"""
@@ -159,6 +175,31 @@ int main(void) {
     gMultiSioSend.raw[16] = 4;
     CHECK(sub_80248F4() == 0, 37);
     CHECK(gMultiSioSend.raw[16] == 4, 38);
+
+    // Reset routine must clear DMA buffers, reinitialize transport, derive
+    // player ID from SIOCNT bits 4..5, and start only when bit 7 is set.
+    memset(&gMultiSioSend, 0xAA, sizeof(gMultiSioSend));
+    memset(gMultiSioRecv, 0xAA, sizeof(gMultiSioRecv));
+    memset(gUnknown_03001060, 0xAA, sizeof(gUnknown_03001060));
+    mockSioCnt = 0x30;
+    mockSioMainResult = 0x80;
+    mockResetCalls = mockInitCalls = mockStartCalls = 0;
+    CHECK(sub_8025D58() == 3, 39);
+    CHECK(gStageData.playerIndex == 3, 40);
+    CHECK(gMultiSioEnabled == TRUE, 41);
+    CHECK(gMultiSioStatusFlags == 0x80, 42);
+    CHECK(mockResetCalls == 1 && mockInitCalls == 1
+          && mockStartCalls == 1, 43);
+    CHECK(gMultiSioSend.raw[0] == 0 && gMultiSioSend.raw[23] == 0
+          && gMultiSioRecv[3].raw[23] == 0, 44);
+    CHECK(gUnknown_03001060[0] == 0 && gUnknown_03001060[3] == 0
+          && gUnknown_030010AC[0] == 0xFF
+          && gUnknown_030010AC[3] == 0xFF, 45);
+
+    mockSioCnt = 0x10;
+    mockSioMainResult = 0;
+    CHECK(sub_8025D58() == 1, 46);
+    CHECK(mockStartCalls == 1, 47);
     return 0;
 }
 """
@@ -188,6 +229,8 @@ class SioReconstructionHostTests(unittest.TestCase):
             extract_body(source, "8026AB8", "void sub_8026AB8(const u8 *packet)"),
             extract_body(source, "80247D4", "u16 sub_80247D4(void)"),
             extract_body(source, "80248F4", "u16 sub_80248F4(void)"),
+            extract_body(source, "8025D58", "s16 sub_8025D58(void)")
+            .replace("*(volatile u32 *)0x04000128", "mockSioCnt"),
         ]
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
