@@ -1099,7 +1099,7 @@ void Task_80050E0(void)
 }
 
 // (95.99%) https://decomp.me/scratch/WQnfu
-NONMATCH("asm/non_matching/game/stage/player__sub_8005130.inc", void sub_8005130(Player *p, s32 qWorldX, s32 qWorldY))
+void sub_8005130(Player *p, s32 qWorldX, s32 qWorldY)
 {
     s32 dy;
     s32 dx;
@@ -1116,16 +1116,20 @@ NONMATCH("asm/non_matching/game/stage/player__sub_8005130.inc", void sub_8005130
     if ((max >= distance) && (p->unkBC >= distance)) {
         temp_r2 = SA2_LABEL(sub_8004418)(dy, dx);
 
-        if (((p->moveState & MOVESTATE_FACING_LEFT) && ((temp_r2 > 256) && (temp_r2 < 768)))
-            || (!(p->moveState & MOVESTATE_FACING_LEFT) && ((temp_r2 < 256) || (temp_r2 > 768)))) {
-            p->unkB0 = qWorldX;
-            p->unkB4 = qWorldY;
-            p->unkBC = distance;
-            p->unkC2 = temp_r2;
+        if (p->moveState & MOVESTATE_FACING_LEFT) {
+            if (!((temp_r2 > 256) && (temp_r2 < 768))) {
+                return;
+            }
+        } else if (!((temp_r2 < 256) || (temp_r2 > 768))) {
+            return;
         }
+
+        p->unkB0 = qWorldX;
+        p->unkB4 = qWorldY;
+        p->unkBC = distance;
+        p->unkC2 = temp_r2;
     }
 }
-END_NONMATCH
 
 void sub_80051CC(Player *p, s32 qWorldX, s32 qWorldY)
 {

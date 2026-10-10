@@ -4,6 +4,51 @@
 > Baseline: `937a94e6492ddc9e561f1510314ce717ec7f6aca` (2026-10-10).
 > Objective: finish the **matching** GBA decompilation, then finish identifying/structuring remaining data, without changing game behavior or the target ROM.
 
+## 0. Current status (verified 2026-10-10)
+
+M0 is **passed**. Toolchain: SAT-R/agbcc `57a5b3e` (includes the newlib
+requirement `cb2282c`), Ubuntu `binutils-arm-none-eabi` 2.42 and
+`gcc-arm-none-eabi` (for `arm-none-eabi-cpp`). With a private,
+SHA-verified `baserom_sa3.gba`, a clean `make -j$(nproc)` passes
+`sha1sum -c sa3.sha1`.
+
+| Metric (`scripts/progress.py`) | Value |
+|---|---:|
+| Matched code at baseline | 637,088 / 816,408 (78.0355%) |
+| Matched code now | 638,096 / 816,408 (78.1590%) |
+| Decompiled code | 722,852 / 816,408 (88.5405%) |
+| Analysed data | 4,930,229 / 14,011,012 (35.1882%) |
+
+Newly matched: `sub_8005130` (player), `sub_806C06C`, `sub_806C370` and
+`sub_806C7B0` (boss_2). 175 `NONMATCH` functions remain. All of them
+compile as C, and they are ranked in [nonmatch_triage.csv](nonmatch_triage.csv).
+
+### Matching workflow
+
+```bash
+python3 scripts/nonmatch_triage.py              # rank every NONMATCH (closest first)
+python3 scripts/nonmatch_triage.py --show FUNC  # instruction diff, target vs C
+python3 scripts/nonmatch_triage.py --promote FUNC  # NONMATCH -> plain C, delete .inc
+make -j$(nproc)                                 # must end in "sa3.gba: OK"
+python3 scripts/permuter_setup.py FUNC          # decomp-permuter dir for regalloc-only diffs
+```
+
+Lessons:
+
+- **Promote functions in a file together.** agbcc output for a function can
+  depend on whether *earlier* functions in the same file are C or naked
+  asm. Promoting `sub_806C06C` alone broke the already-matching
+  `sub_806C970` (an r5/r6 swap). Promoting all three boss_2 functions that
+  were at 0 edits restored a byte-identical ROM. When a promotion breaks
+  some other function, first try promoting the file's other near-matches
+  with it.
+- Triage scores come from compiling with *every* body as C (the final
+  state), so a 0-edit function can still fail `make compare` until its
+  neighbours are C too.
+- Only `make compare` decides. Native GCC/Clang tests of C bodies (e.g.
+  the math batch) don't show matching, and those math bodies still need
+  agbcc-level work.
+
 ## 1. Definition of done
 
 The completion claim is justified only after **all** of the following:
@@ -186,7 +231,6 @@ Prioritize **verified matched ROM bytes**, not number of commits, lines of C or 
 - **Multiplayer/serial timing:** `asm/sio_stuff_x.s` needs protocol and emulator-link tests in addition to matching.
 - **ROM distribution:** baserom must remain private and user-supplied; no copyrighted ROM or unreleased assets in public repo/CI artifacts.
 - **Fork/upstream policy:** upstream SAT-R explicitly prohibits AI/LLM-origin issues and pull requests. Keep this AI-assisted plan and future work inside `celsowm/sa3`; **do not open upstream PRs/issues containing AI-generated content**.
-- **Status honesty:** repository files and upstream progress reports were inspected, but a new local ROM build/emulator run has **not** been executed as part of preparing this plan.
 
 ## 8. First implementation batch (do next)
 
