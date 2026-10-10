@@ -667,15 +667,15 @@ NONMATCH("asm/non_matching/sio/sio__sub_80278F8.inc", void sub_80278F8(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8027904.inc", void sub_8027904(void))
+// The original Thumb implementation is a single bx lr (followed by alignment).
+void sub_8027904(void)
 {
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8027908.inc", void sub_8027908(void))
+// The original Thumb implementation is a single bx lr (followed by alignment).
+void sub_8027908(void)
 {
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/sio/sio__sub_802790C.inc", void sub_802790C(void))
 {
