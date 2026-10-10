@@ -175,3 +175,50 @@ changed**, since `agbcc` and a verified end-to-end `make compare` are
 still missing here. The next priority is either independently recovering
 these final four routines or running the pinned toolchain to promote
 individual existing fallbacks to verified C matches.
+
+
+## Fourth source-level batch: 18 of 18 mathematical NONMATCH C bodies (2026-10-10)
+
+**Completed the remaining four previously empty C implementations:**
+
+| Source symbol | Decompiled algorithm | Notable ABI/behavior |
+|---|---|---|
+| `sa2__sub_80832FC` | Cubic Bezier interpolation in fixed-point with signed 64-bit products | Six arguments, `s32` return; last shift is an `u8` stacked parameter |
+| `sa2__sub_808343C` | Cubic Hermite interpolation and its four polynomial coefficients | `r0..r3` carry p0/m0/m1/p1, plus stacked t/shift |
+| `sa2__sub_8084A24` | Rodrigues 3D rotation matrix from angle and Q6.10 axis | Writes **52 bytes maximum**: zeros 32 bytes and writes `s16` slots 17/21/25, as well as the basis |
+| `sa2__sub_8084C70` | Look-at/orthogonal 3D basis from two positions and direction | Preserve threshold `abs(x+y+z) > 32`, fallback axes and sequential normalization |
+
+All 18 mathematical `NONMATCH` blocks now have real C bodies in
+`src/game/math.c`. The original Assembly fallbacks are intentionally
+preserved; this is a completed **source recovery milestone**, **NOT**
+18 compiled matching functions.
+
+### Fourth-batch validation
+
+- Compiled a **local equivalent native C implementation of the four new
+  function bodies** with host GCC `-O2 -fwrapv -Wall -Wextra -Werror`;
+  **22,000** independent deterministic checks succeeded: 12,000 combined
+  Bezier/Hermite evaluations, 5,000 Rodrigues rotations and 5,000 look-at
+  basis computations (including source-buffer boundaries).
+- A local equivalent source also compiled as an ARMv4T/Thumb relocatable
+  object using Clang; this does **not** establish original agbcc codegen.
+- Updated `scripts/tests/test_math_c_fallbacks.py` to extract the **18
+  actual C bodies** from a checked-out fork and compile/test them on a host.
+  It adds 8,500 deterministic cases in four test methods. Hosted Actions
+  has **zero recorded workflow runs**; success of the entire committed
+  suite has NOT been asserted.
+- Audited an important flaw in the prior hash records: SA2-named symbol
+  suffixes are old SA2 addresses, not SA3 locations. Four independently
+  unique Thumb entry signatures established the common SA3 relocation
+  **`+0x2BAD8`**; 18 SHA-256 reference ranges were corrected and published
+  in [SA2_MATH_ROM_RELOCATION.md](SA2_MATH_ROM_RELOCATION.md), with a
+  reproducible `scripts/math_rom_runtime_map.py` validator and offline tests.
+- The 18 original SA3 ROM label-to-next-label ranges total **6,640 bytes**.
+  This includes literal pools and alignment; **it is not newly matched C**.
+
+**Next gate:** run the pinned SAT-R/agbcc + binutils matching build, verify
+the EU SHA-1 with `make compare`, then remove `NONMATCH` for each C routine
+individually when the complete ROM remains byte-identical. Historical
+~77.97% ROM matching progress is still the last verified value. For
+non-matching compilation, prioritize runtime functionality smoke tests of
+the newly restored transforms as well.
