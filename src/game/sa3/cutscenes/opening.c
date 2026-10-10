@@ -52,6 +52,9 @@ void sub_80A27EC(void);
 void sub_80A2978(s16 arg0);
 void sub_80A2A40(s16 arg0);
 void sub_80A2D80(void);
+void Task_80A2D34(void);
+void Task_170_80A2B54(void);
+void Task_170_80A2C60(void);
 s16 sub_80A2DD8(void);
 
 extern ColorRaw sub_80C4C0C(ColorRaw color);
@@ -375,10 +378,58 @@ void sub_80A2774(void)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A27EC.inc", void sub_80A27EC(void))
+void sub_80A27EC(void)
 {
+    GameIntro *intro = TASK_DATA(gCurTask);
+    s16 i;
+
+    intro->unk14C = (intro->unk14C + 1) & 0xFF;
+
+    if (sub_80A2DD8() != 0) {
+        return;
+    }
+
+    sub_80A2978(intro->unk13E >> 1);
+    intro->unk13C++;
+    intro->unk13E++;
+
+    if (intro->unk14C == 0) {
+        for (i = 0; i < 16; i++) {
+            intro->unk14E[i] = 0;
+        }
+    }
+
+    for (i = 0; i < 16; i++) {
+        if (intro->unk14C > i * 4) {
+            s16 v = intro->unk14C - i * 4;
+            intro->unk14E[i] = (v > 31) ? 31 : v;
+        }
+    }
+
+    for (i = 0; i < 16; i++) {
+        u16 c = intro->unk14E[i] & 0x1F;
+        gBgPalette[i + 0x50] = sub_80C4C0C(c | (c << 5) | (c << 10));
+    }
+
+    gFlags |= FLAGS_UPDATE_BACKGROUND_PALETTES;
+    sub_80A2D80();
+    sub_80A23A4();
+
+    if (intro->unk14C == 149) {
+        m4aMPlayFadeOut(&gMPlayInfo_BGM, 5);
+        m4aMPlayFadeOut(&gMPlayInfo_SE1, 5);
+        m4aMPlayFadeOut(&gMPlayInfo_SE2, 5);
+        m4aMPlayFadeOut(&gMPlayInfo_SE3, 5);
+    }
+
+    if (intro->unk14C > 159) {
+        gBldRegs.bldCnt = 0xBF;
+        gBldRegs.bldAlpha = 0;
+        gBldRegs.bldY = 16;
+        gFlags &= ~FLAGS_EXECUTE_HBLANK_COPY;
+        gCurTask->main = Task_80A2D34;
+    }
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2978.inc", void sub_80A2978(s16 arg0))
 {
@@ -433,15 +484,83 @@ void sub_80A2A40(s16 arg0)
     gFlags |= FLAGS_UPDATE_BACKGROUND_PALETTES;
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_170_80A2A9C.inc", void Task_170_80A2A9C(void))
+void Task_170_80A2A9C(void)
 {
-}
-END_NONMATCH
+    GameIntro *intro = TASK_DATA(gCurTask);
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_170_80A2B54.inc", void Task_170_80A2B54(void))
-{
+    gDispCnt = 0x1441;
+    gBldRegs.bldCnt = 0;
+    gBldRegs.bldAlpha = 0;
+    gBldRegs.bldY = 0;
+    intro->unk13C--;
+
+    if (sub_80A2DD8() == 0) {
+        sub_80A2D80();
+        sub_80A23A4();
+
+        if (intro->unk13C <= 0) {
+            intro->unk13C = 150;
+
+            if (intro->state != 0 && intro->state <= 3) {
+                gDispCnt = 0x1541;
+            }
+
+            if (intro->state == 5) {
+                gDispCnt = 0x1541;
+            }
+
+            gBldRegs.bldCnt = 0x3F41;
+            gBldRegs.bldAlpha = 0x1000;
+            gBldRegs.bldY = 0;
+            gCurTask->main = Task_170_80A2B54;
+        }
+    }
 }
-END_NONMATCH
+
+void Task_170_80A2B54(void)
+{
+    GameIntro *intro = TASK_DATA(gCurTask);
+    s32 t = (u16)intro->unk13C - 1;
+    intro->unk13C = t;
+
+    if ((s16)t > 141) {
+        s16 a = (150 - t) * 2;
+        gBldRegs.bldAlpha = ((16 - a) << 8) | a;
+    } else if ((s16)t <= 8) {
+        s16 a = t * 2;
+        gBldRegs.bldAlpha = ((16 - a) << 8) | a;
+    } else {
+        gBldRegs.bldAlpha = 16;
+    }
+
+    if (sub_80A2DD8() == 0) {
+        sub_80A2D80();
+        sub_80A23A4();
+
+        if (intro->unk13C <= 0) {
+            switch (intro->state) {
+                case 0:
+                    break;
+                case 1:
+                    intro->unk13C = 10;
+                    break;
+                case 2:
+                    intro->unk13C = 120;
+                    gStageData.unk7 = 1;
+                    break;
+                case 3:
+                case 4:
+                case 5:
+                default:
+                    intro->unk13C = 1;
+                    break;
+            }
+
+            gDispCnt = 0x1441;
+            gCurTask->main = Task_170_80A2C60;
+        }
+    }
+}
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_170_80A2C60.inc", void Task_170_80A2C60(void))
 {
