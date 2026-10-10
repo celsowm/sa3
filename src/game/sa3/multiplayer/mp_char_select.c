@@ -885,7 +885,7 @@ void sub_80A0644(void)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A06E8.inc", void sub_80A06E8(void))
+void sub_80A06E8(void)
 {
     MpCharSelect *mcs = TASK_DATA(gCurTask);
 
@@ -906,12 +906,13 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A06E8.inc", void sub
 
         {
             Background *bg = &mcs->bg274;
+            u32 character = gUnknown_080D8F18[mcs->unk1];
             bg->graphics.dest = BG_CHAR_ADDR(2);
             bg->graphics.anim = 0;
             bg->layoutVram = BG_SCREEN_ADDR(27);
             bg->unk18 = 0;
             bg->unk1A = 0;
-            bg->tilemapId = gUnknown_080D8CDC[gUnknown_080D8F18[mcs->unk1] + 10];
+            bg->tilemapId = gUnknown_080D8CDC[character + 10];
             bg->unk1E = 0;
             bg->unk20 = 0;
             bg->unk22 = 0;
@@ -929,7 +930,6 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A06E8.inc", void sub
         gCurTask->main = sub_80A07E0;
     }
 }
-END_NONMATCH
 
 void sub_80A07E0(void)
 {
