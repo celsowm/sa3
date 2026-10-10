@@ -25,6 +25,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NONMATCH_RE = re.compile(r'NONMATCH\(\s*"([^"]+)"\s*,[^)]*?\b(\w+)\s*\(', re.S)
 FUNC_HDR_RE = re.compile(r"^[0-9a-f]+ <([^>]+)>:$")
 INSN_RE = re.compile(r"^\s*[0-9a-f]+:\s+(.*)$")
+RELOC_RE = re.compile(r"^\s*[0-9a-f]+:\s+R_ARM_\w+\s+(\S+)$")
 
 
 def find_nonmatch_files():
@@ -63,7 +64,8 @@ def compile_variant(src, workdir, non_matching):
             cmd = cmd.replace(" -D DEBUG=0", " -D NON_MATCHING=1 -D DEBUG=0", 1)
         r = subprocess.run(cmd, shell=True, cwd=ROOT, capture_output=True, text=True)
         if r.returncode != 0:
-            return None, r.stderr.strip().splitlines()[-1:] or ["compile failed"]
+            errs = [l for l in r.stderr.splitlines() if "rror" in l] or r.stderr.strip().splitlines()[-1:]
+            return None, errs or ["compile failed"]
     return new_base + ".o", None
 
 
@@ -75,7 +77,7 @@ def global_funcs(obj):
 def disasm(obj):
     """Return {global function: [normalized insn]} for an object."""
     out = subprocess.run(
-        ["arm-none-eabi-objdump", "-d", "--no-show-raw-insn", obj], capture_output=True, text=True
+        ["arm-none-eabi-objdump", "-dzr", "--no-show-raw-insn", obj], capture_output=True, text=True
     ).stdout
     globs = global_funcs(obj)
     funcs, cur = {}, None
@@ -85,6 +87,10 @@ def disasm(obj):
             if m.group(1) in globs:
                 cur = m.group(1)
                 funcs[cur] = []
+            continue
+        m = RELOC_RE.match(line)
+        if m and cur and funcs[cur] and funcs[cur][-1] == ".word":
+            funcs[cur][-1] = ".word " + m.group(1)
             continue
         m = INSN_RE.match(line)
         if m and cur:
@@ -138,13 +144,60 @@ def triage_file(src, funcs, workdir):
     return rows
 
 
+def show(func, workdir):
+    for src, funcs in find_nonmatch_files().items():
+        if func in (f for f, _ in funcs):
+            break
+    else:
+        sys.exit(f"{func}: not a NONMATCH function")
+    objs = []
+    for nm in (False, True):
+        obj, err = compile_variant(src, workdir, nm)
+        if obj is None:
+            sys.exit(f"compile failed: {err[0]}")
+        objs.append(obj)
+    target, cand = (disasm(o)[func] for o in objs)
+    for line in difflib.unified_diff(target, cand, "target", "c", n=4, lineterm=""):
+        print(line)
+    print(f"edits={score(target, cand)[0]}", file=sys.stderr)
+
+
+def promote(func):
+    for src, funcs in find_nonmatch_files().items():
+        inc = dict(funcs).get(func)
+        if inc:
+            break
+    else:
+        sys.exit(f"{func}: not a NONMATCH function")
+    path = os.path.join(ROOT, src)
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    m = re.search(r'NONMATCH\(\s*"' + re.escape(inc) + r'"\s*,\s*(.*?)\)\s*\n\{', text, re.S)
+    decl = re.sub(r"\s+", " ", m.group(1))
+    end = text.index("END_NONMATCH\n", m.end())
+    text = text[: m.start()] + decl + "\n{" + text[m.end() : end] + text[end + len("END_NONMATCH\n") :]
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.remove(os.path.join(ROOT, inc))
+    print(f"promoted {func} in {src}; removed {inc}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("-o", "--output", default="docs/nonmatch_triage.csv")
     ap.add_argument("-j", "--jobs", type=int, default=os.cpu_count())
     ap.add_argument("--workdir", default="build/triage")
+    ap.add_argument("--show", metavar="FUNC", help="print a diff for one function instead of a CSV")
+    ap.add_argument("--promote", metavar="FUNC",
+                    help="turn a NONMATCH into plain C and delete its .inc (verify with make compare!)")
     ap.add_argument("files", nargs="*", help="limit to these C files")
     args = ap.parse_args()
+
+    if args.promote:
+        return promote(args.promote)
+
+    if args.show:
+        return show(args.show, os.path.join(ROOT, args.workdir))
 
     files = find_nonmatch_files()
     if args.files:
