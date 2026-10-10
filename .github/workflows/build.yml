@@ -4,22 +4,23 @@ on:
   push:
     branches: [ main ]
   pull_request:
-  pull_request_target:
+
+permissions:
+  contents: read
 
 jobs:
   format:
-    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork || github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.fork}} 
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout PR
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target'}} 
-        uses: actions/checkout@master
+        if: ${{ github.event_name == 'pull_request' }} 
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          allow-unsafe-pr-checkout: true # manually allow CI/CD to run in PRs
       - name: Checkout
         if: ${{ github.event_name == 'push' }}
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
       
       - name: Install tools
         run: |
@@ -29,23 +30,33 @@ jobs:
         run: |
           make check_format
 
+  asm-triage-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run local, ROM-free Python tests
+        run: python3 -m unittest discover -s scripts/tests -v
+
   build:
-    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork || github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.fork}} 
+    # Do not fetch private ROMs or use secrets for untrusted pull requests.
+    # Fork owners can enable the ROM-backed build after configuring secrets.
+    if: ${{ github.event_name == 'push' && vars.ENABLE_ROM_BUILD == 'true' }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout PR
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target'}} 
-        uses: actions/checkout@master
+        if: ${{ github.event_name == 'pull_request' }} 
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          allow-unsafe-pr-checkout: true # manually allow CI/CD to run in PRs
 
       - name: Checkout
         if: ${{ github.event_name == 'push' }}
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
 
       - name: Checkout agbcc
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
         with:
           path: agbcc
           repository: SAT-R/agbcc
@@ -64,8 +75,17 @@ jobs:
           ./install.sh ../
         working-directory: agbcc
         
-      - name: Fetch assets
-        run: curl -o baserom_sa3.gba -u ${{ secrets.STORAGE_USERNAME }}:${{ secrets.STORAGE_PASSWORD }} ${{ secrets.STORAGE_URL }}/baserom.gba
+      - name: Fetch private baserom (trusted push only)
+        env:
+          STORAGE_URL: ${{ secrets.STORAGE_URL }}
+          STORAGE_USERNAME: ${{ secrets.STORAGE_USERNAME }}
+          STORAGE_PASSWORD: ${{ secrets.STORAGE_PASSWORD }}
+        run: |
+          test -n "$STORAGE_URL" && test -n "$STORAGE_USERNAME" && test -n "$STORAGE_PASSWORD"
+          curl --fail --show-error --silent --location \
+            --user "$STORAGE_USERNAME:$STORAGE_PASSWORD" \
+            --output baserom_sa3.gba "$STORAGE_URL/baserom.gba"
+          sha1sum -c sa3.sha1
 
       - name: Compare
         run: make -j${nproc}
@@ -97,12 +117,12 @@ jobs:
     needs: [build]
     # Only able to run from repo pull requests (by maintainers, for debugging)
     # or on the main branch via push
-    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'push' && vars.ENABLE_ROM_BUILD == 'true' }}
     permissions:
       contents: write
     steps:
       - name: Checkout gh-pages
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
         with:
           path: gh-pages
           ref: gh-pages
