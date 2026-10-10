@@ -24,12 +24,14 @@ FUNCTIONS = (
     "sa2__unused_sub_8083B10",
     "sa2__unused_sub_8084EAC",
     "sa2__unused_sub_8085314",
+    "sa2__sub_8083B88",
 )
 C_HEADER = r"""
 #include <math.h>
 #include <stdint.h>
 typedef int16_t s16;
 typedef int32_t s32;
+typedef int64_t s64;
 typedef uint16_t u16;
 typedef struct {
     s16 unk0, unk2, unk4, unk6;
@@ -156,6 +158,7 @@ class MathFallbackNativeTests(unittest.TestCase):
             ("sa2__sub_8083B10", 1, Rotation),
             ("sa2__sub_8084EAC", 1, Matrix),
             ("sa2__sub_8085314", 2, Matrix),
+            ("sa2__sub_8083B88", 3, Matrix),
         ):
             fn = getattr(cls.library, name)
             fn.argtypes = [ctypes.POINTER(type_)] * arity
@@ -225,6 +228,42 @@ class MathFallbackNativeTests(unittest.TestCase):
             self.library.sa2__sub_8085314(ctypes.byref(dst), ctypes.byref(src))
             self.assertEqual(tuple(dst.unk2), matrix_reference(q))
             self.assertEqual((dst.unk14, dst.unk18, dst.unk1C), (0, 0, 0))
+
+
+    def test_affine_matrix_composition_1000_cases(self):
+        """ASM row/column multiplication plus 64-bit translated origin."""
+        rng = random.Random(0x3B88)
+        for _ in range(1000):
+            a, b, c = Matrix(), Matrix(), Matrix()
+            for idx in range(9):
+                a.unk2[idx] = rng.randrange(-1024, 1025)
+                b.unk2[idx] = rng.randrange(-1024, 1025)
+            for name in ("unk14", "unk18", "unk1C"):
+                setattr(a, name, rng.randrange(-200000, 200001))
+                setattr(b, name, rng.randrange(-200000, 200001))
+            a_basis = tuple(a.unk2)
+            b_basis = tuple(b.unk2)
+            a_translation = (a.unk14, a.unk18, a.unk1C)
+            b_translation = (b.unk14, b.unk18, b.unk1C)
+
+            self.library.sa2__sub_8083B88(
+                ctypes.byref(a), ctypes.byref(b), ctypes.byref(c))
+
+            expected_basis = [
+                signed16(sum(a_basis[row * 3 + k] * b_basis[k * 3 + column]
+                             for k in range(3)) >> 10)
+                for row in range(3) for column in range(3)
+            ]
+            expected_translation = [
+                (sum(a_translation[k] * b_basis[k * 3 + col]
+                     for k in range(3)) + b_translation[col]) >> 10
+                for col in range(3)
+            ]
+            self.assertEqual(list(c.unk2), expected_basis)
+            self.assertEqual(
+                (c.unk14, c.unk18, c.unk1C), tuple(expected_translation))
+            self.assertEqual(tuple(a.unk2), a_basis)
+            self.assertEqual(tuple(b.unk2), b_basis)
 
 
 if __name__ == "__main__":
