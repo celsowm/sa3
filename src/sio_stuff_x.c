@@ -27,6 +27,7 @@ void MultiSio_SendPlayerName(void);
 void sub_8025770(void);
 void sub_8025D00(void);
 void sub_8025D48(void);
+void sub_80260F0(void);
 
 NONMATCH("asm/non_matching/sio/sio__sub_8023A88.inc", void sub_8023A88(void))
 {
@@ -428,7 +429,7 @@ END_NONMATCH
 NONMATCH("asm/non_matching/sio/sio__sub_8025770.inc", void sub_8025770(void))
 {
     u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
-    *((u8 *)&gStageData + 6) = id;
+    gStageData.playerIndex = id;
     gMultiSioSend.raw[3] = id;
     *(u16 *)&gMultiSioSend.raw[0] = 0x6606;
     gMultiSioSend.raw[15] = gUnknown_03001060[0x4C];
@@ -440,7 +441,7 @@ END_NONMATCH
 NONMATCH("asm/non_matching/sio/sio__sub_80257AC.inc", void sub_80257AC(u8 value))
 {
     u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
-    *((u8 *)&gStageData + 6) = id;
+    gStageData.playerIndex = id;
     gMultiSioSend.raw[15] = gUnknown_03001060[0x4C];
     gMultiSioSend.raw[16] = gUnknown_03001060[0x4D];
     if (id <= 1) {
@@ -458,7 +459,7 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025808.inc", void sub_8025808(u8 value)
 {
     u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
     u8 i;
-    *((u8 *)&gStageData + 6) = id;
+    gStageData.playerIndex = id;
     if (id <= 1 && !(gUnknown_03001060[7] & (4 << id))) {
         id += 2;
     }
@@ -475,7 +476,7 @@ END_NONMATCH
 NONMATCH("asm/non_matching/sio/sio__sub_8025874.inc", void sub_8025874(u8 value))
 {
     u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
-    *((u8 *)&gStageData + 6) = id;
+    gStageData.playerIndex = id;
     if (id <= 1 && !(gUnknown_03001060[7] & (4 << id))) {
         id += 2;
     }
@@ -629,7 +630,7 @@ END_NONMATCH
 NONMATCH("asm/non_matching/sio/sio__sub_8025BEC.inc", void sub_8025BEC(u8 value))
 {
     u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
-    *((u8 *)&gStageData + 6) = id;
+    gStageData.playerIndex = id;
     *(u16 *)&gMultiSioSend.raw[0] = 0x6603;
     gMultiSioSend.raw[3] = id;
     gMultiSioSend.raw[15 + id] = 0xFF;
@@ -641,7 +642,7 @@ END_NONMATCH
 NONMATCH("asm/non_matching/sio/sio__sub_8025C20.inc", void sub_8025C20(u8 value))
 {
     u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
-    *((u8 *)&gStageData + 6) = id;
+    gStageData.playerIndex = id;
     *(u16 *)&gMultiSioSend.raw[0] = 0x6603;
     gMultiSioSend.raw[3] = id;
     gMultiSioSend.raw[15 + id] = gUnknown_03001060[0x4C + id];
@@ -653,7 +654,7 @@ END_NONMATCH
 NONMATCH("asm/non_matching/sio/sio__sub_8025C64.inc", void sub_8025C64(u8 value))
 {
     u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
-    *((u8 *)&gStageData + 6) = id;
+    gStageData.playerIndex = id;
     *(u16 *)&gMultiSioSend.raw[0] = 0x6605;
     gMultiSioSend.raw[3] = id;
     gMultiSioSend.raw[4] = value;
@@ -669,7 +670,7 @@ END_NONMATCH
 NONMATCH("asm/non_matching/sio/sio__sub_8025CD8.inc", void sub_8025CD8(void))
 {
     u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
-    *((u8 *)&gStageData + 6) = id;
+    gStageData.playerIndex = id;
     gMultiSioSend.raw[3] = id;
     *(u16 *)&gMultiSioSend.raw[0] = 0x660A;
 }
@@ -712,8 +713,37 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025D48.inc", void sub_8025D48(void))
 }
 END_NONMATCH
 
+// Reset the multiplayer transport, clear the packet buffers, and negotiate
+// the local player index. Reconstructed from the European Thumb reference;
+// keep the exact assembly in matching builds until agbcc/ROM comparison passes.
 NONMATCH("asm/non_matching/sio/sio__sub_8025D58.inc", s16 sub_8025D58(void))
 {
+    s16 i;
+
+    sub_80260F0();
+
+    DmaFill32(3, 0, &gMultiSioSend, sizeof(gMultiSioSend));
+    DmaWait(3);
+    DmaFill32(3, 0, gMultiSioRecv, sizeof(gMultiSioRecv));
+    DmaWait(3);
+    DmaFill32(3, 0, gUnknown_03001060, 4);
+    DmaWait(3);
+
+    for (i = 0; i < 4; i++) {
+        gUnknown_03001060[0x4C + i] = 0xFF;
+        gUnknown_03001060[i] = 0;
+    }
+
+    MultiSioInit(0);
+    gMultiSioStatusFlags = MultiSioMain(&gMultiSioSend, gMultiSioRecv, 0);
+    gStageData.playerIndex = (*(volatile u32 *)0x04000128 >> 4) & 3;
+    gMultiSioEnabled = TRUE;
+
+    if (gMultiSioStatusFlags & 0x80) {
+        MultiSioStart();
+    }
+
+    return gStageData.playerIndex;
 }
 END_NONMATCH
 
@@ -785,7 +815,7 @@ END_NONMATCH
 NONMATCH("asm/non_matching/sio/sio__sub_802610C.inc", s16 sub_802610C(void))
 {
     u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
-    if (*((u8 *)&gStageData + 6) != id) {
+    if (gStageData.playerIndex != id) {
         return -1;
     }
     return sub_8025E24(id);
