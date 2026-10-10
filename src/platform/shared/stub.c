@@ -146,30 +146,6 @@ void CreateBoss_8071A08() { }
 void CreateBoss_8073640() { }
 void CreateBoss_8074E88() { }
 void sub_807B6C8() { }
-void sub_807C670() { }
-void sub_807C728() { }
-void sub_807C8AC() { }
-void sub_807C9C0() { }
-void sub_807CA38() { }
-void sub_807CB78() { }
-void sub_807DCD8() { }
-void sub_807DE20() { }
-void sub_807E214() { }
-void sub_807E54C() { }
-void sub_807E99C() { }
-void sub_807EBB8() { }
-void sub_807ECFC() { }
-void sub_807FEB4() { }
-void sub_808007C() { }
-void sub_8081B18() { }
-void sub_8083BE4() { }
-void sub_8083F8C() { }
-void sub_808439C() { }
-void sub_808491C() { }
-void sub_8084B2C() { }
-void sub_8084BEC() { }
-void sub_8084C50() { }
-void sub_80870B0() { }
 void sub_8087B80() { }
 void sub_8088440() { }
 void sub_80885CC() { }
@@ -214,9 +190,5 @@ PlayerSpriteInfo gUnknown_030010D0 = {};
 PlayerSpriteInfo gUnknown_0300110C = {};
 PlayerSpriteInfo gUnknown_03001B00 = {};
 
-void sub_8081C80() { }
 
-void sub_807F4F0() { }
-void sub_8085588() { }
 
-void CreateHyperEggRobo() { }
