@@ -427,7 +427,7 @@ END_NONMATCH
 // C reconstruction of packet assembly; binary matching not yet established.
 NONMATCH("asm/non_matching/sio/sio__sub_8025770.inc", void sub_8025770(void))
 {
-    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
     *((u8 *)&gStageData + 6) = id;
     gMultiSioSend.raw[3] = id;
     *(u16 *)&gMultiSioSend.raw[0] = 0x6606;
@@ -439,7 +439,7 @@ END_NONMATCH
 // C reconstruction of packet assembly; binary matching not yet established.
 NONMATCH("asm/non_matching/sio/sio__sub_80257AC.inc", void sub_80257AC(u8 value))
 {
-    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
     *((u8 *)&gStageData + 6) = id;
     gMultiSioSend.raw[15] = gUnknown_03001060[0x4C];
     gMultiSioSend.raw[16] = gUnknown_03001060[0x4D];
@@ -456,7 +456,7 @@ END_NONMATCH
 // C reconstruction of packet assembly; binary matching not yet established.
 NONMATCH("asm/non_matching/sio/sio__sub_8025808.inc", void sub_8025808(u8 value))
 {
-    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
     u8 i;
     *((u8 *)&gStageData + 6) = id;
     if (id <= 1 && !(gUnknown_03001060[7] & (4 << id))) {
@@ -474,7 +474,7 @@ END_NONMATCH
 // C reconstruction of packet assembly; binary matching not yet established.
 NONMATCH("asm/non_matching/sio/sio__sub_8025874.inc", void sub_8025874(u8 value))
 {
-    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
     *((u8 *)&gStageData + 6) = id;
     if (id <= 1 && !(gUnknown_03001060[7] & (4 << id))) {
         id += 2;
@@ -628,7 +628,7 @@ END_NONMATCH
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025BEC.inc", void sub_8025BEC(u8 value))
 {
-    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
     *((u8 *)&gStageData + 6) = id;
     *(u16 *)&gMultiSioSend.raw[0] = 0x6603;
     gMultiSioSend.raw[3] = id;
@@ -640,7 +640,7 @@ END_NONMATCH
 // Reconstructed from Thumb; leave original instructions in matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_8025C20.inc", void sub_8025C20(u8 value))
 {
-    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
     *((u8 *)&gStageData + 6) = id;
     *(u16 *)&gMultiSioSend.raw[0] = 0x6603;
     gMultiSioSend.raw[3] = id;
@@ -652,7 +652,7 @@ END_NONMATCH
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025C64.inc", void sub_8025C64(u8 value))
 {
-    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
     *((u8 *)&gStageData + 6) = id;
     *(u16 *)&gMultiSioSend.raw[0] = 0x6605;
     gMultiSioSend.raw[3] = id;
@@ -668,7 +668,7 @@ END_NONMATCH
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025CD8.inc", void sub_8025CD8(void))
 {
-    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
     *((u8 *)&gStageData + 6) = id;
     gMultiSioSend.raw[3] = id;
     *(u16 *)&gMultiSioSend.raw[0] = 0x660A;
@@ -784,7 +784,7 @@ END_NONMATCH
 // Thumb-to-C reconstruction; the reference ASM remains the default matching path.
 NONMATCH("asm/non_matching/sio/sio__sub_802610C.inc", s16 sub_802610C(void))
 {
-    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    u8 id = (*(volatile u32 *)0x04000128 >> 4) & 3;
     if (*((u8 *)&gStageData + 6) != id) {
         return -1;
     }
