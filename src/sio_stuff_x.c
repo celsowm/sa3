@@ -142,13 +142,19 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024394.inc", void sub_8024394(void))
 }
 END_NONMATCH
 
+// C reconstruction from the original Thumb instructions; ASM remains the matching fallback.
 NONMATCH("asm/non_matching/sio/sio__sub_80243B4.inc", void sub_80243B4(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6C0A;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80243C4.inc", void sub_80243C4(void))
+// C reconstruction from the original Thumb instructions; ASM remains the matching fallback.
+NONMATCH("asm/non_matching/sio/sio__sub_80243C4.inc", void sub_80243C4(u8 player, u8 value))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6C08;
+    gMultiSioSend.raw[4] = value;
+    gMultiSioSend.raw[5 + player] = value;
 }
 END_NONMATCH
 
@@ -662,8 +668,10 @@ NONMATCH("asm/non_matching/sio/sio__sub_80278DC.inc", void sub_80278DC(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80278F8.inc", void sub_80278F8(void))
+// C reconstruction from the original Thumb instructions; ASM remains the matching fallback.
+NONMATCH("asm/non_matching/sio/sio__sub_80278F8.inc", void sub_80278F8(const u8 *src))
 {
+    *(u16 *)((u8 *)&gStageData + 0x12) = *(const u16 *)(src + 2);
 }
 END_NONMATCH
 
