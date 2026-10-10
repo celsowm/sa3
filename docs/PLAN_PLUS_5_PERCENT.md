@@ -44,6 +44,47 @@ cada**, mais uma reserva de 24 funções para substituir as que travarem.
 "equivalente". `make check_format` não roda (falta `clang-format-13`),
 então mantenho só o estilo das linhas alteradas.
 
+## Andamento
+
+| Data | Matched | Observação |
+|---|---:|---|
+| 2026-10-10 15:53 | 78,1590% | Início (main `30c9858`) |
+| 2026-10-10 17:05 | 78,6714% | +4.184 B, 16 funções |
+
+Funções que passaram a bater: `sub_8034A20`, `sub_807AC48`, `Task_FerrisWheel`,
+`Task_809947C`, `sub_80B3C28`, `sub_803D4C8`, `sub_80B7E1C`, `sub_8003BD8`,
+`sub_8003CA4`, `sub_8002618`, `sa2__sub_8084EAC`, `sa2__sub_8083858`,
+`sa2__sub_8083B10`, `sa2__sub_8083A48`, `sa2__sub_8084A24` (as duas últimas
+copiadas do SAT-R/sa2, que já as tem em C que bate).
+
+Também foram corrigidos erros de lógica em corpos que ainda não batem
+(`Task_RingsMgrStage`, `CreateEntity_MazeCorner`, `sub_8012550`,
+`sub_8097E5C`, `Task_270_809B8C8`, `Options_ButtonConfig`) e vários
+outros foram aproximados.
+
+### O que funcionou
+
+- **Reescrever pelo assembly** funções pequenas/médias cujo C estava
+  confuso ou errado. Muitos corpos antigos tinham remendos (`asm("")`,
+  `do {} while (0)`, `volatile`) ou lógica diferente do alvo.
+- **Comparar símbolos referenciados** (alvo × C) para achar erros de
+  lógica: símbolo errado, `Div()` em vez de `/`, campo errado.
+- **Detalhes que mudam o código gerado:** arrays 2D (`t[i][1]` gera
+  base+1), acessar campos pela struct da task em vez de um ponteiro local,
+  reaproveitar a mesma variável para flags e resultado, `u32` em vez de
+  `u8`, rótulo comum para saídas que o compilador fundiria.
+- **SAT-R/sa2** como fonte de C pronto para funções `sa2__*`.
+- **m2c** (`--target gba`) para esqueletos e dicas de variáveis.
+
+### O que rende pouco
+
+- Diferenças só de alocação de registradores ou de slots de pilha: nem
+  ajuste à mão nem decomp-permuter (10–15 min por função) resolvem com
+  frequência. O permuter não enxerga slots de pilha e não lê statement
+  expressions `({ ... })`.
+- O ritmo observado é de ~3–4 KB por hora, bem abaixo do necessário para
+  +5 pontos (40 KB) numa sessão; a meta vai precisar de várias sessões.
+
 ## Ondas
 
 Cada onda fecha com: `make compare` OK, `progress.py -m` registrado em
