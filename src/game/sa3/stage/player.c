@@ -11322,7 +11322,6 @@ NONMATCH("asm/non_matching/game/stage/player__sub_8011E70.inc", void sub_8011E70
     s32 temp_r6;
     s32 worldX, worldY;
     u8 var_r2;
-    u8 var_r2_2;
     s32 var_r2_m;
     s32 var_r2_n;
 
@@ -11335,13 +11334,12 @@ NONMATCH("asm/non_matching/game/stage/player__sub_8011E70.inc", void sub_8011E70
 
     worldX = -3 - p->spriteOffsetX + I(p->qWorldX);
     worldY = I(p->qWorldY);
-    var_r2 = temp_r6;
+    var_r2_m = temp_r6;
     if (p->qSpeedAirY < Q(3)) {
-        var_r2 = 0x80;
-        var_r2 |= temp_r6;
+        var_r2_m = 0x80;
+        var_r2_m |= temp_r6;
     }
-    temp_r0 = SA2_LABEL(sub_801E4E4)(worldX, worldY, var_r2, -8, NULL, SA2_LABEL(sub_801ED24));
-    var_r2_m = temp_r0;
+    var_r2_m = SA2_LABEL(sub_801E4E4)(worldX, worldY, var_r2_m, -8, NULL, SA2_LABEL(sub_801ED24));
     if (var_r2_m <= 0) {
         p->qWorldX -= Q(var_r2_m);
         p->qSpeedAirX = Q(0);
@@ -11350,11 +11348,11 @@ NONMATCH("asm/non_matching/game/stage/player__sub_8011E70.inc", void sub_8011E70
     temp_r0 += 3;
     worldX = temp_r0 + p->spriteOffsetX;
     worldY = I(p->qWorldY);
-    var_r2_2 = temp_r6;
+    temp_r0_2 = temp_r6;
     if (p->qSpeedAirY < Q(3)) {
-        var_r2_2 |= 0x80;
+        temp_r0_2 |= 0x80;
     }
-    temp_r0_2 = SA2_LABEL(sub_801E4E4)(worldX, worldY, var_r2_2, 8, NULL, SA2_LABEL(sub_801ED24));
+    temp_r0_2 = SA2_LABEL(sub_801E4E4)(worldX, worldY, temp_r0_2, 8, NULL, SA2_LABEL(sub_801ED24));
     var_r2_n = temp_r0_2;
     if (var_r2_n <= 0) {
         p->qWorldX += Q(var_r2_n);
