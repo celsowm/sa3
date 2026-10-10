@@ -191,8 +191,8 @@ NONMATCH("asm/non_matching/game/enemies/euc__Task_40_805C198.inc", void Task_40_
     s16 qWorldY = TO_WORLD_POS_RAW(worldY, strc40->regionY);
 
     if ((gStageData.act != 7) && (gStageData.act != 9) && (strc40->unk4 == 0 && strc40->unk5 == 0)) {
-        u16 regionX = *((vu16 *)&strc40->regionX);
         u16 regionY = *((vu16 *)&strc40->regionY);
+        u16 regionX = *((vu16 *)&strc40->regionX);
 
         if (strc40->p != NULL) {
             sub_805CF38__inline(strc40->qWorldX, strc40->qWorldY, regionX, regionY, strc40->p);
