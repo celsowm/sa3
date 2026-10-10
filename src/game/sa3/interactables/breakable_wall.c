@@ -175,7 +175,7 @@ void Task_BreakableWall(void)
 }
 
 // (98.91%) https://decomp.me/scratch/SCkrx
-NONMATCH("asm/non_matching/game/interactables/breakable_wall__sub_8034A20.inc", s16 sub_8034A20(Player *p))
+s16 sub_8034A20(Player *p)
 {
     if (p->charFlags.someIndex != 3) {
         switch (p->charFlags.anim0) {
@@ -202,7 +202,12 @@ NONMATCH("asm/non_matching/game/interactables/breakable_wall__sub_8034A20.inc", 
             case 527:
             case 570:
             case 690: {
-                return 3;
+                // TODO: Fake-match!
+                if (p) {
+                    return 3;
+                } else {
+                    return 3;
+                }
             } break;
 
             case 42:
@@ -232,7 +237,6 @@ NONMATCH("asm/non_matching/game/interactables/breakable_wall__sub_8034A20.inc", 
 
     return 1;
 }
-END_NONMATCH
 
 void sub_8034C60(s16 param0)
 {
