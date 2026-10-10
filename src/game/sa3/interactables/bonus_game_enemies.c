@@ -982,11 +982,11 @@ void InitCountdownDigitSprite(Sprite *s)
     UpdateSpriteAnimation(s);
 }
 
-extern u8 gUnknown_080CF936[120];
+extern u8 gUnknown_080CF936[60][2];
 extern s16 sFrameCountPerSecond[61];
-extern u8 gUnknown_080CF8BC[122];
+extern u8 gUnknown_080CF8BC[61][2];
 // (91.70%) https://decomp.me/scratch/Mzfqn
-NONMATCH("asm/non_matching/game/interactables/bonus_game_ui__sub_803D4C8.inc", void sub_803D4C8(void))
+void sub_803D4C8(void)
 {
     BonusGameUI *ui = TASK_DATA(gCurTask);
     Sprite *s;
@@ -996,7 +996,8 @@ NONMATCH("asm/non_matching/game/interactables/bonus_game_ui__sub_803D4C8.inc", v
     u8 i;
 
     r4 = ui->timer;
-    r4 -= sFrameCountPerSecond[r4 / 60];
+    r9 = Div(r4, 60);
+    r4 -= sFrameCountPerSecond[r9];
 
     s = &ui->sprTimer[ARRAY_COUNT(ui->sprTimer) - 1];
     s->x = 128;
@@ -1004,27 +1005,27 @@ NONMATCH("asm/non_matching/game/interactables/bonus_game_ui__sub_803D4C8.inc", v
     UpdateSpriteAnimation(s);
     DisplaySprite(s);
 
-    s = &ui->sprTimer[gUnknown_080CF936[(r4 * 2) + 0]];
+    s = &ui->sprTimer[gUnknown_080CF936[r4][0]];
     s->x = 134;
     s->y = 18;
     UpdateSpriteAnimation(s);
     DisplaySprite(s);
 
-    s = &ui->sprTimer[gUnknown_080CF936[(r4 * 2) + 1]];
+    s = &ui->sprTimer[gUnknown_080CF936[r4][1]];
     s->x = 140;
     s->y = 18;
     UpdateSpriteAnimation(s);
     DisplaySprite(s);
 
-    if (gUnknown_080CF8BC[(r4 * 2) + 0]) {
-        s = &ui->sprTimer[gUnknown_080CF8BC[(r4 * 2) + 0]];
+    if (gUnknown_080CF8BC[r9][0]) {
+        s = &ui->sprTimer[gUnknown_080CF8BC[r9][0]];
         s->x = 112;
         s->y = 14;
         UpdateSpriteAnimation(s);
         DisplaySprite(s);
     }
 
-    s = &ui->sprTimer[gUnknown_080CF8BC[(r4 * 2) + 1]];
+    s = &ui->sprTimer[gUnknown_080CF8BC[r9][1]];
     s->x = 120;
     s->y = 14;
     UpdateSpriteAnimation(s);
@@ -1045,7 +1046,6 @@ NONMATCH("asm/non_matching/game/interactables/bonus_game_ui__sub_803D4C8.inc", v
         }
     }
 }
-END_NONMATCH
 
 void sub_803D614(void)
 {
