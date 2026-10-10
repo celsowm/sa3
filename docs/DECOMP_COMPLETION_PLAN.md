@@ -272,3 +272,17 @@ Work was committed directly to `main` in this independent fork:
 **Current gate:** the European reference ROM exists and is SHA-verified, but `SAT-R/agbcc` and ARM binutils are not available in the current sandbox; `make compare` was not executed. The legacy matching percentage (about 77.97%) remains unchanged. No candidate was removed from ASM or declared matching without the exact build.
 
 For the next implementation commit, inspect each destructor's signature and its place within the explicitly ordered `ldscript.txt` `.text` units before editing source. Changing C-object/ASM-object ordering will otherwise shift downstream ROM addresses and break matching even if a generated stub instruction is correct.
+
+
+## 12. Tactical execution sprint — 2026-10-10
+
+The follow-on execution plan is committed as [NEXT_MATCHING_SPRINT.md](NEXT_MATCHING_SPRINT.md).
+It orders the work as (1) reproducible EU ROM build and toolchain pinning;
+(2) map-derived exact function-byte/matching oracle and CI validation;
+(3) one or two Thumb destructor no-op conversions to prove linker feasibility;
+(4) substantive existing-C `NONMATCH` candidates `sub_806CFD4`,
+`sub_805E624`, then `sub_8050D90`; (5) ten verified matching
+conversions and new prioritization toward the 80% matching milestone.
+
+**Planning-only update**: No new C code was converted, no agbcc build was
+executed, and the historical ~77.97% matching rate is unchanged.
