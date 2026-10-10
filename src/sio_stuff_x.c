@@ -1088,13 +1088,31 @@ NONMATCH("asm/non_matching/sio/sio__sub_8027578.inc", void sub_8027578(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80275B8.inc", void sub_80275B8(void))
+// Packet layout reconstructed from Thumb. Keep ASM pending matching validation.
+NONMATCH("asm/non_matching/sio/sio__sub_80275B8.inc", void sub_80275B8(u8 player, u8 value, u8 parameter))
 {
+    u8 packet[5] = { 0 };
+    packet[0] = 0x38;
+    packet[1] = 1;
+    packet[2] = parameter;
+    if (player == 1) {
+        packet[4] = value;
+    }
+    packet[3] = player;
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80275F0.inc", void sub_80275F0(void))
+// Packet layout reconstructed from Thumb. Keep ASM pending matching validation.
+NONMATCH("asm/non_matching/sio/sio__sub_80275F0.inc", void sub_80275F0(u8 player, u8 value, u8 parameter))
 {
+    u8 packet[5] = { 0 };
+    packet[0] = 0x38;
+    packet[1] = 0x20;
+    packet[2] = parameter;
+    packet[4] = value;
+    packet[3] = player;
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
@@ -1113,8 +1131,16 @@ NONMATCH("asm/non_matching/sio/sio__sub_8027658.inc", void sub_8027658(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8027674.inc", void sub_8027674(void))
+// Packet layout reconstructed from Thumb. Keep ASM pending matching validation.
+NONMATCH("asm/non_matching/sio/sio__sub_8027674.inc", void sub_8027674(u8 player, u16 value))
 {
+    u8 packet[5] = { 0 };
+    packet[0] = 0x38;
+    packet[1] = 0x0C;
+    packet[2] = player;
+    packet[3] = (u8)value;
+    packet[4] = (u8)(value >> 8);
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
