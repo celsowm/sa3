@@ -340,7 +340,8 @@ NONMATCH("asm/non_matching/sio/sio__sub_80247D4.inc", u16 sub_80247D4(void))
 
         value = packet[15 + player];
         if (value == 0xFF) {
-            gMultiSioSend.raw[15 + player] = 0xFF;
+            // Thumb updates the cached ID, not the outgoing packet slot.
+            gUnknown_030010AC[player] = 0xFF;
         } else if (value < 8 && (assignedMask & (1 << value))) {
             result |= (0x10 << player);
         } else {
