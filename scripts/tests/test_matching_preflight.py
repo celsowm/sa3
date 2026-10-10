@@ -27,5 +27,17 @@ class MatchingPreflightTests(unittest.TestCase):
             self.assertIsNone(result["build"])
 
 
+    def test_requires_old_agbcc_and_arm_preprocessor(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            # Deliberately invalid local ROM: no command should execute.
+            (root / "baserom_sa3.gba").write_bytes(b"invalid")
+            result = M.check(root, root / "baserom_sa3.gba", build=True)
+            self.assertIn("old_agbcc", result["toolchain"])
+            self.assertIn("arm-none-eabi-cpp", result["toolchain"])
+            self.assertFalse(result["prerequisites_ok"])
+            self.assertIsNone(result["build"])
+
+
 if __name__ == "__main__":
     unittest.main()
