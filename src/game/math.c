@@ -85,14 +85,11 @@ NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808343C.inc",
 {
     s32 t2 = ((s64)t * t) >> shift;
     s32 t3 = ((s64)t2 * t) >> shift;
-    s32 unit = 1u << shift;
-    s32 h00 = 2 * t3 - 3 * t2 + unit;
-    s32 h10 = t3 - 2 * t2 + t;
-    s32 h01 = 3 * t2 - 2 * t3;
-    s32 h11 = t3 - t2;
-
-    return (((s64)p0 * h00) + ((s64)m0 * h10)
-            + ((s64)p1 * h01) + ((s64)m1 * h11)) >> shift;
+    s64 r = (s64)p0 * (((t3 - t2) * 2) - t2 + (1 << shift));
+    r += (s64)m0 * ((t3 - t2) - t2 + t);
+    r += (s64)p1 * ((t2 * 3) - t3 - t3);
+    r += (s64)m1 * (t3 - t2);
+    return r >> shift;
 }
 END_NONMATCH
 
