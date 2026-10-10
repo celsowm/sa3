@@ -113,6 +113,11 @@ void sub_80A0344(void);
 void sub_80A03F8(void);
 void sub_80A04D8(void);
 void sub_80A0644(void);
+void sub_80A06E8(void);
+void sub_80A07E0(void);
+bool32 sub_80A16EC(MpCharSelect *mcs);
+bool32 sub_80A1694(MpCharSelect *mcs);
+bool32 sub_80A1938(MpCharSelect *mcs);
 void sub_80A0EA8(MpCharSelect *mcs);
 bool32 sub_80A163C(MpCharSelect *mcs);
 bool32 sub_80A1668(MpCharSelect *mcs);
@@ -673,13 +678,87 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A04D8.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0644.inc", void sub_80A0644(void))
+void sub_80A0644(void)
 {
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+    u8 count = 0;
+    bool32 res;
+
+    if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+        return;
+    }
+
+    sub_80A19C0(mcs);
+    sub_80A1A04(mcs);
+    sub_80A10B0(mcs);
+    sub_80A1110(mcs);
+    sub_80A11B8(mcs);
+
+    if (sub_80A16EC(mcs) == TRUE) {
+        count = 1;
+    }
+
+    if ((mcs->unk68 <= Q(145)) || ((mcs->unk68 -= Q(6)) < Q(145))) {
+        mcs->unk68 = Q(145);
+        res = TRUE;
+    } else {
+        res = FALSE;
+    }
+
+    if (res == TRUE) {
+        count++;
+    }
+
+    if (count == 2) {
+        *mcs->unk14 = 1;
+        gCurTask->main = sub_80A04D8;
+    }
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A06E8.inc", void sub_80A06E8(void))
 {
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+
+    if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+    } else {
+        gBgSprites_Unknown1[2] = 0;
+        gBgSprites_Unknown2[2][0] = 0;
+        gBgSprites_Unknown2[2][1] = 0;
+        gBgSprites_Unknown2[2][2] = 0xFF;
+        gBgSprites_Unknown2[2][3] = 0x40;
+        mcs->unk6C = Q(142);
+        mcs->unk70 = Q(22);
+        gBgScrollRegs[2][0] = 142;
+        gBgScrollRegs[2][1] = -22;
+        gDispCnt = 0x1740;
+        gBgCntRegs[2] = 0x1B09;
+
+        {
+            Background *bg = &mcs->bg274;
+            bg->graphics.dest = BG_CHAR_ADDR(2);
+            bg->graphics.anim = 0;
+            bg->layoutVram = BG_SCREEN_ADDR(27);
+            bg->unk18 = 0;
+            bg->unk1A = 0;
+            bg->tilemapId = gUnknown_080D8CDC[gUnknown_080D8F18[mcs->unk1] + 10];
+            bg->unk1E = 0;
+            bg->unk20 = 0;
+            bg->unk22 = 0;
+            bg->unk24 = 0;
+            bg->targetTilesX = 16;
+            bg->targetTilesY = 16;
+            mcs->bg274.paletteOffset = 0;
+            bg->flags = 2;
+            DrawBackground(bg);
+        }
+
+        sub_80A10B0(mcs);
+        sub_80A1110(mcs);
+        sub_80A11B8(mcs);
+        gCurTask->main = sub_80A07E0;
+    }
 }
 END_NONMATCH
 
