@@ -30,11 +30,13 @@ FUNCTIONS = (
     "sa2__unused_sub_80842E4",
     "sa2__unused_sub_808442C",
     "sa2__unused_sub_808477C",
+    "sa2__unused_sub_8084EE0",
     "sa2__unused_sub_80851E0",
 )
 C_HEADER = r"""
 #include <math.h>
 #include <stdint.h>
+#include <string.h>
 typedef int16_t s16;
 typedef int32_t s32;
 typedef int64_t s64;
@@ -168,6 +170,7 @@ class MathFallbackNativeTests(unittest.TestCase):
             ("sa2__sub_8083E44", 2, Matrix),
             ("sa2__sub_8084090", 2, Matrix),
             ("sa2__sub_80851E0", 1, Matrix),
+            ("sa2__sub_8084EE0", 1, Matrix),
         ):
             fn = getattr(cls.library, name)
             fn.argtypes = [ctypes.POINTER(type_)] * arity
@@ -437,6 +440,62 @@ class MathFallbackNativeTests(unittest.TestCase):
             self.assertEqual(list(actual), expect)
             done += 1
         self.assertGreaterEqual(done, 700)
+
+
+    def test_3x3_inverse_3000_cases_including_original_halfword_writes(self):
+        """8084EE0: compare independent adjugate formulas and all 32 bytes."""
+        rng = random.Random(0x4EE0)
+        completed = 0
+        for _ in range(3000):
+            matrix = Matrix()
+            original = [rng.randrange(-1000, 1001) for _ in range(9)]
+            for k, value in enumerate(original):
+                matrix.unk2[k] = value
+            matrix.unk14 = rng.randrange(-100000, 100001)
+            matrix.unk18 = rng.randrange(-100000, 100001)
+            matrix.unk1C = rng.randrange(-100000, 100001)
+            a, b, c, d, e, f, g, h, i = original
+            cofactors = [
+                (e * i - f * h) >> 10,
+                -((b * i - c * h) >> 10),
+                (b * f - c * e) >> 10,
+                -((d * i - f * g) >> 10),
+                (a * i - c * g) >> 10,
+                -((a * f - c * d) >> 10),
+                (d * h - e * g) >> 10,
+                -((a * h - b * g) >> 10),
+                (a * e - b * d) >> 10,
+            ]
+            determinant = (a * ((e * i - f * h) >> 10)
+                           - b * ((d * i - f * g) >> 10)
+                           + c * ((d * h - e * g) >> 10))
+            if determinant == 0:
+                continue  # Original ARM divide-by-zero; not a valid input.
+            scale = (0x100000 // abs(determinant)) * (
+                1 if determinant > 0 else -1)
+            expected_basis = [
+                signed16((scale * value) >> 10)
+                for value in cofactors
+            ]
+            expected = bytearray(
+                ctypes.string_at(ctypes.byref(matrix), ctypes.sizeof(matrix)))
+            for k, value in enumerate(expected_basis):
+                expected[2 + k * 2:4 + k * 2] = value.to_bytes(
+                    2, "little", signed=True)
+            original_translation = (matrix.unk14, matrix.unk18, matrix.unk1C)
+            for column in range(3):
+                product = sum(
+                    original_translation[row] * original[row * 3 + column]
+                    for row in range(3))
+                halfword = signed16((-product) >> 10)
+                expected[0x14 + column * 2:0x16 + column * 2] = (
+                    halfword.to_bytes(2, "little", signed=True))
+            self.library.sa2__sub_8084EE0(ctypes.byref(matrix))
+            actual = ctypes.string_at(ctypes.byref(matrix),
+                                      ctypes.sizeof(matrix))
+            self.assertEqual(actual, bytes(expected))
+            completed += 1
+        self.assertGreaterEqual(completed, 2900)
 
 
 if __name__ == "__main__":
