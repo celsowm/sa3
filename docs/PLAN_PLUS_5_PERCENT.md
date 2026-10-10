@@ -1,5 +1,32 @@
 # Plano: +5 pontos percentuais de código matched
 
+## Checkpoint adicional — 2026-10-10, SIO decompilation
+
+**Target is matching code bytes, not merely C reconstruction.** The last
+commit-reported matching figure preceding this batch was approximately
+**81.1094%** (historical progress, not recalculated here). On the old
+816,408-byte code denominator, another five percentage points would mean
+**about 40,821 verified matching bytes** and a target near **86.11%**.
+Recalculate from a fresh `sa3.map` before treating these as official numbers.
+
+Recent direct-to-`main` work reconstructed **34 SIO functions in C** over
+commits `e4d58bf`, `b26bcdb`, `993506f`, `1615b6f`, and `81a83e3`,
+including the queue writer (`sub_8026AB8`), state/error handler
+(`sub_8025E24`), multiplayer readiness check (`sub_802610C`) and packet
+builders. These bodies remain inside `NONMATCH` with original ASM as the
+default matching fallback, so **verified matching progress for this batch:
+zero bytes**. One intervening commit `b3c4906` corrected the reset-helper
+return declaration, and `21ad5a7` added host C smoke tests. Those tests
+exercise behavior; they do not compare compiler output or the full ROM.
+
+To obtain actual percentage gain: prioritize `EngineInit` and
+`Task_RingsMgrStage` (both nearly matching in the existing triage), make
+targeted C/agbcc comparisons, promote only verified matches, and require
+`make compare` plus `sha1sum -c sa3.sha1` with the privately held European
+reference. Do not promote this SIO batch on code inspection alone.
+
+---
+
 Base: `main` @ `30c9858`. **78,1590%** matched (638.096 / 816.408 bytes).
 Meta: **≥ 83,16%**, ou seja, **+40.820 bytes** de código matched.
 
