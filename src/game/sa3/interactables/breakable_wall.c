@@ -374,10 +374,10 @@ inc_counter:
 END_NONMATCH
 
 // (99.88%) https://decomp.me/scratch/XSZVN
-NONMATCH("asm/non_matching/game/interactables/breakable_wall__CreateBreakableWallDebris.inc",
-         void CreateBreakableWallDebris(s16 worldX, s16 worldY, s16 param2, s16 rand, u8 param4, u8 param5, void *tiles))
+void CreateBreakableWallDebris(s16 worldX, s16 worldY, s16 param2, s16 rand, u8 param4, u8 param5, void *tiles)
 {
     BreakableWallDebris *debris;
+    const s16 *sine; // TODO: Fake-match!
     struct Task *t;
     Sprite *sprNew;
     u16 arr[6][2][3]; // sp04
@@ -394,9 +394,10 @@ NONMATCH("asm/non_matching/game/interactables/breakable_wall__CreateBreakableWal
     debris->unkE = param4;
     debris->qUnkC = 32;
 
+    sine = gSineTable;
     randClamped = (rand & ONE_CYCLE);
     debris->qUnk8 = (COS(randClamped & ONE_CYCLE) * param2) >> 14;
-    debris->qUnkA = (SIN(randClamped & ONE_CYCLE) * param2) >> 14;
+    debris->qUnkA = (sine[randClamped & ONE_CYCLE] * param2) >> 14;
 
     if (gStageData.act == ACT_BONUS_ENEMIES) {
         zone = ZONE_1;
@@ -430,7 +431,6 @@ NONMATCH("asm/non_matching/game/interactables/breakable_wall__CreateBreakableWal
     debris->qWorldY = Q(worldY);
     UpdateSpriteAnimation(sprNew);
 }
-END_NONMATCH
 
 void Task_Debris(void)
 {
