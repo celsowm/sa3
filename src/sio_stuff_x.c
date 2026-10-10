@@ -1068,13 +1068,30 @@ NONMATCH("asm/non_matching/sio/sio__sub_8026B10.inc", void sub_8026B10(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80274AC.inc", void sub_80274AC(void))
+// Thumb-to-C SIO message reconstruction; original ASM remains the matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_80274AC.inc", void sub_80274AC(u16 first, u16 second))
 {
+    u8 packet[5];
+    ((u8 *)&gStageData)[0xBB] = 7;
+    packet[0] = 8;
+    packet[1] = (u8)first;
+    packet[2] = (u8)(first >> 8);
+    packet[3] = (u8)second;
+    packet[4] = (u8)(second >> 8);
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80274F4.inc", void sub_80274F4(void))
+// Thumb-to-C SIO message reconstruction; original ASM remains the matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_80274F4.inc", void sub_80274F4(u8 flags, u16 first, u16 second))
 {
+    u8 packet[5];
+    packet[0] = (flags & 7) | 0x10;
+    packet[1] = (u8)first;
+    packet[2] = (u8)(first >> 8);
+    packet[3] = (u8)second;
+    packet[4] = (u8)(second >> 8);
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
@@ -1155,13 +1172,34 @@ NONMATCH("asm/non_matching/sio/sio__sub_8027674.inc", void sub_8027674(u8 player
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80276A8.inc", void sub_80276A8(void))
+// Thumb-to-C SIO message reconstruction; original ASM remains the matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_80276A8.inc", void sub_80276A8(u8 value))
 {
+    u8 *stage = (u8 *)&gStageData;
+    u8 packet[5] = { 0 };
+    packet[0] = 0x38;
+    packet[1] = 6;
+    if ((stage[6] == 0) && (stage[0xAE] == 0) && (stage[0xAF] == 0)) {
+        packet[2] = stage[0x8E];
+    } else {
+        packet[2] = value;
+        stage[0x8E] = value;
+    }
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80276F4.inc", void sub_80276F4(void))
+// Thumb-to-C SIO message reconstruction; original ASM remains the matching path.
+NONMATCH("asm/non_matching/sio/sio__sub_80276F4.inc", void sub_80276F4(u16 first, u16 second))
 {
+    u8 packet[5];
+    ((u8 *)&gStageData)[0x8F] = 1;
+    packet[0] = 0x28;
+    packet[1] = (u8)first;
+    packet[2] = (u8)(first >> 8);
+    packet[3] = (u8)second;
+    packet[4] = (u8)(second >> 8);
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
