@@ -505,7 +505,7 @@ END_NONMATCH
 // Matching builds keep the original ASM until whole-ROM comparison succeeds.
 NONMATCH("asm/non_matching/sio/sio__sub_8024AC0.inc", s16 sub_8024AC0(u16 value))
 {
-    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 4) & 3;
     s16 status;
     s16 result = 0;
 
@@ -540,7 +540,7 @@ END_NONMATCH
 // without invoking the next packet-producer callback.
 NONMATCH("asm/non_matching/sio/sio__sub_8024B84.inc", s16 sub_8024B84(u16 value))
 {
-    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 4) & 3;
     s16 status;
 
     gStageData.playerIndex = player;
@@ -585,7 +585,7 @@ s16 sub_8024DC8(void))
 {
     s16 status;
     u16 packetType;
-    gStageData.playerIndex = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    gStageData.playerIndex = (*(vu32 *)REG_ADDR_SIOCNT >> 4) & 3;
     status = sub_802610C();
     if (status < 0) {
         return status;
@@ -610,7 +610,7 @@ END_NONMATCH
 // Matching builds keep the original ASM until whole-ROM comparison succeeds.
 NONMATCH("asm/non_matching/sio/sio__sub_8024F1C.inc", s16 sub_8024F1C(u8 value))
 {
-    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 4) & 3;
     u8 slot = player;
     s16 status;
 
@@ -647,7 +647,7 @@ END_NONMATCH
 // Matching builds keep the original ASM until whole-ROM comparison succeeds.
 NONMATCH("asm/non_matching/sio/sio__sub_8025024.inc", s16 sub_8025024(u16 value))
 {
-    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 4) & 3;
     u8 slot = player;
     s16 status;
     s16 result = 0;
@@ -850,7 +850,7 @@ END_NONMATCH
 // Source-level reconstruction from Thumb; matching builds retain original ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025714.inc", void sub_8025714(u8 value))
 {
-    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 4) & 3;
     u8 slot;
 
     gStageData.playerIndex = player;
@@ -1073,7 +1073,7 @@ s16 sub_8025AA8(void))
 {
     s16 status;
     u16 packetType;
-    gStageData.playerIndex = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    gStageData.playerIndex = (*(vu32 *)REG_ADDR_SIOCNT >> 4) & 3;
     status = sub_802610C();
     if (status < 0) {
         return status;
