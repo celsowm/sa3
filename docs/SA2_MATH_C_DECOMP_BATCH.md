@@ -1,4 +1,11 @@
-# SA3: Six mathematical Assembly fallbacks reimplemented in C
+# SA3: Mathematical Assembly fallbacks reimplemented in C
+
+> **2026-10-10 correction:** Function suffixes preserve SA2 addresses. The ROM
+> intervals and SHA-256 values below use the actual SA3 Europe locations,
+> mapped with a confirmed +0x2BAD8 offset. See
+> [SA2_MATH_ROM_RELOCATION.md](SA2_MATH_ROM_RELOCATION.md) for the full
+> 18-entry audit and signature evidence. Earlier unrelocated hashes were invalid.
+
 
 **Date:** 2026-10-10. **Target:** `celsowm/sa3`, European matching ROM.
 **Changed production file:** [`src/game/math.c`](../src/game/math.c).
@@ -91,12 +98,12 @@ Implemented in `src/game/math.c` after the original six-function batch:
 
 | Symbol | C recovery | EU ROM range [start, end) | Range SHA-256 |
 |---|---|---|---|
-| `sa2__sub_8083E44` | 3x3 affine multiply in-place over lhs | `08083E44–08084090` (588 B) | `ef5850f8d7050336e3cb36d7206559e0fa1efd7c770e309f9c316fee35ed839a` |
-| `sa2__sub_8084090` | 3x3 affine multiply in-place over rhs | `08084090–080842E4` (596 B) | `15622b53d55424f24c706bc858d203783b1b2f047286aea646f504615b324757` |
-| `sa2__sub_80842E4` | Affine transform of a 3D vector into separate output | `080842E4–0808442C` (328 B) | `60490bc58cc3631b647f939ace286572746e387f6f482182de3c9bd96538ef57` |
-| `sa2__sub_808442C` | In-place 3D affine transform with sequential updated coordinates | `0808442C–0808458C` (352 B) | `8ccb209c6aa5c5e1a5d215c0e935fe9ad50f52096b06b91a234e071da162f0c6` |
-| `sa2__sub_808477C` | Perspective-normalized projected 3D vector | `0808477C–08084904` (392 B) | `1ace076ea09c5c0075abfd36ee3be30a60aa253231a26a5b4c148da5990ee71a` |
-| `sa2__sub_80851E0` | Orthogonal affine inverse: transpose and transformed negated translation | `080851E0–08085314` (308 B) | `86c8595c13fa82b1a3effd51abbc29a34452c03a573395576704900181acb5e9` |
+| `sa2__sub_8083E44` | 3x3 affine multiply in-place over lhs | `080AF91C–080AFB68` (588 B) | `b5a303e5d0d8a24798ff73d547c44cf605fbaa71a71b6e5271c938e0bfeee391` |
+| `sa2__sub_8084090` | 3x3 affine multiply in-place over rhs | `080AFB68–080AFDBC` (596 B) | `b17cdb328ca52e6df75d7b4ba79a951e6016d49b0df28380d32f6e224d7de1c8` |
+| `sa2__sub_80842E4` | Affine transform of a 3D vector into separate output | `080AFDBC–080AFF04` (328 B) | `eaf74c952f27224ef818d687ae560c63c8283a1562ec760387cc806f8ffbcd38` |
+| `sa2__sub_808442C` | In-place 3D affine transform with sequential updated coordinates | `080AFF04–080B0064` (352 B) | `f7b95e266ccdee2d635fc0bb702c435345a21fe55b889d644defea3579d14d19` |
+| `sa2__sub_808477C` | Perspective-normalized projected 3D vector | `080B0254–080B03DC` (392 B) | `e7e18154bef25d2debe4f600e42b642fa4c4ace72a7c230743109a24c2a9246f` |
+| `sa2__sub_80851E0` | Orthogonal affine inverse: transpose and transformed negated translation | `080B0CB8–080B0DEC` (308 B) | `481160edc80a8160c389157ab8d94a48078a75c51c379b828153d43fa7542e2d` |
 
 Reference EU ROM SHA-1: `685af3a2dc0f1b3f8922e73ec42c1dc92e210e39`.
 All six range hashes were computed privately on the verified original European ROM. The **2,564 total bytes** are original **symbol-to-next-symbol intervals**, potentially including literal pools and alignment. **Do not count them as verified C matching bytes.**
@@ -122,8 +129,8 @@ its SHA-1 is `685af3a2dc0f1b3f8922e73ec42c1dc92e210e39`.
 
 | Source symbol | Algorithm / important original behavior | EU original ROM interval | SHA-256 of original interval |
 |---|---|---|---|
-| `sa2__sub_8084EE0` | Q6.10 inverse/adjugate; **three 16-bit writes at offsets 0x14, 0x16, 0x18**, despite the current type declaring 32-bit translation members | `0x08084EE0..0x080851E0` (768 bytes) | `1f08506cb704f549f8f8ecc63cf59c3dbb3228c59baecacc5abde1fba8cf318f` |
-| `sa2__sub_808458C` | Signed 64-bit quotient/projection; the **last product `z*unk1C` is the numerator**, while the accumulated dot product plus `0x100000`, shifted by 10, forms the divisor; input is re-read per output component to respect aliasing | `0x0808458C..0x0808477C` (496 bytes) | `d00a2a00a260548c87137ad273509188d52a184179f6dadf579582c91f879535` |
+| `sa2__sub_8084EE0` | Q6.10 inverse/adjugate; **three 16-bit writes at offsets 0x14, 0x16, 0x18**, despite the current type declaring 32-bit translation members | `0x080B09B8..0x080B0CB8` (768 bytes) | `9ebc67cf2f6d381c8793f27ad8339ca88de21bcab1c84a6bc04d7e2da7d17ee1` |
+| `sa2__sub_808458C` | Signed 64-bit quotient/projection; the **last product `z*unk1C` is the numerator**, while the accumulated dot product plus `0x100000`, shifted by 10, forms the divisor; input is re-read per output component to respect aliasing | `0x080B0064..0x080B0254` (496 bytes) | `829ded12a661c24e1dbe0132a04217998edf9629fe52c297ca4e323b9a74308d` |
 
 The original ROM intervals total **1,264 bytes**, including possible
 literal-pool data and alignment. They are **NOT newly matching C bytes**.
