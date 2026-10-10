@@ -4,10 +4,11 @@
 #include "malloc_ewram.h"
 #include "lib/m4a/m4a.h"
 #include "game/stage.h" // gStageData
+#include "constants/songs.h"
 #include "constants/tilemaps.h"
 
 typedef struct {
-    /* 0x00 */ u8 unk0;
+    /* 0x00 */ u16 unk0;
     /* 0x02 */ s16 unk2;
     /* 0x04 */ s16 unk4;
     /* 0x06 */ s16 unk6;
@@ -22,12 +23,12 @@ typedef struct {
     /* 0x0A8 */ Background bgA8;
     /* 0x0E8 */ Background bgE8;
     /* 0x128 */ s16 state;
-    /* 0x12C */ void *hblankBuf;
-    /* 0x130 */ s32 *recipTable;
+    /* 0x12C */ s16 *hblankBuf;
+    /* 0x130 */ u32 *recipTable;
     /* 0x134 */ s16 unk134;
     /* 0x136 */ s16 unk136;
-    /* 0x138 */ s16 unk138;
-    /* 0x13A */ s16 unk13A;
+    /* 0x138 */ u16 unk138;
+    /* 0x13A */ u16 unk13A;
     /* 0x13C */ s16 unk13C;
     /* 0x13E */ s16 unk13E;
     /* 0x140 */ s16 unk140;
@@ -41,6 +42,13 @@ typedef struct {
 } GameIntro; /* 0x170 */
 
 void Task_170_GameIntroInit(void);
+void Task_170_80A2A9C(void);
+void sub_80A2700(void);
+void sub_80A217C(GameIntro *intro);
+void sub_80A22E0(GameIntro *intro);
+void sub_80A23A4(void);
+
+extern ColorRaw sub_80C4C0C(ColorRaw color);
 void TaskDestructor_GameIntro(struct Task *t);
 
 void CreateGameIntroState(s16 state)
@@ -161,20 +169,159 @@ void sub_80A217C(GameIntro *intro)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A22E0.inc", void sub_80A22E0(void))
+void sub_80A22E0(GameIntro *intro)
 {
+    GameIntroSub *sub = &intro->sub[0];
+    Sprite *s = &intro->s;
+
+    s->tiles = OBJ_VRAM0;
+    s->frameFlags = 0x1020;
+    s->anim = 161;
+    s->x = 130;
+    s->y = 140;
+    s->oamFlags = SPRITE_OAM_ORDER(17);
+    s->qAnimDelay = 0;
+    s->prevAnim = -1;
+    s->variant = 3;
+    s->prevVariant = -1;
+    s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+    s->palId = 0;
+    s->hitboxes[0].index = -1;
+    sub->unk0 = 0;
+    sub->unk2 = -224;
+    sub->unk4 = 224;
+    sub->unk6 = s->x;
+    sub->unk8 = s->y;
+
+    s = &intro->s2;
+    sub++;
+    s->tiles = OBJ_VRAM0 + 0x800;
+    s->frameFlags = 0x1021;
+    s->anim = 487;
+    s->x = 100;
+    s->y = 140;
+    s->oamFlags = SPRITE_OAM_ORDER(16);
+    s->qAnimDelay = 0;
+    s->prevAnim = -1;
+    s->variant = 4;
+    s->prevVariant = -1;
+    s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+    s->palId = 1;
+    s->hitboxes[0].index = -1;
+    sub->unk0 = 0;
+    sub->unk2 = -256;
+    sub->unk4 = 256;
+    sub->unk6 = s->x;
+    sub->unk8 = s->y;
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A23A4.inc", void sub_80A23A4(void))
 {
+    GameIntro *intro = TASK_DATA(gCurTask);
+    s16 *buf;
+    s16 i;
+
+    gHBlankCopySize = 16;
+    gHBlankCopyTarget = (void *)&REG_BG2PA;
+    gBgOffsetsHBlankPrimary = buf = intro->hblankBuf;
+    gFlags |= FLAGS_EXECUTE_HBLANK_COPY;
+
+    intro->unk138 = (intro->unk138 + intro->unk140) & 0xFFF;
+    intro->unk13A = (intro->unk13A + intro->unk142) & 0x7FF;
+    intro->unk148 = intro->unk148 + intro->unk144;
+    intro->unk14A = intro->unk14A + intro->unk146;
+
+    for (i = 0; i < DISPLAY_HEIGHT; i++) {
+        u16 dist;
+        u16 v;
+
+        if (i - intro->unk136 >= 0) {
+            dist = i - intro->unk136;
+        } else {
+            dist = intro->unk136 - i;
+        }
+
+        v = intro->recipTable[(s16)dist] * (s16)dist * 2 + intro->unk13A * 16;
+
+        if (i < intro->unk136) {
+            if ((s16)v < 0) {
+                v -= 0x8000;
+            }
+        } else if ((s16)v >= 0) {
+            v += 0x8000;
+        }
+
+        buf[0] = intro->recipTable[(s16)dist] >> 2;
+        buf[4] = ((intro->recipTable[(s16)dist] * intro->unk134) >> 2) + intro->unk138 * 16;
+        buf[6] = v;
+        buf += 8;
+    }
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_170_GameIntroInit.inc", void Task_170_GameIntroInit(void))
+void Task_170_GameIntroInit(void)
 {
+    GameIntro *intro = TASK_DATA(gCurTask);
+    BgAffineReg affine;
+    BgAffineReg *pAffine = &affine;
+    s16 *buf;
+    s16 i;
+
+    memset(pAffine, 0, sizeof(affine));
+    pAffine->pa = Q(1);
+    pAffine->pd = Q(1);
+    gDispCnt = 0x42;
+    sub_80A217C(intro);
+    sub_80A22E0(intro);
+
+    buf = intro->hblankBuf = EwramMalloc(DISPLAY_HEIGHT * sizeof(affine));
+    for (i = 0; i < DISPLAY_HEIGHT; i++, buf += sizeof(affine) / sizeof(u16)) {
+        CpuSet(&affine, buf, sizeof(affine) / sizeof(u16));
+    }
+
+    intro->recipTable = EwramMalloc(256 * sizeof(u32));
+    for (i = 0; i < 256; i++) {
+        intro->recipTable[i] = 0x100000 / (i * 16 + 0x400);
+    }
+
+    for (i = 0; i < 16; i++) {
+        gBgPalette[i + 0x50] = sub_80C4C0C(RGB_BLACK);
+    }
+
+    gFlags |= FLAGS_UPDATE_BACKGROUND_PALETTES;
+    gBldRegs.bldCnt = 0x1D42;
+    gBldRegs.bldAlpha = 0x1010;
+    gBldRegs.bldY = 0;
+    intro->unk14C = 0;
+
+    for (i = 0; i < 16; i++) {
+        intro->unk14E[i] = 0;
+    }
+
+    switch (intro->state) {
+        case 0:
+            gCurTask->main = Task_170_80A2A9C;
+            break;
+        case 1:
+            m4aMPlayAllStop();
+            m4aSongNumStart(MUS_INTRO);
+        case 2:
+            intro->unk13C = 10;
+            gCurTask->main = Task_170_80A2A9C;
+            break;
+        case 3:
+            intro->unk13C = 0;
+            gCurTask->main = sub_80A2700;
+            break;
+        case 4:
+            gCurTask->main = Task_170_80A2A9C;
+            break;
+        case 5:
+            intro->unk13C = 0;
+            gCurTask->main = sub_80A2700;
+            break;
+    }
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2700.inc", void sub_80A2700(void))
 {
