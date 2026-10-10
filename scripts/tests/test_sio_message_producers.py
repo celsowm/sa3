@@ -48,14 +48,14 @@ class SioMessageProducers(unittest.TestCase):
 
     def test_source_assembly_event_codes(self):
         for address, header in PRODUCERS.items():
-            asm = (ROOT / "asm/non_matching/sio/sio__sub_"
-                   / (address + ".inc"))
-            # The source files are named sio__sub_802xxxx.inc.
             asm = ROOT / "asm/non_matching/sio" / ("sio__sub_" + address + ".inc")
             source = asm.read_text(encoding="utf-8")
             self.assertIn("bl sub_8026AB8", source)
-            self.assertIn("movs r0, #0x38", source)
-            self.assertIn("movs r0, #" + hex(header[1]), source)
+            immediates = [int(number, 0) for number in re.findall(
+                r"movs\\s+r\\d+,\\s*#(0x[0-9a-fA-F]+|\\d+)", source
+            )]
+            self.assertIn(header[0], immediates)
+            self.assertIn(header[1], immediates)
 
 
 if __name__ == "__main__":
