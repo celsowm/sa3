@@ -510,8 +510,40 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024AC0.inc", s16 sub_8024AC0(u16 value)
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024B84.inc", void sub_8024B84(void))
+// Ack processor for 0x6603/0x6604. The acknowledgement bits here are
+// shifted by eight relative to sub_8024AC0. A successful 1/2 reply exits
+// without invoking the next packet-producer callback.
+NONMATCH("asm/non_matching/sio/sio__sub_8024B84.inc", s16 sub_8024B84(u16 value))
 {
+    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    s16 status;
+
+    gStageData.playerIndex = player;
+    status = sub_802610C();
+    if (status < 0) {
+        return status;
+    }
+    if (gMultiSioStatusFlags & 1) {
+        u16 type = gMultiSioRecv[0].raw[0] | ((u16)gMultiSioRecv[0].raw[1] << 8);
+        if (type == 0x6603 || type == 0x6604) {
+            u8 i;
+            u16 flags;
+            for (i = 0; i < 4; i++) {
+                u8 id = gMultiSioRecv[0].raw[15 + i];
+                gMultiSioSend.raw[15 + i] = id;
+                gUnknown_030010AC[i] = id;
+            }
+            flags = gMultiSioRecv[0].raw[12] | ((u16)gMultiSioRecv[0].raw[13] << 8);
+            if (flags & (0x100u << player)) {
+                return 1;
+            }
+            if (flags & (0x1000u << player)) {
+                return 2;
+            }
+        }
+    }
+    sub_8025C64(value);
+    return 0;
 }
 END_NONMATCH
 
