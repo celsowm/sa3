@@ -32,6 +32,10 @@ FUNCTIONS = (
     "sa2__unused_sub_808477C",
     "sa2__unused_sub_8084EE0",
     "sa2__unused_sub_808458C",
+    "sa2__unused_sub_80832FC",
+    "sa2__unused_sub_808343C",
+    "sa2__unused_sub_8084A24",
+    "sa2__unused_sub_8084C70",
     "sa2__unused_sub_80851E0",
 )
 C_HEADER = r"""
@@ -52,6 +56,9 @@ struct UNK_8085F1C_1 {
     s32 unk14, unk18, unk1C;
 };
 u16 Sqrt(uint32_t v) { return (u16)sqrt((double)v); }
+s16 gSineTable[1280];
+#define SIN(angle) gSineTable[(angle)]
+#define COS(angle) gSineTable[(angle) + 256]
 #define NONMATCH(path, decl) decl
 #define END_NONMATCH
 """
@@ -191,6 +198,23 @@ class MathFallbackNativeTests(unittest.TestCase):
         plane_fn.argtypes = [ctypes.POINTER(Matrix), ctypes.POINTER(ctypes.c_int32),
                              ctypes.POINTER(ctypes.c_int32)]
         plane_fn.restype = None
+        for name in ("sa2__sub_80832FC", "sa2__sub_808343C"):
+            fn = getattr(cls.library, name)
+            fn.argtypes = [ctypes.c_int32] * 5 + [ctypes.c_uint8]
+            fn.restype = ctypes.c_int32
+        axis_fn = cls.library.sa2__sub_8084A24
+        axis_fn.argtypes = [ctypes.POINTER(ctypes.c_int16), ctypes.c_uint16,
+                           ctypes.POINTER(ctypes.c_int16)]
+        axis_fn.restype = None
+        look_fn = cls.library.sa2__sub_8084C70
+        look_fn.argtypes = [ctypes.POINTER(Matrix), ctypes.POINTER(ctypes.c_int32),
+                            ctypes.POINTER(ctypes.c_int32), ctypes.POINTER(ctypes.c_int16)]
+        look_fn.restype = None
+        table = (ctypes.c_int16 * 1280).in_dll(cls.library, "gSineTable")
+        for angle in range(1280):
+            table[angle] = round(16384 * math.sin(2 * math.pi * angle / 1024))
+        cls.sine = tuple(table)
+
 
     @classmethod
     def tearDownClass(cls):
@@ -545,6 +569,110 @@ class MathFallbackNativeTests(unittest.TestCase):
                     self.assertEqual(list(buffer), xyz)
                 completed += 1
             self.assertGreaterEqual(completed, 2900)
+
+
+    def test_bezier_2000_cases(self):
+        rng = random.Random(0x32FC)
+        for _ in range(2000):
+            shift = rng.randrange(6, 13)
+            unit = 1 << shift
+            t = rng.randrange(unit + 1)
+            p0, p1, p2, p3 = [rng.randrange(-10000, 10001) for i in range(4)]
+            u = unit - t
+            q2 = t * t >> shift
+            q3 = q2 * t >> shift
+            u2 = u * u >> shift
+            u3 = u2 * u >> shift
+            expect = ((p0 * u3 + 3 * p1 * (u2 * t >> shift)
+                       + 3 * p2 * (u * q2 >> shift) + p3 * q3) >> shift)
+            self.assertEqual(self.library.sa2__sub_80832FC(
+                p0, p1, p2, p3, t, shift), expect)
+
+    def test_hermite_2000_cases(self):
+        rng = random.Random(0x343C)
+        for _ in range(2000):
+            shift = rng.randrange(6, 13)
+            unit = 1 << shift
+            t = rng.randrange(unit + 1)
+            a, m0, m1, b = [rng.randrange(-10000, 10001) for i in range(4)]
+            q2 = t * t >> shift
+            q3 = q2 * t >> shift
+            expect = ((a * (2 * q3 - 3 * q2 + unit)
+                       + m0 * (q3 - 2 * q2 + t)
+                       + b * (3 * q2 - 2 * q3)
+                       + m1 * (q3 - q2)) >> shift)
+            self.assertEqual(self.library.sa2__sub_808343C(
+                a, m0, m1, b, t, shift), expect)
+
+    def test_rodrigues_2000_cases_and_extra_storage(self):
+        rng = random.Random(0x4A24)
+        for _ in range(2000):
+            angle = rng.randrange(1024)
+            sine = self.sine[angle] >> 4
+            cosine = self.sine[angle + 256] >> 4
+            k = 1024 - cosine
+            a, b, c = [rng.randrange(-1024, 1025) for i in range(3)]
+            axis = (ctypes.c_int16 * 3)(a, b, c)
+            sentinel = 0x1357
+            out = (ctypes.c_int16 * 30)(*([sentinel] * 30))
+            self.library.sa2__sub_8084A24(out, angle, axis)
+            ab = ((a * b) >> 10) * k >> 10
+            ac = ((a * c) >> 10) * k >> 10
+            bc = ((b * c) >> 10) * k >> 10
+            expected = [0] * 16 + [sentinel] * 14
+            expected[1:10] = [
+                cosine + ((((a * a) >> 10) * k) >> 10),
+                ab + ((c * sine) >> 10),
+                ac - ((b * sine) >> 10),
+                ab - ((c * sine) >> 10),
+                cosine + ((((b * b) >> 10) * k) >> 10),
+                bc + ((a * sine) >> 10),
+                ac + ((b * sine) >> 10),
+                bc - ((a * sine) >> 10),
+                cosine + ((((c * c) >> 10) * k) >> 10),
+            ]
+            for i in (17, 21, 25):
+                expected[i] = 1024
+            self.assertEqual(list(out), list(map(signed16, expected)))
+
+    def test_look_at_basis_2500_cases(self):
+        rng = random.Random(0x4C70)
+
+        def unit_vector(values, fallback):
+            total = abs(sum(values))
+            if total <= 0x20:
+                return fallback
+            mag = math.isqrt(sum(x * x for x in values))
+            factor = 0x100000 // mag
+            return tuple(signed16(factor * x >> 10) for x in values)
+
+        for _ in range(2500):
+            origin = [rng.randrange(-20000, 20001) for i in range(3)]
+            delta = [rng.randrange(-1000, 1001) for i in range(3)]
+            target = [origin[i] + delta[i] for i in range(3)]
+            direction = [rng.randrange(-1024, 1025) for i in range(3)]
+            first = unit_vector(delta, (0, 0, 1024))
+            a, b, c = first
+            d, e, f = direction
+            second = unit_vector([
+                signed16((e * c - f * b) >> 10),
+                signed16((f * a - d * c) >> 10),
+                signed16((d * b - e * a) >> 10),
+            ], (1024, 0, 0))
+            x, y, z = second
+            final = [
+                signed16((b * z - c * y) >> 10),
+                signed16((c * x - a * z) >> 10),
+                signed16((a * y - b * x) >> 10),
+            ]
+            mat = Matrix()
+            in1 = (ctypes.c_int32 * 3)(*origin)
+            in2 = (ctypes.c_int32 * 3)(*target)
+            direction_buffer = (ctypes.c_int16 * 3)(*direction)
+            self.library.sa2__sub_8084C70(
+                ctypes.byref(mat), in1, in2, direction_buffer)
+            self.assertEqual(list(mat.unk2), list(second) + final + list(first))
+            self.assertEqual((mat.unk14, mat.unk18, mat.unk1C), tuple(origin))
 
 
 if __name__ == "__main__":
