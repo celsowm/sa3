@@ -26,6 +26,8 @@ typedef uint8_t bool8;
 
 union MultiSioData { u8 raw[0x18]; };
 u8 gUnknown_03001060[0x60];
+#define gUnknown_030010AC (gUnknown_03001060 + 0x4C)
+union MultiSioData gMultiSioSend;
 u8 gUnknown_03001CC0[2 + 8 * 5];
 u32 gMultiSioStatusFlags;
 union MultiSioData gMultiSioRecv[4];
@@ -98,6 +100,65 @@ int main(void) {
     sub_8026AB8(packetC);
     CHECK(memcmp(&gUnknown_03001CC0[2], packetA, 5) == 0, 21);
     CHECK(memcmp(&gUnknown_03001CC0[7], packetB, 5) == 0, 22);
+
+    // 0x6604 packet: synchronize the multiplayer slot.
+    memset(gUnknown_03001060, 0, sizeof(gUnknown_03001060));
+    memset(&gMultiSioSend, 0xFF, sizeof(gMultiSioSend));
+    memset(gMultiSioRecv, 0, sizeof(gMultiSioRecv));
+    gUnknown_03001060[7] = 2;
+    gMultiSioRecv[1].raw[0] = 0x04;
+    gMultiSioRecv[1].raw[1] = 0x66;
+    gMultiSioRecv[1].raw[3] = 1;
+    gMultiSioRecv[1].raw[16] = 3;
+    CHECK(sub_80247D4() == 0, 23);
+    CHECK(gMultiSioSend.raw[16] == 3, 24);
+    CHECK(gUnknown_030010AC[1] == 3, 25);
+
+    // A conflicting player ID is signaled, not overwritten.
+    memset(gUnknown_03001060, 0, sizeof(gUnknown_03001060));
+    memset(&gMultiSioSend, 0xFF, sizeof(gMultiSioSend));
+    memset(gMultiSioRecv, 0, sizeof(gMultiSioRecv));
+    gMultiSioSend.raw[15] = 2;
+    gUnknown_03001060[7] = 2;
+    gMultiSioRecv[1].raw[0] = 0x07;
+    gMultiSioRecv[1].raw[1] = 0x66;
+    gMultiSioRecv[1].raw[3] = 1;
+    gMultiSioRecv[1].raw[16] = 2;
+    CHECK(sub_80247D4() == 0x20, 26);
+    CHECK(gMultiSioSend.raw[16] == 0xFF, 27);
+
+    // A free ID is adopted by the send buffer and ID map.
+    gMultiSioRecv[1].raw[16] = 3;
+    CHECK(sub_80247D4() == 2, 28);
+    CHECK(gMultiSioSend.raw[16] == 3, 29);
+    CHECK(gUnknown_030010AC[1] == 3, 30);
+
+    // 0xFF marks a missing player without changing the ID map.
+    gUnknown_030010AC[1] = 6;
+    gMultiSioRecv[1].raw[16] = 0xFF;
+    CHECK(sub_80247D4() == 0, 31);
+    CHECK(gMultiSioSend.raw[16] == 0xFF, 32);
+    CHECK(gUnknown_030010AC[1] == 6, 33);
+
+    // 0x6605 disconnect clears the selected player's assignment.
+    memset(gUnknown_03001060, 0, sizeof(gUnknown_03001060));
+    memset(&gMultiSioSend, 0, sizeof(gMultiSioSend));
+    memset(gMultiSioRecv, 0, sizeof(gMultiSioRecv));
+    gUnknown_03001060[7] = 4;
+    gMultiSioRecv[2].raw[0] = 5;
+    gMultiSioRecv[2].raw[1] = 0x66;
+    gMultiSioRecv[2].raw[3] = 1;
+    gMultiSioSend.raw[16] = 2;
+    gUnknown_030010AC[1] = 2;
+    CHECK(sub_80248F4() == 0x200, 34);
+    CHECK(gMultiSioSend.raw[16] == 0xFF, 35);
+    CHECK(gUnknown_030010AC[1] == 0xFF, 36);
+
+    // Ignore packets from inactive players.
+    gUnknown_03001060[7] = 0;
+    gMultiSioSend.raw[16] = 4;
+    CHECK(sub_80248F4() == 0, 37);
+    CHECK(gMultiSioSend.raw[16] == 4, 38);
     return 0;
 }
 """
@@ -125,6 +186,8 @@ class SioReconstructionHostTests(unittest.TestCase):
         functions = [
             extract_body(source, "8025E24", "s16 sub_8025E24(u8 id)"),
             extract_body(source, "8026AB8", "void sub_8026AB8(const u8 *packet)"),
+            extract_body(source, "80247D4", "u16 sub_80247D4(void)"),
+            extract_body(source, "80248F4", "u16 sub_80248F4(void)"),
         ]
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
