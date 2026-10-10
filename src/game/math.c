@@ -381,7 +381,31 @@ NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808442C.inc",
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808458C.inc", void sa2__sub_808458C()) { }
+// Project a vector with a plane-dependent signed 64-bit quotient.
+// Unusual original ARM behavior: the numerator is the LAST product
+// (z * matrix->unk1C), not the accumulated three-axis dot product.
+// The latter, plus 0x100000, is shifted and used as the denominator.
+// Re-read the input vector for every row to preserve potential aliasing.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808458C.inc",
+         void sa2__sub_808458C(struct UNK_8085F1C_1 *matrix, s32 *vector, s32 *output))
+{
+    s32 x = vector[0];
+    s32 y = vector[1];
+    s32 z = vector[2];
+    s64 finalProduct = (s64)z * matrix->unk1C;
+    s64 divisor = ((s64)x * matrix->unk14 + (s64)y * matrix->unk18
+                    + finalProduct + 0x100000) >> 10;
+    s32 quotient = finalProduct / divisor;
+    s32 row;
+
+    for (row = 0; row < 3; row++) {
+        s64 dot = ((s64)vector[0] * matrix->unk2[row * 3])
+                  + ((s64)vector[1] * matrix->unk2[row * 3 + 1])
+                  + ((s64)vector[2] * matrix->unk2[row * 3 + 2]);
+        s32 scaledDot = dot >> 10;
+        output[row] = ((s64)scaledDot * quotient) >> 10;
+    }
+}
 END_NONMATCH
 
 // Perspective-like Q6.10 projection of a 3D vector in place.
