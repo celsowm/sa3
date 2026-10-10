@@ -11,14 +11,9 @@
 #include "constants/tilemaps.h"
 
 typedef struct {
-    /* 0x00 */ SpriteTransform tf;
-    /* 0x0A */ u16 unkA;
-} GameIntroSub; /* 0xC */
-
-typedef struct {
     /* 0x000 */ Sprite s;
     /* 0x028 */ Sprite s2;
-    /* 0x050 */ GameIntroSub sub[2];
+    /* 0x050 */ SpriteTransform transforms[2];
     /* 0x068 */ Background bg68;
     /* 0x0A8 */ Background bgA8;
     /* 0x0E8 */ Background bgE8;
@@ -184,7 +179,7 @@ void sub_80A217C(GameIntro *intro)
 
 void sub_80A22E0(GameIntro *intro)
 {
-    GameIntroSub *sub = &intro->sub[0];
+    SpriteTransform *tf = &intro->transforms[0];
     Sprite *s = &intro->s;
 
     s->tiles = OBJ_VRAM0;
@@ -200,14 +195,14 @@ void sub_80A22E0(GameIntro *intro)
     s->animSpeed = SPRITE_ANIM_SPEED(1.0);
     s->palId = 0;
     s->hitboxes[0].index = -1;
-    sub->tf.rotation = 0;
-    sub->tf.qScaleX = -224;
-    sub->tf.qScaleY = 224;
-    sub->tf.x = s->x;
-    sub->tf.y = s->y;
+    tf->rotation = 0;
+    tf->qScaleX = -224;
+    tf->qScaleY = 224;
+    tf->x = s->x;
+    tf->y = s->y;
 
     s = &intro->s2;
-    sub++;
+    tf++;
     s->tiles = OBJ_VRAM0 + 0x800;
     s->frameFlags = 0x1021;
     s->anim = 487;
@@ -221,11 +216,11 @@ void sub_80A22E0(GameIntro *intro)
     s->animSpeed = SPRITE_ANIM_SPEED(1.0);
     s->palId = 1;
     s->hitboxes[0].index = -1;
-    sub->tf.rotation = 0;
-    sub->tf.qScaleX = -256;
-    sub->tf.qScaleY = 256;
-    sub->tf.x = s->x;
-    sub->tf.y = s->y;
+    tf->rotation = 0;
+    tf->qScaleX = -256;
+    tf->qScaleY = 256;
+    tf->x = s->x;
+    tf->y = s->y;
 }
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A23A4.inc", void sub_80A23A4(void))
@@ -443,26 +438,26 @@ NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2978.inc", void su
 
     if (arg0 < 256) {
         s32 off = ((arg0 + 32) >> 4) - 4;
-        intro->sub[0].tf.y = intro->s.y = intro->unk136 - off;
+        intro->transforms[0].y = intro->s.y = intro->unk136 - off;
         off = (arg0 >> 4) - 4;
-        intro->sub[1].tf.y = intro->s2.y = intro->unk136 - off;
+        intro->transforms[1].y = intro->s2.y = intro->unk136 - off;
         half = arg0 >> 1;
-        intro->sub[0].tf.x = intro->s.x = arg0 + (half + 130);
+        intro->transforms[0].x = intro->s.x = arg0 + (half + 130);
 
         sum = half + arg0;
         t = 224 - sum;
         if (t > 0) {
-            intro->sub[0].tf.qScaleX = -t;
-            intro->sub[0].tf.qScaleY = t;
+            intro->transforms[0].qScaleX = -t;
+            intro->transforms[0].qScaleY = t;
         }
 
         off = (arg0 >> 2) - 100;
-        intro->sub[1].tf.x = intro->s2.x = arg0 * 2 - off;
+        intro->transforms[1].x = intro->s2.x = arg0 * 2 - off;
 
         t = 256 - sum;
         if (t > 0) {
-            intro->sub[1].tf.qScaleX = -t;
-            intro->sub[1].tf.qScaleY = t;
+            intro->transforms[1].qScaleX = -t;
+            intro->transforms[1].qScaleY = t;
         }
     }
 }
@@ -635,12 +630,12 @@ NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2D80.inc", void su
     Sprite *s = &intro->s;
 
     UpdateSpriteAnimation(s);
-    TransformSprite(s, &intro->sub[0].tf);
+    TransformSprite(s, &intro->transforms[0]);
     DisplaySprite(s);
 
     s = &intro->s2;
     UpdateSpriteAnimation(s);
-    TransformSprite(s, &intro->sub[1].tf);
+    TransformSprite(s, &intro->transforms[1]);
     DisplaySprite(s);
 }
 END_NONMATCH
