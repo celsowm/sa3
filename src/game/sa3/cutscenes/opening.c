@@ -79,6 +79,16 @@ void Task_174_80A3444(void);
 void TaskDestructor_174_80A3E38(struct Task *t);
 void sub_80A3228(Intro174 *strc);
 void sub_80A3354(Intro174 *strc);
+void Task_174_80A3564(void);
+void Task_174_80A3664(void);
+void Task_174_80A3710(void);
+void Task_174_80A37B8(void);
+void Task_174_80A3844(void);
+bool32 sub_80A3E3C(Intro174 *strc);
+bool32 sub_80A3E60(Intro174 *strc);
+void sub_80A3E90(Intro174 *strc);
+void sub_80A3EAC(Intro174 *strc);
+void sub_80A3EDC(Intro174 *strc);
 void Task_A0_80A2FF4(void);
 void Task_A0_80A3074(void);
 void TaskDestructor_A0_80A3E34(struct Task *t);
@@ -984,15 +994,98 @@ void sub_80A3354(Intro174 *strc)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_174_80A3444.inc", void Task_174_80A3444(void))
+void Task_174_80A3444(void)
 {
-}
-END_NONMATCH
+    Intro174 *strc = TASK_DATA(gCurTask);
+    u8 count = 0;
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_174_80A3564.inc", void Task_174_80A3564(void))
-{
+    if (strc->unk6 == 0) {
+        gBldRegs.bldCnt = 0xC2;
+        gDispCnt |= (DISPCNT_WIN0_ON | DISPCNT_WIN1_ON);
+        gWinRegs[WINREG_WIN0H] = 0xFF;
+        gWinRegs[WINREG_WIN1H] = 0xFF;
+        gWinRegs[WINREG_WIN1V] = 0xFF;
+        gWinRegs[WINREG_WININ] = 0x1137;
+        gWinRegs[WINREG_WINOUT] = 0;
+        gBldRegs.bldY = 16;
+        strc->unk4 = 0x1000;
+        strc->unk6 = 1;
+        sub_80A3228(strc);
+        gDispCnt &= ~DISPCNT_BG0_ON;
+    }
+
+    if (strc->unk10 >= Q(48)) {
+        strc->unk10 -= Q(1);
+        if (strc->unk10 <= Q(48)) {
+            strc->unk10 = Q(48);
+            count = 1;
+        }
+    }
+
+    if (strc->unk8 <= Q(64)) {
+        strc->unk8 += Q(2);
+        if (strc->unk8 >= Q(64)) {
+            strc->unk8 = Q(64);
+            count++;
+        }
+    }
+
+    if (gBldRegs.bldY != 0) {
+        gBldRegs.bldY = strc->unk4 >> 8;
+        strc->unk4 -= Q(1);
+    } else {
+        count++;
+    }
+
+    gWinRegs[WINREG_WIN0V] = (I(strc->unk10) << 8) + I(strc->unk10) + I(strc->unk8);
+
+    if (count == 3) {
+        gBldRegs.bldCnt = 0xF0;
+        gWinRegs[WINREG_WININ] = 0x3017;
+        gBldRegs.bldAlpha = 0x1F;
+        gBldRegs.bldY = 0;
+        strc->unk6 = 0;
+        strc->unk4 = 0;
+        gCurTask->main = Task_174_80A3564;
+    }
 }
-END_NONMATCH
+
+void Task_174_80A3564(void)
+{
+    Intro174 *strc = TASK_DATA(gCurTask);
+
+    sub_80A3E3C(strc);
+
+    if (gBldRegs.bldY < 16) {
+        strc->unk4 += 0x80;
+        gBldRegs.bldY = strc->unk4 >> 8;
+    } else {
+        gBgPalette[0] = sub_80C4C0C(RGB_BLACK);
+        gFlags |= FLAGS_UPDATE_BACKGROUND_PALETTES;
+    }
+
+    if (++strc->unk2 > 150) {
+        strc->unk4 = 0x1000;
+        strc->unk2 = 0;
+        gBldRegs.bldCnt = 0xD0;
+        gWinRegs[WINREG_WININ] = 0x3017;
+        gBldRegs.bldAlpha = 0x1F;
+        gBldRegs.bldY = 16;
+        strc->unk6 = 0;
+        strc->unk4 = 0x1000;
+        gBgPalette[0] = sub_80C4C0C(RGB_BLACK);
+        gFlags |= FLAGS_UPDATE_BACKGROUND_PALETTES;
+        gCurTask->main = Task_174_80A3664;
+    } else {
+        gWinRegs[WINREG_WIN0V] = (I(strc->unk10) << 8) + I(strc->unk10) + I(strc->unk8);
+        gBgScrollRegs[2][0] = I(strc->unk14);
+        gBgScrollRegs[2][1] = I(strc->unk18);
+
+        if (strc->unk0 == 0 && (gPressedKeys & START_BUTTON)) {
+            sub_808ADF0(2);
+        }
+    }
+}
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_174_80A3664.inc", void Task_174_80A3664(void))
 {
