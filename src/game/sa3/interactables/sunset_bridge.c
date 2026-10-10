@@ -244,10 +244,12 @@ NONMATCH("asm/non_matching/game/interactables/Sunset_Bridge__sub_8045060.inc", v
 {
     s32 numSegments = bridge->numSegments;
     u8 i;
-    s16 r1 = 0;
+    s32 r1 = 0;
 
-    for (i = 0; i < numSegments; i++, r1 += bridge->unk24) {
-        bridge->unk28[i] = (SIN(r1) * bridge->unk22) >> 14;
+    for (i = 0; i < numSegments; i++) {
+        s16 t = r1;
+        bridge->unk28[i] = (SIN(t) * bridge->unk22) >> 14;
+        r1 = t + bridge->unk24;
     }
     // _080450AE
 
