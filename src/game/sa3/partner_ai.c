@@ -1477,26 +1477,17 @@ NONMATCH("asm/non_matching/game/cx__sub_80B8FB8.inc", bool32 sub_80B8FB8(Struc_3
     u32 var_r3;
     s32 anim0 = p->charFlags.anim0;
 
-    switch (anim0) {
-        case 0: {
-            var_r3 = 0x20;
-        } break;
-
-        case 1: {
-            var_r3 = 0x20;
-        } break;
-
-        case 2: {
-            var_r3 = 0x1000;
-        } break;
-
-        case 6: {
+    if (anim0 == 1) {
+        var_r3 = 0x20;
+    } else if (anim0 == 0) {
+        var_r3 = 0x20;
+    } else if (anim0 == 2) {
+        var_r3 = 0x1000;
+    } else {
+        var_r3 = 0x20;
+        if (anim0 == 6) {
             var_r3 = 0x10;
-        } break;
-
-        default: {
-            var_r3 = 0x20;
-        } break;
+        }
     }
 
     temp_r0_2 = PseudoRandom32();

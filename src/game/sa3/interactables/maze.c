@@ -86,11 +86,19 @@ NONMATCH("asm/non_matching/game/interactables/maze__CreateEntity_MazeCorner.inc"
     maze->base.meX = me->x;
     maze->base.id = id;
 
-    i = GetFirstSetBitIndex(me->d.uData[4], 4);
+    for (i = 0; i < 4; i++) {
+        if (GetBit(me->d.uData[4], i)) {
+            break;
+        }
+    }
 
     maze->unk3C = i;
 
-    i = GetFirstSetBitIndex(me->d.uData[4], 4);
+    for (i = 0; i < 4; i++) {
+        if (GetBit(me->d.uData[4], i + 4)) {
+            break;
+        }
+    }
 
     maze->unk3D = i;
     maze->unk3E = 0;
