@@ -1644,59 +1644,266 @@ void sub_80A3FDC(Intro94B *strc)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_94_B_80A40A0.inc", void Task_94_B_80A40A0(void))
+void Task_94_B_80A40A0(void)
 {
-}
-END_NONMATCH
+    Intro94B *strc = TASK_DATA(gCurTask);
+    u8 count = 0;
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_94_B_80A41AC.inc", void Task_94_B_80A41AC(void))
-{
-}
-END_NONMATCH
+    if (strc->unk8 == 0) {
+        gBldRegs.bldCnt = 0x3FFF;
+        gDispCnt |= (DISPCNT_WIN0_ON | DISPCNT_WIN1_ON);
+        gWinRegs[WINREG_WIN0H] = 0xFF;
+        gWinRegs[WINREG_WIN1H] = 0xFF;
+        gWinRegs[WINREG_WIN1V] = 0xFF;
+        gWinRegs[WINREG_WININ] = 0x1011;
+        gWinRegs[WINREG_WINOUT] = 0;
+        gBldRegs.bldY = 16;
+        strc->unk6 = 0x1000;
+        strc->unk8 = 1;
+        CreateSomeTask_809BF3C(&strc->unk2, &strc->unk1, &strc->unk18, &strc->unk1C, strc->tiles28);
+    }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_94_B_80A4228.inc", void Task_94_B_80A4228(void))
-{
+    if (strc->unk14 >= Q(64)) {
+        strc->unk14 -= Q(1);
+        if (strc->unk14 <= Q(64)) {
+            strc->unk14 = Q(64);
+            count = 1;
+        }
+    }
+
+    if (strc->unkC <= Q(32)) {
+        strc->unkC += Q(2);
+        if (strc->unkC >= Q(32)) {
+            strc->unkC = Q(32);
+            count++;
+        }
+    }
+
+    gWinRegs[WINREG_WIN0V] = (I(strc->unk14) << 8) + I(strc->unk14) + I(strc->unkC);
+
+    if (count == 2) {
+        gBldRegs.bldCnt = 0x3FFF;
+        gWinRegs[WINREG_WININ] = 0x1011;
+        gBldRegs.bldAlpha = 0;
+        gBldRegs.bldY = 16;
+        strc->unk8 = 0;
+        gCurTask->main = Task_94_B_80A41AC;
+    }
 }
-END_NONMATCH
+
+void Task_94_B_80A41AC(void)
+{
+    Intro94B *strc = TASK_DATA(gCurTask);
+
+    sub_80A4598(strc);
+    gWinRegs[WINREG_WIN0V] = (I(strc->unk14) << 8) + I(strc->unk14) + I(strc->unkC);
+    sub_80A43E0(strc);
+
+    if (strc->unk4 > 44) {
+        strc->unk4 = 0;
+        gCurTask->main = Task_94_B_80A4228;
+    } else if (gPressedKeys & START_BUTTON) {
+        strc->unk18 = Q(310);
+        strc->unk1 = 29;
+        sub_808ADF0(2);
+    } else {
+        strc->unk4++;
+    }
+}
+
+void Task_94_B_80A4228(void)
+{
+    Intro94B *strc = TASK_DATA(gCurTask);
+
+    sub_80A4598(strc);
+
+    if (sub_80A453C(strc) == TRUE) {
+        strc->unk1 = 27;
+    }
+
+    sub_80A4440(strc);
+
+    if (strc->unk4 > 119) {
+        strc->unk4 = 0;
+        gCurTask->main = Task_94_B_80A429C;
+    } else if (gPressedKeys & START_BUTTON) {
+        strc->unk18 = Q(310);
+        strc->unk1 = 29;
+        sub_808ADF0(2);
+    } else {
+        strc->unk4++;
+    }
+}
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_94_B_80A429C.inc", void Task_94_B_80A429C(void))
 {
+    Intro94B *strc = TASK_DATA(gCurTask);
+
+    strc->unk18 = Q(310);
+    strc->unk1 = 29;
+
+    if (++strc->unk2 > 4) {
+        strc->unk4 = 0;
+        gBldRegs.bldCnt = 0xA0;
+        gWinRegs[WINREG_WININ] = 0x3000;
+        gWinRegs[WINREG_WINOUT] = 0;
+        gBldRegs.bldY = 16;
+        gBgPalette[0] = sub_80C4C0C(RGB_BLACK);
+        gFlags |= FLAGS_UPDATE_BACKGROUND_PALETTES;
+        gCurTask->main = Task_94_B_80A4384;
+    } else {
+        strc->unk1 = 25;
+        strc->unk3 = (strc->unk3 > 0) ? -1 : 1;
+
+        if (strc->unk3 > 0) {
+            strc->unk18 = -Q(120);
+            strc->unk20 = Q(300);
+        } else {
+            strc->unk18 = Q(360);
+            strc->unk20 = -Q(60);
+        }
+
+        {
+            Sprite *s = &strc->s;
+            s->anim = gUnknown_080D99A8[strc->unk2].anim;
+            s->variant = gUnknown_080D99A8[strc->unk2].variant;
+            s->prevVariant = -1;
+            UpdateSpriteAnimation(s);
+        }
+        gCurTask->main = Task_94_B_80A41AC;
+    }
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_94_B_80A4384.inc", void Task_94_B_80A4384(void))
+void Task_94_B_80A4384(void)
 {
+    Intro94B *strc = TASK_DATA(gCurTask);
+    u32 *pltt = (u32 *)BG_PLTT;
+
+    gBldRegs.bldCnt = 0xA0;
+    gWinRegs[WINREG_WININ] = 0x3000;
+    gWinRegs[WINREG_WINOUT] = 0;
+    gBldRegs.bldY = 16;
+    *pltt = 0;
+
+    if (strc->unk4 > 2) {
+        CreateIntroEggmanCutscene(0);
+        TaskDestroy(gCurTask);
+    } else {
+        strc->unk4++;
+    }
 }
-END_NONMATCH
 
 void TaskDestructor_94_B_80A43DC(struct Task *t)
 {
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A43E0.inc", bool32 sub_80A43E0(Intro94B *strc))
+bool32 sub_80A43E0(Intro94B *strc)
 {
-}
-END_NONMATCH
+    if (strc->unk4 > 14) {
+        if (strc->unk3 > 0) {
+            if (strc->unk18 <= Q(150)) {
+                strc->unk18 += (strc->unk0 << 9);
+                if (strc->unk18 >= Q(150)) {
+                    strc->unk18 = Q(150);
+                    return TRUE;
+                }
+            }
+        } else if (strc->unk18 >= Q(90)) {
+            strc->unk18 -= (strc->unk0 << 9);
+            if (strc->unk18 <= Q(90)) {
+                strc->unk18 = Q(90);
+                return TRUE;
+            }
+        }
+    }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A4440.inc", bool32 sub_80A4440(Intro94B *strc))
-{
+    return FALSE;
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A4494.inc", bool32 sub_80A4494(Intro94B *strc))
+bool32 sub_80A4440(Intro94B *strc)
 {
-}
-END_NONMATCH
+    if (strc->unk3 > 0) {
+        if (strc->unk18 <= Q(240)) {
+            strc->unk18 += (strc->unk0 << 5);
+            if (strc->unk18 >= Q(240)) {
+                strc->unk18 = Q(240);
+                return TRUE;
+            }
+        }
+    } else if (strc->unk18 >= Q(1)) {
+        strc->unk18 -= (strc->unk0 << 5);
+        if (strc->unk18 <= Q(1)) {
+            strc->unk18 = Q(1);
+            return TRUE;
+        }
+    }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A44E8.inc", bool32 sub_80A44E8(Intro94B *strc))
-{
+    return FALSE;
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A453C.inc", bool32 sub_80A453C(Intro94B *strc))
+bool32 sub_80A4494(Intro94B *strc)
 {
+    if (strc->unk3 > 0) {
+        if (strc->unk18 <= Q(310)) {
+            strc->unk18 += (strc->unk0 << 10);
+            if (strc->unk18 >= Q(310)) {
+                strc->unk18 = Q(310);
+                return TRUE;
+            }
+        }
+    } else if (strc->unk18 >= -Q(70)) {
+        strc->unk18 -= (strc->unk0 << 10);
+        if (strc->unk18 <= -Q(70)) {
+            strc->unk18 = -Q(70);
+            return TRUE;
+        }
+    }
+
+    return FALSE;
 }
-END_NONMATCH
+
+bool32 sub_80A44E8(Intro94B *strc)
+{
+    if (strc->unk3 > 0) {
+        if (strc->unk20 >= -Q(200)) {
+            strc->unk20 -= (strc->unk0 << 11);
+            if (strc->unk20 <= -Q(200)) {
+                strc->unk20 = -Q(200);
+                return TRUE;
+            }
+        }
+    } else if (strc->unk20 <= Q(440)) {
+        strc->unk20 += (strc->unk0 << 11);
+        if (strc->unk20 >= Q(440)) {
+            strc->unk20 = Q(440);
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+bool32 sub_80A453C(Intro94B *strc)
+{
+    if (strc->unk3 > 0) {
+        if (strc->unk20 >= Q(10)) {
+            strc->unk20 -= (strc->unk0 << 11);
+            if (strc->unk20 <= Q(10)) {
+                strc->unk20 = Q(10);
+                return TRUE;
+            }
+        }
+    } else if (strc->unk20 <= Q(230)) {
+        strc->unk20 += (strc->unk0 << 11);
+        if (strc->unk20 >= Q(230)) {
+            strc->unk20 = Q(230);
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
 
 void sub_80A4598(Intro94B *strc)
 {
