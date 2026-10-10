@@ -225,3 +225,32 @@ must not be advanced based only on this metadata analysis.
 pointer-backed USA streams, build a verified USA↔Europe cross-reference map
 only with independently established correspondence, and obtain a local
 European source of reference bytes before declaring any Europe matching win.
+
+## 10. European reference ROM now verified — 2026-10-10
+
+The user supplied the **exact European rev-0 ROM** required for the original target:
+
+- `B3SP` / 16 MiB / GBA header valid.
+- SHA-1 `685af3a2dc0f1b3f8922e73ec42c1dc92e210e39` matches `sa3.sha1`.
+- SHA-256 `d9c96aad4b3795d3e667637fcf9399636ae355fcf12677d2883107ea273dea15`.
+- Reference bytes are privately available for analysis; **never commit or upload ROM data**.
+
+Cross-region mapping completed: 28 structurally valid aligned LZ10 candidates
+per ROM, 12 with direct pointer-shaped sites per ROM, and 22 EU streams
+with identical decoded SHA-256 in USA. The 12 directly referenced
+correspondences all have EU stream address = USA stream address + `0x390`,
+but this is not a safe general relocation rule. A companion reproducible
+tool and three offline tests are committed:
+
+- [EUROPE_ROM_BASELINE.md](EUROPE_ROM_BASELINE.md)
+- `scripts/rom_region_compare.py`
+- `scripts/tests/test_rom_region_compare.py`
+
+**M0 remains BLOCKED solely at the build/hash verification gate** in this
+sandbox: compatible agbcc and ARM binutils are not installed, and direct
+network access from the build container is restricted. The input ROM itself
+is now **verified and available**, so it is no longer the blocker. No
+claim of successful compilation, 100% match, increased matching percentage,
+or emulator runtime validation has been made. Next work: provision exact
+toolchain, reproduce `make compare`, measure the current map, then start
+verified leaf-function matching. 
