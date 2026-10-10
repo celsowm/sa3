@@ -3,16 +3,16 @@
 #include "flags.h"
 #include "malloc_ewram.h"
 #include "lib/m4a/m4a.h"
+#include "code_0_1.h"
+#include "game/save.h"
+#include "game/special_stage.h" // sub_808ADF0
 #include "game/stage.h" // gStageData
 #include "constants/songs.h"
 #include "constants/tilemaps.h"
 
 typedef struct {
-    /* 0x00 */ u16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ s16 unk8;
+    /* 0x00 */ SpriteTransform tf;
+    /* 0x0A */ u16 unkA;
 } GameIntroSub; /* 0xC */
 
 typedef struct {
@@ -55,6 +55,9 @@ void sub_80A2D80(void);
 void Task_80A2D34(void);
 void Task_170_80A2B54(void);
 void Task_170_80A2C60(void);
+void sub_80A2E38(u8 arg0);
+void sub_80A3F18(void);
+void CreateIntroEggmanCutscene(u8 arg0);
 s16 sub_80A2DD8(void);
 
 extern ColorRaw sub_80C4C0C(ColorRaw color);
@@ -197,11 +200,11 @@ void sub_80A22E0(GameIntro *intro)
     s->animSpeed = SPRITE_ANIM_SPEED(1.0);
     s->palId = 0;
     s->hitboxes[0].index = -1;
-    sub->unk0 = 0;
-    sub->unk2 = -224;
-    sub->unk4 = 224;
-    sub->unk6 = s->x;
-    sub->unk8 = s->y;
+    sub->tf.rotation = 0;
+    sub->tf.qScaleX = -224;
+    sub->tf.qScaleY = 224;
+    sub->tf.x = s->x;
+    sub->tf.y = s->y;
 
     s = &intro->s2;
     sub++;
@@ -218,11 +221,11 @@ void sub_80A22E0(GameIntro *intro)
     s->animSpeed = SPRITE_ANIM_SPEED(1.0);
     s->palId = 1;
     s->hitboxes[0].index = -1;
-    sub->unk0 = 0;
-    sub->unk2 = -256;
-    sub->unk4 = 256;
-    sub->unk6 = s->x;
-    sub->unk8 = s->y;
+    sub->tf.rotation = 0;
+    sub->tf.qScaleX = -256;
+    sub->tf.qScaleY = 256;
+    sub->tf.x = s->x;
+    sub->tf.y = s->y;
 }
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A23A4.inc", void sub_80A23A4(void))
@@ -440,26 +443,26 @@ NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2978.inc", void su
 
     if (arg0 < 256) {
         s32 off = ((arg0 + 32) >> 4) - 4;
-        intro->sub[0].unk8 = intro->s.y = intro->unk136 - off;
+        intro->sub[0].tf.y = intro->s.y = intro->unk136 - off;
         off = (arg0 >> 4) - 4;
-        intro->sub[1].unk8 = intro->s2.y = intro->unk136 - off;
+        intro->sub[1].tf.y = intro->s2.y = intro->unk136 - off;
         half = arg0 >> 1;
-        intro->sub[0].unk6 = intro->s.x = arg0 + (half + 130);
+        intro->sub[0].tf.x = intro->s.x = arg0 + (half + 130);
 
         sum = half + arg0;
         t = 224 - sum;
         if (t > 0) {
-            intro->sub[0].unk2 = -t;
-            intro->sub[0].unk4 = t;
+            intro->sub[0].tf.qScaleX = -t;
+            intro->sub[0].tf.qScaleY = t;
         }
 
         off = (arg0 >> 2) - 100;
-        intro->sub[1].unk6 = intro->s2.x = arg0 * 2 - off;
+        intro->sub[1].tf.x = intro->s2.x = arg0 * 2 - off;
 
         t = 256 - sum;
         if (t > 0) {
-            intro->sub[1].unk2 = -t;
-            intro->sub[1].unk4 = t;
+            intro->sub[1].tf.qScaleX = -t;
+            intro->sub[1].tf.qScaleY = t;
         }
     }
 }
@@ -564,30 +567,99 @@ void Task_170_80A2B54(void)
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_170_80A2C60.inc", void Task_170_80A2C60(void))
 {
+    GameIntro *intro = TASK_DATA(gCurTask);
+    s32 res;
+
+    intro->unk13C--;
+
+    res = sub_80A2DD8();
+    if (res == 0) {
+        if (intro->unk13C > 0) {
+            sub_80A2D80();
+            sub_80A23A4();
+        } else {
+            gBldRegs.bldCnt = 0xFF;
+            gBldRegs.bldAlpha = res;
+            gBldRegs.bldY = 16;
+
+            switch (intro->state) {
+                case 0:
+                    sub_80A2E38(1);
+                    break;
+                case 1:
+                    sub_80A2E38(0);
+                    break;
+                case 2:
+                    sub_80A3F18();
+                    break;
+                case 4:
+                    CreateIntroEggmanCutscene(1);
+                    break;
+            }
+
+            TaskDestroy(gCurTask);
+        }
+    }
 }
 END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__TaskDestructor_GameIntro.inc", void TaskDestructor_GameIntro(struct Task *t))
 {
+    GameIntro *intro = TASK_DATA(t);
+    EwramFree(intro->hblankBuf);
+    EwramFree(intro->recipTable);
+    gFlags &= ~FLAGS_EXECUTE_HBLANK_COPY;
 }
 END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_80A2D34.inc", void Task_80A2D34(void))
 {
+    GameIntro *intro = TASK_DATA(gCurTask);
+
+    switch (intro->state) {
+        case 3:
+            sub_808ADF0(2);
+            break;
+        case 5:
+            LOADED_SAVE->unk34 |= 1;
+            sub_8001E58();
+            WarpToMap(2, 0);
+            break;
+    }
 }
 END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2D80.inc", void sub_80A2D80(void))
 {
+    GameIntro *intro = TASK_DATA(gCurTask);
+    Sprite *s = &intro->s;
+
+    UpdateSpriteAnimation(s);
+    TransformSprite(s, &intro->sub[0].tf);
+    DisplaySprite(s);
+
+    s = &intro->s2;
+    UpdateSpriteAnimation(s);
+    TransformSprite(s, &intro->sub[1].tf);
+    DisplaySprite(s);
 }
 END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2DD8.inc", s16 sub_80A2DD8(void))
 {
+    GameIntro *intro = TASK_DATA(gCurTask);
+
+    if (gStageData.unk7 != 0 && intro->state != 0 && intro->state <= 3 && (gPressedKeys & START_BUTTON)) {
+        gFlags &= ~FLAGS_EXECUTE_HBLANK_COPY;
+        sub_808ADF0(2);
+        return TRUE;
+    }
+
+    return FALSE;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2E38.inc", void sub_80A2E38(void))
+NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A2E38.inc", void sub_80A2E38(u8 arg0))
 {
 }
 END_NONMATCH
@@ -607,7 +679,7 @@ NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_A0_80A3074.inc", voi
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__CreateIntroEggmanCutscene.inc", void CreateIntroEggmanCutscene(void))
+NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__CreateIntroEggmanCutscene.inc", void CreateIntroEggmanCutscene(u8 arg0))
 {
 }
 END_NONMATCH
