@@ -539,16 +539,14 @@ void sub_80870E4(u16 value)
     }
 }
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087140.inc", void sub_8087140(u16 value, u8 start, u8 end))
+void sub_8087140(u16 value, u8 start, u8 end)
 {
-    u16 *offsets = &((u16 *)gBgOffsetsHBlankPrimary)[start];
+    u16 *offsets = gBgOffsetsHBlankPrimary;
 
-    for (; start < end; start++) {
-        *offsets = value;
-        offsets++;
+    for (offsets += start; start < end; start++) {
+        *offsets++ = value;
     }
 }
-END_NONMATCH
 
 void sub_8087174(ExtraBoss *boss)
 {
