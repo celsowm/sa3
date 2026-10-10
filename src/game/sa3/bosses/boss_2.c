@@ -983,7 +983,7 @@ NONMATCH("asm/non_matching/game/bosses/boss_2__sub_806B788.inc", void sub_806B78
         boss->unk2E++;
         points[0] = gCamera.x + x;
         points[1] = gCamera.maxY - 50;
-        points[2] = gCamera.x;
+        points[2] = gCamera.x + x;
         points[3] = gCamera.maxY - 27;
         sub_8078E34(points, EnablePlayerMovement);
     }
