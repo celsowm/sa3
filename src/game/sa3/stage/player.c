@@ -14549,7 +14549,7 @@ const s16 gUnknown_080CE6B8[NUM_CHARACTERS][2] = {
 };
 
 // (96.29%) https://decomp.me/scratch/Hbq4u
-NONMATCH("asm/non_matching/game/stage/player__sub_8015C90.inc", void sub_8015C90(Player *p, u32 param2))
+void sub_8015C90(Player *p, u32 param2)
 {
     s16 temp_r0;
     s16 temp_r0_2;
@@ -14557,6 +14557,7 @@ NONMATCH("asm/non_matching/game/stage/player__sub_8015C90.inc", void sub_8015C90
     s32 temp_r1_2;
     u16 var_r0;
     u8 *var_r5;
+    s32 cMin, kMin; // TODO: Fake-match!
 
     temp_r1 = &p->framesInvulnerable;
     p->framesInvulnerable = 4;
@@ -14581,17 +14582,15 @@ NONMATCH("asm/non_matching/game/stage/player__sub_8015C90.inc", void sub_8015C90
     if (p->charFlags.character == KNUCKLES) {
         temp_r0 = p->charFlags.anim0;
         if ((temp_r0 < 0xF3)) {
-            if (temp_r0 >= 0xF0) {
-                p->charFlags.anim0 = 0x18;
-            } else {
-                if (p->charFlags.anim0 == 0x85) {
-                    p->charFlags.anim0 = 0x18;
-                }
+            kMin = 0xF0;
+            if (temp_r0 < kMin) {
+                goto block_17;
             }
+            p->charFlags.anim0 = 0x18;
         } else {
             goto block_17;
         }
-    } else if ((p->charFlags.character != CREAM) || ((p->charFlags.anim0 > 0xC4)) || (p->charFlags.anim0 < 0xC1)) {
+    } else if (cMin = 0xC1, (p->charFlags.character != CREAM) || ((p->charFlags.anim0 > 0xC4)) || (p->charFlags.anim0 < cMin)) {
     block_17:
         if (p->charFlags.anim0 == 0x85) {
             p->charFlags.anim0 = 0x18;
@@ -14601,7 +14600,6 @@ NONMATCH("asm/non_matching/game/stage/player__sub_8015C90.inc", void sub_8015C90
     }
     SetPlayerCallback(p, Player_800DAF4);
 }
-END_NONMATCH
 
 s32 Player_8015D7C(Player *p)
 {
