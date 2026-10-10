@@ -411,7 +411,7 @@ void Task_Boss_8073B5C(void)
 }
 
 // (85.35%) https://decomp.me/scratch/K1gBj
-NONMATCH("asm/non_matching/game/bosses/boss_6__Task_Boss_8073BE0.inc", void Task_Boss_8073BE0(void))
+void Task_Boss_8073BE0(void)
 {
     EggPinball *boss = TASK_DATA(gCurTask);
     Sprite *s = &boss->sprEggman;
@@ -431,9 +431,14 @@ NONMATCH("asm/non_matching/game/bosses/boss_6__Task_Boss_8073BE0.inc", void Task
 
     if (boss->unk46 != 0) {
         boss->unk46 -= 1;
+    } else if (boss->unk48 != 0) {
+        boss->unk48 -= 1;
+    } else {
+        goto create;
     }
 
-    if (--boss->unk48 == 0) {
+    if (boss->unk48 == 0) {
+    create:
         CreateEggPinballBall(boss);
         boss->unk46 = 0x14U;
         boss->unk48 = gUnknown_080D58E0[boss->unk3D];
@@ -461,7 +466,6 @@ NONMATCH("asm/non_matching/game/bosses/boss_6__Task_Boss_8073BE0.inc", void Task
     sub_8074CF0(boss);
     sub_8074148(boss);
 }
-END_NONMATCH
 
 void Task_Boss_8073CE4(void)
 {
