@@ -56,7 +56,7 @@ extern const TileInfo2 gUnknown_080D736C[2];
 extern const TileInfo2 gUnknown_080D7364;
 extern ColorRaw gUnknown_080D737C[16];
 extern ColorRaw gUnknown_080D739C[16];
-extern const ButtonConfigPacked gUnknown_080D73BC;
+extern const u8 gUnknown_080D73BC[3];
 extern u16 gUnknown_080D73C0[3];
 extern const TileInfo2 gUnknown_080D73C8;
 
@@ -65,11 +65,14 @@ NONMATCH("asm/non_matching/game/sa3/options/opt__Options_ButtonConfig.inc",
          void Options_ButtonConfig(s16 highlitButton, u8 *vramBase, s16 *arg2, u8 *arg3))
 {
     u16 sp4[3] = { LOADED_SAVE->buttonConfig.jump, LOADED_SAVE->buttonConfig.attack, LOADED_SAVE->buttonConfig.trick };
-    u8 spC[3] = { 0, 1, 2 };
+    u8 spC[3];
     u8 var_r6;
-    struct Task *t
-        = TaskCreate(Task_Options_ButtonConfig_Init, sizeof(OptionsButtonConfig), 0x100U, 0U, TaskDestructor_Options_ButtonConfig);
-    OptionsButtonConfig *config = TASK_DATA(t);
+    struct Task *t;
+    OptionsButtonConfig *config;
+
+    memcpy(spC, gUnknown_080D73BC, sizeof(spC));
+    t = TaskCreate(Task_Options_ButtonConfig_Init, sizeof(OptionsButtonConfig), 0x100U, 0U, TaskDestructor_Options_ButtonConfig);
+    config = TASK_DATA(t);
 
     config->highlitButton = highlitButton;
     config->initArg3 = arg3;
@@ -99,8 +102,6 @@ NONMATCH("asm/non_matching/game/sa3/options/opt__Options_ButtonConfig.inc",
     config->unk20 = config->unkC[2][0];
 
     for (var_r6 = 0; var_r6 < ARRAY_COUNT(config->unk24[0]); var_r6++) {
-        u8 argh[8];
-
         config->unk24[0][var_r6].x = 0x70 - gBgScrollRegs[1][0];
         config->unk24[0][var_r6].y = 0x2D - gBgScrollRegs[1][1];
         config->unk24[1][var_r6].x = config->unk24[0][var_r6].x - 0x46;
