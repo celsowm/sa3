@@ -9,7 +9,7 @@ parameters, packet recognition, queue copies and return values:
 | Function | Recovered Thumb behavior |
 |---|---|
 | `sub_8024A4C(u16)` | Propagate negative link error; if connected, copy four receiver identity bytes into outgoing slots on `0x6603`/`0x6604`; always call `sub_8025BEC(value & 0xFF)` on nonnegative status; return 0 |
-| `sub_8024AC0(u16)` | Update player ID from SIOCNT bits 6–7; on `0x6603`, `0x6604` or `0x6606`, update four cached IDs; acknowledge via `0x10 << player` only when `1 << player` is clear (return 2 without sending); otherwise dispatch `sub_8025C20` and return 0 or 1 |
+| `sub_8024AC0(u16)` | Update player ID from SIOCNT bits 4–5; on `0x6603`, `0x6604` or `0x6606`, update four cached IDs; acknowledge via `0x10 << player` only when `1 << player` is clear (return 2 without sending); otherwise dispatch `sub_8025C20` and return 0 or 1 |
 | `sub_8024B84(u16)` | Recognize `0x6603`/`0x6604`, copy four IDs to both outgoing slots and local cache; reply 1 on `0x100 << player`, otherwise 2 on `0x1000 << player`; otherwise send through `sub_8025C64`, returning 0 |
 | `sub_8024F1C(u8)` | Remap hardware IDs 0→2 and 1→3, mark that outgoing slot `0xFF`, reset the halfword acknowledgement mask at offset `0x0C`, OR successive masks from `sub_80247D4` and `sub_80248F4`, then invoke `sub_8025C8C`; return 1 or the original negative link status |
 | `sub_8025024(u16)` | Remap hardware player index, copy four cached IDs into outgoing slots on `0x6607`/`0x6608`, return 2 on the unacknowledged `0x10 << slot` flag and 1 on other valid replies; otherwise send through `sub_8025808` and return 0 |
