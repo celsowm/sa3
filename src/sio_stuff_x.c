@@ -429,23 +429,45 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025B78.inc", void sub_8025B78(void))
 }
 END_NONMATCH
 
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025BA0.inc", void sub_8025BA0(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6601;
 }
 END_NONMATCH
 
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025BB0.inc", void sub_8025BB0(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6602;
 }
 END_NONMATCH
 
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025BC0.inc", void sub_8025BC0(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6603;
+    gMultiSioSend.raw[3] = 0;
+    gMultiSioSend.raw[4] = 0;
+    *(u16 *)&gMultiSioSend.raw[6] = 0;
+    *(u32 *)&gMultiSioSend.raw[8] = 0;
+    *(u16 *)&gMultiSioSend.raw[12] = 0;
+    gMultiSioSend.raw[15] = 0xFF;
+    gMultiSioSend.raw[16] = 0xFF;
+    gMultiSioSend.raw[17] = 0xFF;
+    gMultiSioSend.raw[18] = 0xFF;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025BEC.inc", void sub_8025BEC(void))
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_8025BEC.inc", void sub_8025BEC(u8 value))
 {
+    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    *((u8 *)&gStageData + 6) = id;
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6603;
+    gMultiSioSend.raw[3] = id;
+    gMultiSioSend.raw[15 + id] = 0xFF;
+    gMultiSioSend.raw[4] = value;
 }
 END_NONMATCH
 
@@ -454,8 +476,14 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025C20.inc", void sub_8025C20(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025C64.inc", void sub_8025C64(void))
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_8025C64.inc", void sub_8025C64(u8 value))
 {
+    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    *((u8 *)&gStageData + 6) = id;
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6605;
+    gMultiSioSend.raw[3] = id;
+    gMultiSioSend.raw[4] = value;
 }
 END_NONMATCH
 
@@ -464,33 +492,50 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025C8C.inc", void sub_8025C8C(void))
 }
 END_NONMATCH
 
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025CD8.inc", void sub_8025CD8(void))
 {
+    u8 id = (*(volatile u32 *)0x04000128 >> 30) & 3;
+    *((u8 *)&gStageData + 6) = id;
+    gMultiSioSend.raw[3] = id;
+    *(u16 *)&gMultiSioSend.raw[0] = 0x660A;
 }
 END_NONMATCH
 
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025D00.inc", void sub_8025D00(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x660B;
 }
 END_NONMATCH
 
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025D10.inc", void sub_8025D10(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x660C;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025D20.inc", void sub_8025D20(void))
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_8025D20.inc", void sub_8025D20(u8 value))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x660D;
+    gMultiSioSend.raw[5] = value;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025D34.inc", void sub_8025D34(void))
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
+NONMATCH("asm/non_matching/sio/sio__sub_8025D34.inc", void sub_8025D34(u8 value))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x660E;
+    gMultiSioSend.raw[5] = value;
 }
 END_NONMATCH
 
+// C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025D48.inc", void sub_8025D48(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x660F;
 }
 END_NONMATCH
 
