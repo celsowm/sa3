@@ -37,6 +37,7 @@ void sub_8026AB8(const u8 *packet);
 void sub_8025D10(void);
 void sub_802613C(void);
 void sub_80296F8(u8 value);
+void Task_8026178(void);
 
 NONMATCH("asm/non_matching/sio/sio__sub_8023A88.inc", void sub_8023A88(void))
 {
@@ -1073,8 +1074,12 @@ NONMATCH("asm/non_matching/sio/sio__sub_802610C.inc", s16 sub_802610C(void))
 }
 END_NONMATCH
 
+// A successful MultiBoot result transitions into a dedicated priority
+// 0x2000 task and releases flag 0x400. Task data size is zero in Thumb.
 NONMATCH("asm/non_matching/sio/sio__sub_802613C.inc", void sub_802613C(void))
 {
+    gFlags &= ~0x400;
+    TaskCreate(Task_8026178, 0, 0x2000, 0, NULL);
 }
 END_NONMATCH
 
