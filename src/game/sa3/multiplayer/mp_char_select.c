@@ -697,10 +697,73 @@ void sub_80A03F8(void)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A04D8.inc", void sub_80A04D8(void))
+void sub_80A04D8(void)
 {
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+    s16 pid = gStageData.playerIndex;
+    u8 count = 0;
+    u8 i;
+
+    if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+        return;
+    }
+
+    sub_80A19C0(mcs);
+    sub_80A1A04(mcs);
+    sub_80A10B0(mcs);
+    sub_80A1110(mcs);
+    sub_80A11B8(mcs);
+
+    if (pid == 0 || pid == 1) {
+        pid += 2;
+    }
+
+    if (*mcs->unk18 == 21) {
+        *mcs->unk14 = 0;
+        return;
+    }
+
+    for (i = 0; i < 4; i++) {
+        u8 *chars = gUnknown_030010AC;
+        if (pid != i && chars[i] == gUnknown_080D8F18[*mcs->unk30]) {
+            sub_80A1A28(mcs);
+        }
+    }
+
+    if (*mcs->unk18 == 20) {
+        mcs->unk1 = *mcs->unk30;
+        mcs->unk3 = *mcs->unk18;
+        gCurTask->main = sub_80A06E8;
+        return;
+    }
+
+    if (*mcs->unk18 == 19) {
+        *mcs->unk14 = 1;
+    }
+
+    if (mcs->unk1 != *mcs->unk30) {
+        *mcs->unk14 = 0;
+
+        if (sub_80A1694(mcs) == TRUE) {
+            count++;
+        }
+
+        if (sub_80A1938(mcs) == TRUE) {
+            count++;
+        }
+
+        if (count == 2) {
+            mcs->unk4C = Q(300);
+            mcs->unk1 = *mcs->unk30;
+            sub_80A0DC8(mcs);
+            gCurTask->main = sub_80A0644;
+        }
+    } else if (*mcs->unk18 <= 19) {
+        sub_80A18E0(mcs);
+        sub_80A1030(mcs);
+    }
 }
-END_NONMATCH
 
 void sub_80A0644(void)
 {
