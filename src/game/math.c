@@ -205,21 +205,17 @@ void SA2_LABEL(sub_8083798)(UNK_8085D14_2 *arg0)
 
 // Normalize a Q6.10 four-component rotation value in place.
 // The original routine computes 0x100000 / (u16)Sqrt(sum of squares).
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083858.inc", void sa2__sub_8083858(UNK_8085D14 *rotation))
+void sa2__sub_8083858(UNK_8085D14 *rotation)
 {
-    s32 a = rotation->unk0;
-    s32 b = rotation->unk2;
-    s32 c = rotation->unk4;
-    s32 d = rotation->unk6;
-    u16 magnitude = Sqrt(a * a + b * b + c * c + d * d);
+    u16 magnitude = Sqrt(rotation->unk0 * rotation->unk0 + rotation->unk2 * rotation->unk2 + rotation->unk4 * rotation->unk4
+                         + rotation->unk6 * rotation->unk6);
     s32 scale = 0x100000 / magnitude;
 
-    rotation->unk0 = (scale * a) >> 10;
-    rotation->unk2 = (scale * b) >> 10;
-    rotation->unk4 = (scale * c) >> 10;
-    rotation->unk6 = (scale * d) >> 10;
+    rotation->unk0 = (rotation->unk0 * scale) >> 10;
+    rotation->unk2 = (rotation->unk2 * scale) >> 10;
+    rotation->unk4 = (rotation->unk4 * scale) >> 10;
+    rotation->unk6 = (rotation->unk6 * scale) >> 10;
 }
-END_NONMATCH
 
 void SA2_LABEL(sub_80838CC)(UNK_8085D14 *arg0, UNK_8085D14 *arg1, UNK_8085D14 *arg2)
 {
@@ -261,21 +257,17 @@ NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083A48.inc", void sa2__sub
 END_NONMATCH
 
 // Normalize and conjugate the first three Q6.10 rotation components.
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083B10.inc", void sa2__sub_8083B10(UNK_8085D14 *rotation))
+void sa2__sub_8083B10(UNK_8085D14 *rotation)
 {
-    s32 a = rotation->unk0;
-    s32 b = rotation->unk2;
-    s32 c = rotation->unk4;
-    s32 d = rotation->unk6;
-    u16 magnitude = Sqrt(a * a + b * b + c * c + d * d);
+    u16 magnitude = Sqrt(rotation->unk0 * rotation->unk0 + rotation->unk2 * rotation->unk2 + rotation->unk4 * rotation->unk4
+                         + rotation->unk6 * rotation->unk6);
     s32 scale = 0x100000 / magnitude;
 
-    rotation->unk0 = (scale * -a) >> 10;
-    rotation->unk2 = (scale * -b) >> 10;
-    rotation->unk4 = (scale * -c) >> 10;
-    rotation->unk6 = (scale * d) >> 10;
+    rotation->unk0 = (-rotation->unk0 * scale) >> 10;
+    rotation->unk2 = (-rotation->unk2 * scale) >> 10;
+    rotation->unk4 = (-rotation->unk4 * scale) >> 10;
+    rotation->unk6 = (rotation->unk6 * scale) >> 10;
 }
-END_NONMATCH
 
 // Compose the Q6.10 3x3 basis and its translated origin.
 // The original routine reads row-major basis values from a and columns
