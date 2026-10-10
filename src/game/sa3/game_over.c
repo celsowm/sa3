@@ -251,10 +251,10 @@ const u8 gUnknown_080CE52C[NUM_COURSE_ZONES][4]
         { MUS_OVERWORLD__CHAOS_ANGEL, MUS_CHAOS_ANGEL__ACT_1, MUS_CHAOS_ANGEL__ACT_2, MUS_CHAOS_ANGEL__ACT_3 } };
 #endif
 // (92.91%) https://decomp.me/scratch/FqhOj
-NONMATCH("asm/non_matching/game/shared/go__sub_8002618.inc", void sub_8002618(void))
+void sub_8002618(void)
 {
     s16 act;
-    u16 zone;
+    u32 zone;
     u16 song;
 #ifndef NON_MATCHING
     u8 actSongs[NUM_COURSE_ZONES][4];
@@ -295,12 +295,13 @@ NONMATCH("asm/non_matching/game/shared/go__sub_8002618.inc", void sub_8002618(vo
             case ACT_BOSS:
                 song = (actSongs[zone][1]);
                 break;
+            default:
+                return;
         }
     }
 
     CreateStageMusicManager(song);
 }
-END_NONMATCH
 
 void sub_80026BC(void)
 {
