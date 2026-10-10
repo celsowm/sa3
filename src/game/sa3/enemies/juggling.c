@@ -278,13 +278,11 @@ NONMATCH("asm/non_matching/game/enemies/juggling__sub_805E624.inc", void sub_805
             }
 
             if (enemy->unkE[i] > Q(8)) {
-                s32 *dst = &enemy->unk28[i].y;
                 var_r0 = (((SIN(((enemy->unkE[i] >> 0x4) & 0xFF) * 4)) >> 6) * 4) + 0x1200;
-                *dst = enemy->qPos.y - (var_r0);
+                enemy->unk28[i].y = enemy->qPos.y - (var_r0);
             } else {
-                s32 *dst = &enemy->unk28[i].y;
                 var_r0 = (((SIN(((enemy->unkE[i] >> 0x4) & 0xFF) * 4)) >> 6) * 16) + 0x2000;
-                *dst = enemy->qPos.y - (var_r0);
+                enemy->unk28[i].y = enemy->qPos.y - (var_r0);
             }
         }
         if (i == 0) {
