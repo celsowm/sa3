@@ -8,7 +8,7 @@ implementations derived from their original Thumb routines:
 
 | Function | Recovered behavior |
 |---|---|
-| `sub_8024DC8` | Get SIO player ID from `REG_ADDR_SIOCNT[7:6]`; propagate negative status; on success call `sub_8025770`, and recognize `0x6606` reply when connected |
+| `sub_8024DC8` | Get SIO player ID from `REG_ADDR_SIOCNT[5:4]`; propagate negative status; on success call `sub_8025770`, and recognize `0x6606` reply when connected |
 | `sub_8025AA8` | Read same player ID; propagate negative status; on success send state via `sub_8025D10`; recognize `0x660D` reply when connected |
 | `sub_80261B0` | Advance four-state local queue generation, clear queue-control byte, mark eight five-byte slots free, update flags on all four players, and mark send/receive byte `0x12` invalid |
 | `sub_8027538` | Send five-byte X delta packet `0x18`, subtracting the entity-manager task-data 32-bit reference at offset `+4`, little-endian modulo `2^32` |
