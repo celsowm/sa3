@@ -481,10 +481,92 @@ void Task_809FCFC(void)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__Task_809FEB0.inc", void Task_809FEB0(void))
+void Task_809FEB0(void)
 {
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+    s16 pid = gStageData.playerIndex;
+    s32 dir = 0;
+    u8 i;
+
+    if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+        return;
+    }
+
+    if (*mcs->unk18 == 35) {
+        *mcs->unk18 = 29;
+        mcs->unk3 = *mcs->unk18;
+        mcs->unk2 = mcs->unk1;
+        mcs->unk4C = Q(310);
+        mcs->unk54 = Q(310);
+        sub_80A19C0(mcs);
+        sub_80A10B0(mcs);
+        sub_80A1110(mcs);
+        gCurTask->main = Task_80A13F4;
+        return;
+    }
+
+    sub_80A19C0(mcs);
+    sub_80A10B0(mcs);
+    sub_80A1110(mcs);
+
+    if ((pid == 0 || pid == 1) && mcs->unk1 == *mcs->unk30) {
+        for (i = 0; i < 4; i++) {
+            u8 *chars = gUnknown_030010AC;
+            if (pid != i && chars[i] == gUnknown_080D8F18[*mcs->unk30]) {
+                sub_80A1A28(mcs);
+            }
+        }
+    }
+
+    if (*mcs->unk18 > 11) {
+        *mcs->unk14 = 0;
+        mcs->unk3 = *mcs->unk18;
+        gCurTask->main = sub_80A021C;
+        return;
+    }
+
+    if (mcs->unk1 != *mcs->unk30) {
+        *mcs->unk14 = 0;
+
+        if (mcs->unk1 == 0 && *mcs->unk30 == 4) {
+            dir = 1;
+        } else if (mcs->unk1 == 4 && *mcs->unk30 == 0) {
+            dir = 2;
+        } else if (mcs->unk1 > *mcs->unk30) {
+            dir = 1;
+        } else if (mcs->unk1 < *mcs->unk30) {
+            dir = 2;
+        }
+    }
+
+    if (dir != 0) {
+        sub_80A18B8(mcs);
+    } else {
+        sub_80A18E0(mcs);
+        sub_80A1030(mcs);
+    }
+
+    switch (dir) {
+        case 1:
+            if (sub_80A14E4(mcs) == TRUE) {
+                mcs->unk4C = -Q(60);
+                mcs->unk1 = *mcs->unk30;
+                sub_80A0DC8(mcs);
+                gCurTask->main = sub_80A0080;
+            }
+            break;
+
+        case 2:
+            if (sub_80A1540(mcs) == TRUE) {
+                mcs->unk4C = Q(300);
+                mcs->unk1 = *mcs->unk30;
+                sub_80A0DC8(mcs);
+                gCurTask->main = sub_80A010C;
+            }
+            break;
+    }
 }
-END_NONMATCH
 
 void sub_80A0080(void)
 {
