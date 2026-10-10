@@ -610,23 +610,125 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0EA8.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1030.inc", void sub_80A1030(MpCharSelect *mcs))
+void sub_80A1030(MpCharSelect *mcs)
 {
-}
-END_NONMATCH
+    Sprite *s = &mcs->s8C;
+    u32 n = 2;
+    s32 x;
+    s32 left, right;
+    u8 i;
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A10B0.inc", void sub_80A10B0(MpCharSelect *mcs))
-{
-}
-END_NONMATCH
+    x = (*mcs->unk18 > 13) ? 180 : 120;
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1110.inc", void sub_80A1110(MpCharSelect *mcs))
-{
+    for (i = 0, left = x - 40, right = x + 40; i < n; i++) {
+        if (i != 0) {
+            s->x = left - I(mcs->unk44);
+        } else {
+            s->x = right + I(mcs->unk44);
+        }
+        s->y = I(mcs->unk48);
+
+        if (i != 0) {
+            s->frameFlags |= SPRITE_FLAG_MASK_X_FLIP;
+        } else {
+            s->frameFlags &= ~SPRITE_FLAG_MASK_X_FLIP;
+        }
+        DisplaySprite(s);
+    }
 }
-END_NONMATCH
+
+void sub_80A10B0(MpCharSelect *mcs)
+{
+    Sprite *s;
+    u8 i;
+
+    for (i = 0, s = &mcs->sDC; i < 2; i++) {
+        s->x = I(mcs->unk3C);
+        s->y = I(mcs->unk40);
+
+        if (i != 0) {
+            s->frameFlags &= ~SPRITE_FLAG_MASK_X_FLIP;
+        } else {
+            s->frameFlags |= SPRITE_FLAG_MASK_X_FLIP;
+        }
+        DisplaySprite(s);
+    }
+
+    s = &mcs->sB4;
+    s->x = I(mcs->unk34);
+    s->y = I(mcs->unk38);
+    DisplaySprite(s);
+}
+
+void sub_80A1110(MpCharSelect *mcs)
+{
+    Sprite *s;
+    u8 i;
+    u8 character;
+    u32 lang;
+
+    for (i = 0, s = &mcs->s12C; i < 2; i++) {
+        s->x = I(mcs->unk5C);
+        s->y = I(mcs->unk60);
+        s->palId = 0;
+
+        if (i != 0) {
+            s->frameFlags |= SPRITE_FLAG_MASK_X_FLIP;
+        } else {
+            s->frameFlags &= ~SPRITE_FLAG_MASK_X_FLIP;
+        }
+        DisplaySprite(s);
+    }
+
+    lang = (mcs->language != 0);
+    if (*mcs->unk18 > 12) {
+        character = gUnknown_080D8F18[mcs->unk2];
+    } else {
+        character = gUnknown_080D8F18[mcs->unk1];
+    }
+
+    s = &mcs->s104;
+    {
+        s->anim = gUnknown_080D8E80[character + lang * 8].anim;
+        s->variant = gUnknown_080D8E80[character + lang * 8].variant;
+    }
+    s->x = I(mcs->unk5C);
+    s->y = I(mcs->unk60);
+    UpdateSpriteAnimation(s);
+    DisplaySprite(s);
+}
 
 NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A11B8.inc", void sub_80A11B8(MpCharSelect *mcs))
 {
+    Sprite *s;
+    u8 i;
+    u32 lang;
+
+    for (i = 0, s = &mcs->s12C; i < 2; i++) {
+        s->x = I(mcs->unk64);
+        s->y = I(mcs->unk68);
+        s->palId = 1;
+
+        if (i != 0) {
+            s->frameFlags |= SPRITE_FLAG_MASK_X_FLIP;
+        } else {
+            s->frameFlags &= ~SPRITE_FLAG_MASK_X_FLIP;
+        }
+        DisplaySprite(s);
+    }
+
+    lang = (mcs->language != 0);
+    {
+        u8 idx = gUnknown_080D8F18[mcs->unk1];
+        Sprite *s2 = &mcs->s154;
+        const TileInfo2 *ti = &gUnknown_080D8E80[lang * 8 + idx];
+        s2->anim = ti->anim;
+        s2->variant = ti->variant;
+        s2->x = I(mcs->unk64);
+        s2->y = I(mcs->unk68);
+        UpdateSpriteAnimation(s2);
+        DisplaySprite(s2);
+    }
 }
 END_NONMATCH
 
@@ -635,10 +737,15 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A124C.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A137C.inc", void sub_80A137C(void))
+void sub_80A137C(MpCharSelect *mcs)
 {
+    gBgScrollRegs[1][0] = I(mcs->unk74);
+    gBgScrollRegs[1][1] = -I(mcs->unk78);
+    gBgScrollRegs[0][0] = I(mcs->unk7C);
+    gBgScrollRegs[0][1] = I(mcs->unk80);
+    gBgScrollRegs[2][0] = I(mcs->unk6C);
+    gBgScrollRegs[2][1] = -I(mcs->unk70);
 }
-END_NONMATCH
 
 void TaskDestructor_80A13B0(struct Task *t)
 {
