@@ -1116,8 +1116,19 @@ NONMATCH("asm/non_matching/sio/sio__sub_80275F0.inc", void sub_80275F0(u8 player
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8027620.inc", void sub_8027620(void))
+// Recovered directly from the original Thumb packet layout.
+// The ASM fallback remains authoritative until an agbcc whole-ROM match.
+NONMATCH("asm/non_matching/sio/sio__sub_8027620.inc", void sub_8027620(u16 first, u16 second))
 {
+    // The original Thumb routine writes a five-byte 0x30 message.
+    // The queue copies exactly five bytes, so all bytes must be backed.
+    u8 packet[5];
+    packet[0] = 0x30;
+    packet[1] = (u8)first;
+    packet[2] = (u8)(first >> 8);
+    packet[3] = (u8)second;
+    packet[4] = (u8)(second >> 8);
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
@@ -1199,8 +1210,16 @@ NONMATCH("asm/non_matching/sio/sio__sub_80277F0.inc", void sub_80277F0(u16 first
 }
 END_NONMATCH
 
+// Recovered directly from the original Thumb packet layout.
+// The ASM fallback remains authoritative until an agbcc whole-ROM match.
 NONMATCH("asm/non_matching/sio/sio__sub_8027834.inc", void sub_8027834(void))
 {
+    // ASM writes only bytes 0, 1 and 3, but the queue reads five.
+    u8 packet[5] = { 0 };
+    packet[0] = 0x38;
+    packet[1] = 0x23;
+    packet[3] = ((const u8 *)&gStageData)[0xB4];
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
@@ -1214,18 +1233,40 @@ NONMATCH("asm/non_matching/sio/sio__sub_802785C.inc", void sub_802785C(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8027878.inc", void sub_8027878(void))
+// Recovered directly from the original Thumb packet layout.
+// The ASM fallback remains authoritative until an agbcc whole-ROM match.
+NONMATCH("asm/non_matching/sio/sio__sub_8027878.inc", void sub_8027878(u8 value))
 {
+    u8 packet[5] = { 0 };
+    packet[0] = 0x38;
+    packet[1] = 0x24;
+    packet[2] = value;
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
+// Recovered directly from the original Thumb packet layout.
+// The ASM fallback remains authoritative until an agbcc whole-ROM match.
 NONMATCH("asm/non_matching/sio/sio__sub_802789C.inc", void sub_802789C(void))
 {
+    u8 packet[5] = { 0 };
+    const u8 *stage = (const u8 *)&gStageData;
+    packet[0] = 0x38;
+    packet[1] = 0x25;
+    packet[2] = stage[0xAE];
+    packet[3] = stage[0xAF];
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
+// Recovered directly from the original Thumb packet layout.
+// The ASM fallback remains authoritative until an agbcc whole-ROM match.
 NONMATCH("asm/non_matching/sio/sio__sub_80278C4.inc", void sub_80278C4(void))
 {
+    const u8 *stage = (const u8 *)&gStageData;
+    gMultiSioSend.raw[0x12] = stage[5];
+    gMultiSioSend.raw[0x14] = stage[0xAE];
+    gMultiSioSend.raw[0x15] = stage[0xAF];
 }
 END_NONMATCH
 
