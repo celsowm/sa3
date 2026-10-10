@@ -399,8 +399,8 @@ NONMATCH("asm/non_matching/game/char_select__sub_8097E5C.inc", void sub_8097E5C(
     s = &cs->spr9C;
     s->tiles = vram;
     vram += 0x640;
-    s->anim = gUnknown_080D8D08[cs->language].anim;
-    s->variant = gUnknown_080D8D08[cs->language].variant;
+    s->anim = gUnknown_080D8D08[cs->language * 8].anim;
+    s->variant = gUnknown_080D8D08[cs->language * 8].variant;
     s->prevVariant = -1;
     s->x = I(cs->qUnk24);
     s->y = I(cs->qUnk28);
