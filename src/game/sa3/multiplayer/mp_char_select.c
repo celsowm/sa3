@@ -1196,7 +1196,7 @@ void sub_80A0C5C(void)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0D20.inc", void sub_80A0D20(void))
+void sub_80A0D20(void)
 {
     MpCharSelect *mcs = TASK_DATA(gCurTask);
     u8 i;
@@ -1207,7 +1207,9 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0D20.inc", void sub
     }
 
     for (i = 0; i < 4; i++) {
-        gPlayers[i].charFlags.character = gUnknown_030010AC[i];
+        // TODO: Fake-match!
+        s16 j = i;
+        gPlayers[i].charFlags.character = gUnknown_030010AC[j];
     }
 
     TasksDestroyAll();
@@ -1216,7 +1218,6 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0D20.inc", void sub
     gVramGraphicsCopyCursor = gVramGraphicsCopyQueueIndex;
     sub_809BFE8(0);
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0DC8.inc", void sub_80A0DC8(MpCharSelect *mcs))
 {
