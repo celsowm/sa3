@@ -300,13 +300,86 @@ NONMATCH("asm/non_matching/sio/sio__sub_80246B4.inc", void sub_80246B4(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80247D4.inc", void sub_80247D4(void))
+// Reconstructed from Thumb multiplayer packet reconciliation;
+// leave the source assembly in use until full agbcc matching is confirmed.
+NONMATCH("asm/non_matching/sio/sio__sub_80247D4.inc", u16 sub_80247D4(void))
 {
+    u8 assignedMask = 0;
+    u16 result = 0;
+    u8 participants = gUnknown_03001060[7];
+    u8 i;
+
+    // Track player IDs already held by the outgoing packet.
+    for (i = 0; i < 4; i++) {
+        u8 id = gMultiSioSend.raw[15 + i];
+        if (id != 0xFF && id < 8) {
+            assignedMask |= 1 << id;
+        }
+    }
+
+    for (i = 0; i < 4; i++) {
+        const u8 *packet;
+        u8 player;
+        u8 value;
+        u16 type;
+
+        if (!(participants & (1 << i))) {
+            continue;
+        }
+
+        packet = (i == 0) ? gMultiSioSend.raw : gMultiSioRecv[i].raw;
+        player = packet[3];
+        type = *(const u16 *)packet;
+
+        if (type == 0x6604 || type == 0x6608) {
+            value = packet[15 + player];
+            gMultiSioSend.raw[15 + player] = value;
+            gUnknown_030010AC[player] = value;
+            continue;
+        }
+
+        value = packet[15 + player];
+        if (value == 0xFF) {
+            gMultiSioSend.raw[15 + player] = 0xFF;
+        } else if (value < 8 && (assignedMask & (1 << value))) {
+            result |= (0x10 << player);
+        } else {
+            result |= (1 << player);
+            gMultiSioSend.raw[15 + player] = value;
+            gUnknown_030010AC[player] = value;
+        }
+    }
+    return result;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80248F4.inc", void sub_80248F4(void))
+// Reconstructed from Thumb multiplayer packet reconciliation;
+// leave the source assembly in use until full agbcc matching is confirmed.
+NONMATCH("asm/non_matching/sio/sio__sub_80248F4.inc", u16 sub_80248F4(void))
 {
+    u8 participants = gUnknown_03001060[7];
+    u16 result = 0;
+    u8 i;
+
+    for (i = 0; i < 4; i++) {
+        const u8 *packet;
+        u8 player;
+
+        if (!(participants & (1 << i))) {
+            continue;
+        }
+
+        packet = gMultiSioRecv[i].raw;
+        player = packet[3];
+        if (*(const u16 *)packet != 0x6605) {
+            continue;
+        }
+
+        result |= 0x100 << player;
+        gMultiSioSend.raw[15 + player] = 0xFF;
+        gUnknown_030010AC[player] = 0xFF;
+    }
+    return result;
 }
 END_NONMATCH
 
