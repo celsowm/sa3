@@ -1,4 +1,4 @@
-"""Native regression for four recovered SIO slot-negotiation functions.
+"""Native regression for five recovered SIO slot-negotiation functions.
 
 Extracts the production C bodies from src/sio_stuff_x.c (not hand-maintained
 copies), compiling them with mock link buffers. Not an agbcc/ROM matching test.
@@ -14,6 +14,7 @@ SOURCE = Path(__file__).resolve().parents[2] / "src/sio_stuff_x.c"
 FUNCTIONS = {
     "sub_8024A4C": "s16 sub_8024A4C(u16 value)",
     "sub_8024AC0": "s16 sub_8024AC0(u16 value)",
+    "sub_8024B84": "s16 sub_8024B84(u16 value)",
     "sub_8024F1C": "s16 sub_8024F1C(u8 value)",
     "sub_8025024": "s16 sub_8025024(u16 value)",
 }
@@ -33,7 +34,7 @@ struct MockPacket { u8 raw[24]; } gMultiSioSend, gMultiSioRecv[4];
 u8 gUnknown_030010AC[4];
 u32 gMultiSioStatusFlags;
 static s16 mockStatus;
-static int statusCalls, lastStatusPlayer, callsBEC, callsC20;
+static int statusCalls, lastStatusPlayer, callsBEC, callsC20, callsC64;
 static int calls808, callsC8C, calls7D4, calls8F4, orderError;
 static u8 lastValue;
 s16 sub_802610C(void) {
@@ -43,6 +44,7 @@ s16 sub_802610C(void) {
 }
 void sub_8025BEC(u8 v) { callsBEC++; lastValue = v; }
 void sub_8025C20(u8 v) { callsC20++; lastValue = v; }
+void sub_8025C64(u8 v) { callsC64++; lastValue = v; }
 void sub_8025808(u8 v) { calls808++; lastValue = v; }
 void sub_8025C8C(u8 v) { callsC8C++; lastValue = v; }
 u16 sub_80247D4(void) { calls7D4++; return 0x1234; }
@@ -74,7 +76,7 @@ static void init(unsigned id, s16 status, unsigned connected,
     gMultiSioRecv[0].raw[13] = ack >> 8;
     for (i = 0; i < 4; i++)
         gMultiSioRecv[0].raw[15+i] = (u8)(input+i);
-    statusCalls = callsBEC = callsC20 = calls808 = 0;
+    statusCalls = callsBEC = callsC20 = callsC64 = calls808 = 0;
     callsC8C = calls7D4 = calls8F4 = orderError = 0;
     lastStatusPlayer = -1;
     lastValue = 0;
@@ -99,6 +101,8 @@ int main(void) {
         int acceptB = acceptA || (connected && types[ty] == 0x6606);
         int acceptD = connected &&
                      (types[ty] == 0x6607 || types[ty] == 0x6608);
+        u16 highAck = (bit & 1 ? (0x100u << id) : 0) |
+                      (bit & 2 ? (0x1000u << id) : 0);
         int special = !(ack & (1u << id)) &&
                       (ack & (0x10u << id));
         u8 slot = id <= 1 ? id + 2 : id;
@@ -126,6 +130,22 @@ int main(void) {
                   (success && acceptB ? (u8)(input+i) : 0xC7));
         CHECK(gMultiSioSend.raw[15+id] ==
               (success && acceptB && special ? 0xFF : 0xA5));
+
+        init(id, statuses[st], connected, types[ty], highAck, input);
+        CHECK(sub_8024B84(input) ==
+              (!success ? statuses[st] :
+               (acceptA && (bit & 1) ? 1 :
+                acceptA && (bit & 2) ? 2 : 0)));
+        CHECK(statusCalls == 1 && lastStatusPlayer == (int)id &&
+              gStageData.playerIndex == id);
+        CHECK(callsC64 == (success && !(acceptA && (bit & 3))));
+        if (callsC64) CHECK(lastValue == (u8)input);
+        for (i = 0; i < 4; i++) {
+            CHECK(gUnknown_030010AC[i] ==
+                  (success && acceptA ? (u8)(input+i) : 0xC7));
+            CHECK(gMultiSioSend.raw[15+i] ==
+                  (success && acceptA ? (u8)(input+i) : 0xA5));
+        }
 
         init(id, statuses[st], connected, types[ty], ack, input);
         CHECK(sub_8024F1C((u8)input) == (success ? 1 : statuses[st]));
@@ -167,7 +187,7 @@ def extract_real_c(source, name, signature):
 
 
 class SioNegotiationHostTests(unittest.TestCase):
-    def test_all_four_negotiation_paths(self):
+    def test_all_five_negotiation_paths(self):
         compiler = shutil.which("cc") or shutil.which("gcc")
         if compiler is None:
             self.skipTest("Native C compiler unavailable")
