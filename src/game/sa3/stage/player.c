@@ -11764,56 +11764,48 @@ END_NONMATCH
 // (91.03%) https://decomp.me/scratch/K83Y8
 NONMATCH("asm/non_matching/game/stage/player__sub_8012550.inc", s32 sub_8012550(Player *p))
 {
-    s32 sp8;
-    s32 spC;
-    s32 sp10;
-    s32 sp14;
-    s32 temp_r0;
-    s32 temp_r0_2;
-    s32 var_r0;
-    s8 *temp_r7;
-    u8 temp_r5;
-    u8 var_r2;
-    u8 var_r2_2;
+    s32 qWorldX, qWorldY;
+    s32 qSpeedAirX, qSpeedAirY;
+    s32 res;
     s32 worldX, worldY;
-    s32 worldX2, worldY2;
-    s32 r2;
+    u8 layer;
+    u8 flags;
 
-    temp_r5 = p->layer;
-    sp8 = p->qWorldX;
-    spC = p->qWorldY;
-    sp10 = p->qSpeedAirX;
-    sp14 = p->qSpeedAirY;
-    worldX = -3 - p->spriteOffsetY + I(sp8);
-    worldY = I(spC);
-    var_r2 = temp_r5;
+    layer = p->layer;
+    qWorldX = p->qWorldX;
+    qWorldY = p->qWorldY;
+    qSpeedAirX = p->qSpeedAirX;
+    qSpeedAirY = p->qSpeedAirY;
+
+    worldY = I(qWorldY) - 3 - p->spriteOffsetY;
+    worldX = I(qWorldX);
+    flags = layer;
     if (p->qSpeedAirY < Q(3)) {
-        var_r2 = 0x80 | temp_r5;
+        flags = 0x80 | layer;
     }
-    temp_r0 = SA2_LABEL(sub_801E4E4)(worldX, worldY, var_r2, -8, NULL, SA2_LABEL(sub_801ED24));
-    if (temp_r0 <= 0) {
-        p->qWorldY -= Q(temp_r0);
+    res = SA2_LABEL(sub_801E4E4)(worldY, worldX, flags, -8, NULL, SA2_LABEL(sub_801EE64));
+    if (res <= 0) {
+        p->qWorldY -= Q(res);
     }
-    worldX2 = +I(p->qWorldY);
-    worldX2 += +3;
-    worldX2 += p->spriteOffsetY;
-    worldY2 = I(p->qWorldX);
-    var_r2_2 = temp_r5;
+
+    worldY = I(p->qWorldY) + 3 + p->spriteOffsetY;
+    worldX = I(p->qWorldX);
+    flags = layer;
     if (p->qSpeedAirY < Q(0)) {
-        var_r2_2 |= 0x80;
+        flags |= 0x80;
     }
-    temp_r0 = SA2_LABEL(sub_801E4E4)(worldX2, worldY2, var_r2_2, 8, NULL, SA2_LABEL(sub_801ED24));
-    if (temp_r0 <= 0) {
-        p->qWorldY += Q(temp_r0);
+    res = SA2_LABEL(sub_801E4E4)(worldY, worldX, flags, 8, NULL, SA2_LABEL(sub_801EE64));
+    if (res <= 0) {
+        p->qWorldY += Q(res);
     }
 
-    var_r0 = sub_8011024(1, p, NULL, NULL);
+    res = sub_8011024(1, p, NULL, NULL);
 
-    p->qWorldX = sp8;
-    p->qWorldY = spC;
-    p->qSpeedAirX = sp10;
-    p->qSpeedAirY = sp14;
-    return var_r0;
+    p->qWorldX = qWorldX;
+    p->qWorldY = qWorldY;
+    p->qSpeedAirX = qSpeedAirX;
+    p->qSpeedAirY = qSpeedAirY;
+    return res;
 }
 END_NONMATCH
 
