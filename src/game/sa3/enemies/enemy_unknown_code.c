@@ -482,7 +482,7 @@ NONMATCH("asm/non_matching/game/enemies/euc__sub_805C63C.inc", u32 sub_805C63C(E
 END_NONMATCH
 
 // (99.91%) https://decomp.me/scratch/07C6C
-NONMATCH("asm/non_matching/game/enemies/euc__sub_805C890.inc", bool32 sub_805C890(EnemyUnknownStruc0 *param0, s8 param1))
+bool32 sub_805C890(EnemyUnknownStruc0 *param0, s8 param1)
 {
     bool32 result;
     u8 i;
@@ -543,17 +543,10 @@ NONMATCH("asm/non_matching/game/enemies/euc__sub_805C890.inc", bool32 sub_805C89
                 } else if (sub_8020700(s, worldX, worldY, 1, p, 0) != 0) {
                     if (!(p->moveState & MOVESTATE_1000000) && (p->framesInvulnerable == 0)) {
                         if (p->framesInvincible == 0) {
-                            Player *players;
                             Player *innerPartner;
-                            u32 *moveState;
                             sub_8020CE0(s, worldX, worldY, 0, p);
                             sub_8020CE0(s, worldX, worldY, 1, p);
-                            players = &gPlayers[PLAYER_1];
-                            moveState = &players[p->charFlags.partnerIndex].moveState;
-#ifndef NON_MATCHING
-                            asm("" ::"r"(moveState));
-#endif
-                            if (*moveState & MOVESTATE_1000000) {
+                            if (gPlayers[p->charFlags.partnerIndex].moveState & MOVESTATE_1000000) {
                                 innerPartner = GET_SP_PLAYER_V1(PLAYER_2);
                                 sub_8020CE0(s, worldX, worldY, 0, innerPartner);
                                 innerPartner = GET_SP_PLAYER_V1(PLAYER_2);
@@ -582,7 +575,6 @@ NONMATCH("asm/non_matching/game/enemies/euc__sub_805C890.inc", bool32 sub_805C89
 
     return result;
 }
-END_NONMATCH
 
 void sub_805CB70(Player *p, Sprite *s, u32 collision, s32 x, UNUSED s32 y, s8 dir)
 {
