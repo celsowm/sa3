@@ -2590,7 +2590,7 @@ void sub_8078070(EggGravity104 *strc104, Vec2_32 *pos)
 }
 
 // (98.57%) https://decomp.me/scratch/8NhQO
-NONMATCH("asm/non_matching/game/bosses/boss_7__sub_807813C.inc", void sub_807813C(EggGravity30 *strc30))
+void sub_807813C(EggGravity30 *strc30)
 {
 #ifndef NON_MATCHING
     register s32 worldX asm("r5");
@@ -2604,14 +2604,30 @@ NONMATCH("asm/non_matching/game/bosses/boss_7__sub_807813C.inc", void sub_807813
     s32 worldY2;
 #endif
 
-    strc30->unk20 += strc30->unkC;
-    worldX = I(strc30->unk20) + gCamera.x;
-    if (worldX > gCamera.maxX) {
-        strc30->unk5 = -1;
-        strc30->unkC = -strc30->unkC;
-    } else if (worldX < gCamera.minX) {
-        strc30->unk5 = +1;
-        strc30->unkC = -strc30->unkC;
+    // TODO: Fake-match!
+    {
+        register s32 q asm("r0") = strc30->unk20;
+        register s32 dx asm("r3") = strc30->unkC;
+        q += dx;
+        strc30->unk20 = q;
+        q = I(q);
+        {
+            register s32 cx asm("r2") = gCamera.x;
+            worldX = q + cx;
+        }
+        if (worldX > gCamera.maxX) {
+            strc30->unk5 = -1;
+            {
+                register s32 n asm("r0") = -dx;
+                strc30->unkC = n;
+            }
+        } else if (worldX < gCamera.minX) {
+            strc30->unk5 = +1;
+            {
+                register s32 n asm("r0") = -dx;
+                strc30->unkC = n;
+            }
+        }
     }
     strc30->unk24 += strc30->unk10;
 
@@ -2621,7 +2637,7 @@ NONMATCH("asm/non_matching/game/bosses/boss_7__sub_807813C.inc", void sub_807813
     worldY += gCamera.y;
     worldY2 = worldY;
 
-    if (SA2_LABEL(sub_801F07C)(worldY, worldX2, 1, 8, NULL, sa2__sub_801EE64) < 0) {
+    if ((s8)SA2_LABEL(sub_801F07C)(worldY, worldX2, 1, 8, NULL, sa2__sub_801EE64) < 0) {
         strc30->unk6 = -1;
         strc30->unk10 = -strc30->unk10;
     } else if (worldY2 < gCamera.minY) {
@@ -2629,7 +2645,6 @@ NONMATCH("asm/non_matching/game/bosses/boss_7__sub_807813C.inc", void sub_807813
         strc30->unk10 = -strc30->unk10;
     }
 }
-END_NONMATCH
 
 void sub_80781C0(Vec2_32 *arg0, s8 *arg1)
 {
@@ -3088,7 +3103,7 @@ NONMATCH("asm/non_matching/game/bosses/boss_7__sub_8078BAC.inc", s32 sub_8078BAC
     u32 r1 = 0;
     u32 r2 = 0;
 #endif
-    temp_r0 = someFunc(0, strc30->pSpr28->y + gCamera.y, r4);
+    temp_r0 = SA2_LABEL(sub_801F07C)(strc30->pSpr28->y + gCamera.y, r1, r2, 8, r4, SA2_LABEL(sub_801EE64));
     if (temp_r0 < 0) {
         strc30->unk24 += Q(temp_r0);
         strc30->unk6 = -1;
