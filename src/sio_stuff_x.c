@@ -1166,18 +1166,36 @@ NONMATCH("asm/non_matching/sio/sio__sub_802773C.inc", void sub_802773C(u16 playe
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8027768.inc", void sub_8027768(void))
+// C reconstruction of the Thumb branch matrix; retain matching ASM fallback.
+NONMATCH("asm/non_matching/sio/sio__sub_8027768.inc", void sub_8027768(u16 first, u16 second))
 {
+    u8 packet[5] = { 0 };
+    packet[0] = 0x38;
+    packet[1] = 8;
+    packet[2] = (((first & 1) != 0) == (second != 0)) ? 10 : 5;
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80277AC.inc", void sub_80277AC(void))
+// C reconstruction of the Thumb branch matrix; retain matching ASM fallback.
+NONMATCH("asm/non_matching/sio/sio__sub_80277AC.inc", void sub_80277AC(u16 first, u16 second))
 {
+    u8 packet[5] = { 0 };
+    packet[0] = 0x38;
+    packet[1] = 9;
+    packet[2] = (((first & 1) != 0) == (second != 0)) ? 5 : 10;
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80277F0.inc", void sub_80277F0(void))
+// C reconstruction of the Thumb branch matrix; retain matching ASM fallback.
+NONMATCH("asm/non_matching/sio/sio__sub_80277F0.inc", void sub_80277F0(u16 first, u16 second))
 {
+    u8 packet[5] = { 0 };
+    packet[0] = 0x38;
+    packet[1] = 10;
+    packet[2] = (((first & 1) != 0) == (second != 0)) ? 10 : 5;
+    sub_8026AB8(packet);
 }
 END_NONMATCH
 
