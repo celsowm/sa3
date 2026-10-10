@@ -1,5 +1,32 @@
 # Plano: +5 pontos percentuais de código matched
 
+## Checkpoint — SIO control-flow verification (subsequent main commits)
+
+The SIO port now has **41 reconstructed C functions** in the sequence tracked
+here (34 in the previous checkpoint, plus `sub_8025D58`,
+`sub_80247D4`, `sub_80248F4`, `sub_8025908`, `sub_8025948`,
+`sub_80259F8`, and `sub_8025B78`). All seven newer functions are still
+`NONMATCH`, so the verified matching increase remains **0 bytes**.
+
+An ASM review found a semantic error in `sub_80247D4`: an ordinary
+incoming packet's `0xFF` player value clears `gUnknown_030010AC[player]`
+without overwriting the outgoing packet slot. Explicit `0x6608` sync
+packets *do* copy both. Fixed in `fd3d2e9` with regression checks
+(`e62f480`).
+
+The four dispatch wrappers were reconstructed in `749d703` and covered by
+a ROM-free host test in `4bf42ba`. Isolated `cc -std=c99 -Wall -Wextra
+-Werror` smoke checks passed for the invalid-ID, sync, conflict and dispatch
+paths. These local isolated checks **do not establish full-suite success or
+agbcc equivalence**. The complete repo's `make compare` remains unrun.
+
+The blocker for actual +5pp remains the missing configured pinned agbcc
+matching-build environment. Resume by matching the existing near-miss
+`EngineInit` and `Task_RingsMgrStage` bodies with `scripts/nonmatch_triage.py`,
+promoting only after a private European-ROM `make compare`.
+
+---
+
 ## Checkpoint adicional — 2026-10-10, SIO decompilation
 
 **Target is matching code bytes, not merely C reconstruction.** The last
