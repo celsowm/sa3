@@ -107,38 +107,63 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024298.inc", void sub_8024298(void))
 }
 END_NONMATCH
 
+// Reconstructed from Thumb; retain the original assembly for matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_8024304.inc", void sub_8024304(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0;
+    gMultiSioSend.raw[2] = 0;
 }
 END_NONMATCH
 
+// Reconstructed from Thumb; retain the original assembly for matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_8024314.inc", void sub_8024314(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6C01;
 }
 END_NONMATCH
 
+// Reconstructed from Thumb; retain the original assembly for matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_8024324.inc", void sub_8024324(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6C02;
 }
 END_NONMATCH
 
+// Reconstructed from Thumb; retain the original assembly for matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_8024334.inc", void sub_8024334(void))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6C03;
+    gMultiSioSend.raw[4] = 0;
+    gMultiSioSend.raw[3] = 0;
+    gMultiSioSend.raw[5] = 0xFF;
+    gMultiSioSend.raw[6] = 0xFF;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024354.inc", void sub_8024354(void))
+// Reconstructed from Thumb; retain the original assembly for matching builds.
+NONMATCH("asm/non_matching/sio/sio__sub_8024354.inc", void sub_8024354(u8 player, u8 value))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6C03;
+    gMultiSioSend.raw[4] = value;
+    gMultiSioSend.raw[5 + player] = value;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024374.inc", void sub_8024374(void))
+// Reconstructed from Thumb; retain the original assembly for matching builds.
+NONMATCH("asm/non_matching/sio/sio__sub_8024374.inc", void sub_8024374(u8 player, u8 value))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6C04;
+    gMultiSioSend.raw[4] = value;
+    gMultiSioSend.raw[5 + player] = value;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024394.inc", void sub_8024394(void))
+// Reconstructed from Thumb; retain the original assembly for matching builds.
+NONMATCH("asm/non_matching/sio/sio__sub_8024394.inc", void sub_8024394(u8 player, u8 value))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6C07;
+    gMultiSioSend.raw[4] = value;
+    gMultiSioSend.raw[5 + player] = value;
 }
 END_NONMATCH
 
@@ -158,13 +183,19 @@ NONMATCH("asm/non_matching/sio/sio__sub_80243C4.inc", void sub_80243C4(u8 player
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80243E4.inc", void sub_80243E4(void))
+// Reconstructed from Thumb; retain the original assembly for matching builds.
+NONMATCH("asm/non_matching/sio/sio__sub_80243E4.inc", void sub_80243E4(u8 value))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6C0B;
+    gMultiSioSend.raw[7] = value;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80243F8.inc", void sub_80243F8(void))
+// Reconstructed from Thumb; retain the original assembly for matching builds.
+NONMATCH("asm/non_matching/sio/sio__sub_80243F8.inc", void sub_80243F8(u8 value))
 {
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6C0C;
+    gMultiSioSend.raw[7] = value;
 }
 END_NONMATCH
 
