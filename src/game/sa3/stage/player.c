@@ -11399,16 +11399,13 @@ NONMATCH("asm/non_matching/game/stage/player__sub_8011FB8.inc", void sub_8011FB8
     s32 var_r2_2;
     s32 var_r2_3;
     s32 var_r2_4;
-    u8 temp_r0;
-    u8 var_r2;
+    u32 temp_r0;
+    u32 var_r2;
     u32 moveState;
 
     temp_r0 = p->layer;
     if (p->moveState & MOVESTATE_GRAVITY_SWITCHED) {
-        var_r0 = -3 - p->spriteOffsetX + I(p->qWorldX);
-        var_r1 = I(p->qWorldY);
-        var_r2 = temp_r0;
-        temp_r0_2 = SA2_LABEL(sub_801E4E4)(var_r0, var_r1, var_r2, -8, NULL, SA2_LABEL(sub_801ED24));
+        temp_r0_2 = SA2_LABEL(sub_801E4E4)(-3 - p->spriteOffsetX + I(p->qWorldX), I(p->qWorldY), temp_r0, -8, NULL, SA2_LABEL(sub_801ED24));
     } else {
         var_r0 = -3 - p->spriteOffsetX + I(p->qWorldX);
         var_r1 = I(p->qWorldY);
