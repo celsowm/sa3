@@ -532,80 +532,44 @@ u32 sub_80B7D74(Struc_3001150_1C *strc, Player *partner, Player *p)
 }
 
 // (86.94%) https://decomp.me/scratch/S6QH2
-NONMATCH("asm/non_matching/game/cx__sub_80B7E1C.inc", bool32 sub_80B7E1C(Struc_3001150_1C *strc, Player *partner, Player *p))
+bool32 sub_80B7E1C(Struc_3001150_1C *strc, Player *partner, Player *p)
 {
-    s32 temp_r0;
-    s32 character;
     s32 temp_r3;
-    s32 var_r0;
-    s32 var_r0_2;
-    s32 var_r6;
-    u32 var_r1;
+    s32 range;
     s32 max;
+    s32 rand;
+    u32 result;
 
-    if ((strc->unk0 != 0xF) && (partner->moveState & 4)) {
-        if (((0 - ~strc->unk34) | ~strc->unk34) < 0) {
-            temp_r3 = partner->unkC & 0xC000;
-            var_r6 = 0;
-            if ((partner->charFlags.character == CREAM) && ((temp_r3 == 0x4000) || (temp_r3 == 0xC000))) {
-                var_r6 = 0x4000;
-            } else {
-                do {
-                    if (partner->charFlags.character == SONIC) {
-                        if ((temp_r3 == 0x4000) || (temp_r3 == 0x8000)) {
-                            asm("");
-                            var_r6 = Q(32);
-                            break;
-                        }
-                        asm("");
-                    }
-                    if (partner->charFlags.character == TAILS) {
-                        if ((temp_r3 == 0x4000) || (temp_r3 == 0x8000)) {
-                            var_r6 = Q(32);
-                            break;
-                        }
-                        asm("");
-                    }
-                    if (partner->charFlags.character == KNUCKLES) {
-                        if ((temp_r3 == 0x4000)) {
-                            var_r6 = Q(32);
-                            break;
-                        }
-                        asm("");
-                    }
-                    if (partner->charFlags.character == AMY) {
-                        if ((temp_r3 == 0x4000) || (temp_r3 == 0x20)) {
-                            var_r6 = Q(32);
-                            break;
-                        }
-                        asm("");
-                    }
-                } while (0);
-            }
-
-            if (ABS(strc->unk14) <= var_r6) {
-                if (ABS(strc->unk18) > (max = Q(32))) {
-                block_25:
-                    return 0U;
-                }
-                temp_r0 = PseudoRandom32();
-                var_r1 = 0;
-                if (max > (u32)((u32)(temp_r0 << 8) >> 0x10)) {
-                    var_r1 = 1;
-                }
-                return var_r1;
-            }
-            goto block_25;
-        } else {
-            goto block_25;
-        }
-    } else {
-        goto block_25;
+    if ((strc->unk0 == 0xF) || !(partner->moveState & 4) || (((0 - ~strc->unk34) | ~strc->unk34) >= 0)) {
+        goto ret0;
     }
 
-    return 1;
+    temp_r3 = partner->unkC & 0xC000;
+    range = 0;
+
+    if ((partner->charFlags.character == CREAM) && ((temp_r3 == 0x4000) || (temp_r3 == 0xC000))) {
+        range = 0x4000;
+    } else if ((partner->charFlags.character == SONIC && (temp_r3 == 0x4000 || temp_r3 == 0x8000))
+               || (partner->charFlags.character == TAILS && (temp_r3 == 0x4000 || temp_r3 == 0x8000))
+               || (partner->charFlags.character == KNUCKLES && temp_r3 == 0x4000)
+               || (partner->charFlags.character == AMY && (temp_r3 == 0x4000 || temp_r3 == 0x20))) {
+        range = Q(32);
+    }
+
+    if (ABS(strc->unk14) <= range) {
+        if (ABS(strc->unk18) > (max = Q(32))) {
+        ret0:
+            return 0;
+        }
+        rand = PseudoRandom32();
+        result = 0;
+        if (max > (u32)((u32)(rand << 8) >> 0x10)) {
+            result = 1;
+        }
+        return result;
+    }
+    goto ret0;
 }
-END_NONMATCH
 
 bool32 sub_80B7F00(Struc_3001150_1C *strc, Player *partner, Player *p)
 {
