@@ -335,7 +335,7 @@ void DrawBackground(Background *);
 bool32 SA2_LABEL(sub_8002B20)(void);
 u32 SA2_LABEL(sub_80039E4)(void);
 u32 SA2_LABEL(sub_8004010)(void);
-s16 SA2_LABEL(sub_8004418)(s16 x, s16 y);
+s32 SA2_LABEL(sub_8004418)(s16 x, s16 y);
 void ProcessOamBuffers(void);
 OamData *OamMalloc(u8 order);
 
@@ -355,7 +355,7 @@ void SA2_LABEL(sub_8003EE4)(u16 p0, s16 p1, s16 p2, s16 p3, s16 p4, s16 p5, s16 
 // void sub_8003914(Sprite *);
 // void sub_80047A0(u16, s16, s16, u16);
 //
-s16 sa2__sub_8004418(s16 x, s16 y);
+s32 sa2__sub_8004418(s16 x, s16 y);
 
 extern u8 gNextFreeAffineIndex; // related to Sprite.frameFlags
 

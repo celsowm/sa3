@@ -304,7 +304,7 @@ NONMATCH("asm/non_matching/game/bosses/gatk__sub_807ABB8.inc", bool32 sub_807ABB
 END_NONMATCH
 
 // (98.69%) https://decomp.me/scratch/KfevY
-NONMATCH("asm/non_matching/game/bosses/gatk__sub_807AC48.inc", bool32 sub_807AC48(GemerlAttacks *strc10C))
+bool32 sub_807AC48(GemerlAttacks *strc10C)
 {
     s16 var_r0;
     s32 temp_r2;
@@ -368,7 +368,6 @@ NONMATCH("asm/non_matching/game/bosses/gatk__sub_807AC48.inc", bool32 sub_807AC4
     tf->rotation = (rotation)&0x3FF;
     return 0U;
 }
-END_NONMATCH
 
 // (93.86%) https://decomp.me/scratch/P8qmG
 NONMATCH("asm/non_matching/game/bosses/gatk__sub_807AD88.inc", bool32 sub_807AD88(GemerlAttacks *strc10C))

@@ -70,7 +70,7 @@ const u8 gOamShapesSizes[12][2] = {
 // Potentially something to do with collision/distance?
 //
 // Vector-to-rotation(0-1023) ?
-s16 sa2__sub_8004418(s16 x, s16 y)
+s32 sa2__sub_8004418(s16 x, s16 y)
 {
     s16 fraction;
     s32 result;
