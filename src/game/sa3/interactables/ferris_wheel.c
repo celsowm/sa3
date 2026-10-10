@@ -73,7 +73,7 @@ void CreateEntity_FerrisWheel(MapEntity *me, u16 regionX, u16 regionY, u8 id)
 }
 
 // (99.83%) https://decomp.me/scratch/shAdS
-NONMATCH("asm/non_matching/game/interactables/ferris_wheel__Task_FerrisWheel.inc", void Task_FerrisWheel(void))
+void Task_FerrisWheel(void)
 {
     FerrisWheel *wheel = TASK_DATA(gCurTask);
     Sprite *s2 = &wheel->s2;
@@ -95,12 +95,12 @@ NONMATCH("asm/non_matching/game/interactables/ferris_wheel__Task_FerrisWheel.inc
         s32 mask;
 
         ball = &wheel->balls[i];
-        mask = SIN_PERIOD - 1;
 
         sinX = SIN(r6) >> 8;
         sinY = COS(r6) >> 8;
 
         ball->screenX0 = (sinX * 17) >> 4;
+        mask = SIN_PERIOD - 1;
         ball->screenY0 = (sinY * 17) >> 4;
         ball->screenX1 = (sinX * 5) >> 2;
         ball->screenY1 = (sinY * 5) >> 2;
@@ -188,7 +188,6 @@ NONMATCH("asm/non_matching/game/interactables/ferris_wheel__Task_FerrisWheel.inc
 
     sub_8046EC0();
 }
-END_NONMATCH
 
 void sub_8046E20(FerrisWheel *wheel)
 {
