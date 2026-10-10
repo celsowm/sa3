@@ -141,3 +141,31 @@ The original SAT-R/sa3 README prohibits AI-origin issues and pull requests; keep
 - Created `scripts/boss2_reference_oracle.py` and `scripts/tests/test_boss2_reference_oracle.py` for candidate `sub_806CFD4`: original Europe ROM interval **0x0806CFD4..0x0806D01C** (72 bytes), SHA-256 `90b2fc662a30ffd5bf7693e8ebce4da3a744cabc389a2f4653daf509f0639ba1`. Four boundary behavior tests were authored; hosted or complete local suite execution for this new addition is **not yet verified**.
 - This oracle documents vertical screen-space behavior, but is **not** an emitted matching C implementation. Its mathematical model assumes typical non-overflow game coordinates, not universal ARM flag accuracy.
 - **No change to the historical matching percentage.** The immediate next gate remains provisioning agbcc/binutils in a network-enabled build environment and reproducing the European image checksum.
+
+
+## Implemented source milestone — 2026-10-10: six mathematical C fallbacks
+
+This iteration advanced actual game source, not only tooling:
+
+- `src/game/math.c`: six formerly empty `NONMATCH` C bodies now contain
+  fixed-point implementations for quaternion normalization/conjugation,
+  quaternion multiplication, matrix transposition, quaternion-to-matrix
+  conversion and 3x3 affine transform composition.
+- `scripts/tests/test_math_c_fallbacks.py` extracts these functions from the
+  **actual source file**, compiles them with native C and checks 2,600 seeded
+  mathematical examples against separate reference formulas.
+- A parallel equivalent local host-GCC implementation was compiled and
+  evaluated on 2,600 samples (all passed); an equivalent ARMv4T Thumb object
+  also compiled with Clang 17. Refer to
+  [SA2_MATH_C_DECOMP_BATCH.md](SA2_MATH_C_DECOMP_BATCH.md) for evidence and
+  restrictions.
+- **These six are source-level C reimplementations, NOT verified matching C.**
+  The `NONMATCH` fallbacks remain intact for original GBA builds because
+  exact `agbcc` and `make compare` validation is still pending. Do not
+  increase the historical 77.97% matching number.
+
+**Updated priority:** once the exact European build runs, measure and tackle
+`sa2__sub_8083B88` first among the new math functions because it covers
+3x3 basis multiplication plus 64-bit translation, then the normalization and
+matrix helpers. Return to Boss 2 `sub_806CFD4` and entity fallbacks after
+confirming the best matching-code bytes gained per function.
