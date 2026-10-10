@@ -1,6 +1,7 @@
 #include "global.h"
 #include "core.h"
 #include "malloc_vram.h"
+#include "lib/m4a/m4a.h"
 #include "game/stage.h" // gStageData
 #include "game/shared/stage/camera.h"
 #include "game/shared/stage/player.h"
@@ -37,10 +38,19 @@ typedef struct {
     /* 0x06C */ void *tiles6C;
     /* 0x070 */ u32 unk70;
     /* 0x074 */ void *tiles74;
-    /* 0x078 */ u8 filler78[0x314];
+    /* 0x078 */ u8 filler78[0x2C];
+    /* 0x0A4 */ s32 unkA4;
+    /* 0x0A8 */ s32 unkA8;
+    /* 0x0AC */ u8 fillerAC[0x4];
+    /* 0x0B0 */ s32 unkB0;
+    /* 0x0B4 */ s32 unkB4;
+    /* 0x0B8 */ u8 fillerB8[0x35];
+    /* 0x0ED */ u8 unkED;
+    /* 0x0EE */ u8 fillerEE[0x1];
+    /* 0x0EF */ s8 unkEF;
+    /* 0x0F0 */ u8 fillerF0[0x29C];
     /* 0x38C */ Sprite s38C;
-    /* 0x3B4 */ Sprite s3B4;
-    /* 0x3DC */ u8 filler3DC[0x78];
+    /* 0x3B4 */ Sprite s3B4[4];
     /* 0x454 */ Sprite s454;
     /* 0x47C */ u8 filler47C[0x398];
     /* 0x814 */ Sprite s814;
@@ -57,6 +67,20 @@ void sub_80824F4(ExtraBoss *boss);
 void sub_8082A4C(ExtraBoss *boss);
 void sub_80853D8(ExtraBoss *boss);
 void sub_8086F08(void);
+void sub_8086F48(void);
+void sub_808211C(ExtraBoss *boss);
+void sub_8082388(ExtraBoss *boss);
+void sub_8082428(ExtraBoss *boss);
+void sub_8082794(ExtraBoss *boss);
+void sub_8082D08(ExtraBoss *boss);
+void sub_80862D8(ExtraBoss *boss);
+void sub_8084EB4(ExtraBoss *boss);
+void sub_8081EFC(ExtraBoss *boss);
+void sub_8087174(ExtraBoss *boss);
+
+extern void (*const gUnknown_08E2ED50[])(ExtraBoss *);
+extern const u16 gUnknown_080D5D0C[][2];
+extern const u8 gUnknown_080D5D18[];
 
 NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8081C80.inc", void sub_8081C80(void))
 {
@@ -86,7 +110,7 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8081C80.inc", void sub_80
     gBgScrollRegs[0][1] = 48;
     gCamera.SA2_LABEL(unk50) |= 1;
     boss->s38C.tiles = NULL;
-    boss->s3B4.tiles = NULL;
+    boss->s3B4[0].tiles = NULL;
     boss->s454.tiles = NULL;
     boss->s814.tiles = NULL;
     boss->tiles1C = NULL;
@@ -111,8 +135,8 @@ void TaskDestructor_878_8081D64(struct Task *t)
     if (boss->s38C.tiles != NULL) {
         VramFree(boss->s38C.tiles);
     }
-    if (boss->s3B4.tiles != NULL) {
-        VramFree(boss->s3B4.tiles);
+    if (boss->s3B4[0].tiles != NULL) {
+        VramFree(boss->s3B4[0].tiles);
     }
     if (boss->s454.tiles != NULL) {
         VramFree(boss->s454.tiles);
@@ -192,17 +216,17 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8081FBC.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_808211C.inc", void sub_808211C(void))
+NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_808211C.inc", void sub_808211C(ExtraBoss *boss))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082388.inc", void sub_8082388(void))
+NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082388.inc", void sub_8082388(ExtraBoss *boss))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082428.inc", void sub_8082428(void))
+NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082428.inc", void sub_8082428(ExtraBoss *boss))
 {
 }
 END_NONMATCH
@@ -212,7 +236,7 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_80824F4.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082794.inc", void sub_8082794(void))
+NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082794.inc", void sub_8082794(ExtraBoss *boss))
 {
 }
 END_NONMATCH
@@ -222,7 +246,7 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082A4C.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082D08.inc", void sub_8082D08(void))
+NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8082D08.inc", void sub_8082D08(ExtraBoss *boss))
 {
 }
 END_NONMATCH
@@ -272,7 +296,7 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8084C50.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8084EB4.inc", void sub_8084EB4(void))
+NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8084EB4.inc", void sub_8084EB4(ExtraBoss *boss))
 {
 }
 END_NONMATCH
@@ -322,7 +346,7 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_808587C.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_80862D8.inc", void sub_80862D8(void))
+NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_80862D8.inc", void sub_80862D8(ExtraBoss *boss))
 {
 }
 END_NONMATCH
@@ -367,65 +391,121 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__Task_38_8086E58.inc", void Ta
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__TaskDestructor_878_2_8086ED8.inc", void TaskDestructor_878_2_8086ED8(struct Task *t))
+void TaskDestructor_878_2_8086ED8(struct Task *t)
 {
-}
-END_NONMATCH
+    ExtraBoss *boss = TASK_DATA(t);
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8086F08.inc", void sub_8086F08(void))
-{
+    if (boss->s38C.tiles != NULL) {
+        VramFree(boss->s38C.tiles);
+    }
+    if (boss->s454.tiles != NULL) {
+        VramFree(boss->s454.tiles);
+    }
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8086F48.inc", void sub_8086F48(void))
+void sub_8086F08(void)
 {
-}
-END_NONMATCH
+    ExtraBoss *boss = TASK_DATA(gCurTask);
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__Task_878_2_8086FA4.inc", void Task_878_2_8086FA4(void))
-{
+    m4aSongNumStart(575);
+    sub_808211C(boss);
+    sub_8082388(boss);
+    sub_8082794(boss);
+    gCurTask->main = sub_8086F48;
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8086FE4.inc", void sub_8086FE4(void))
+void sub_8086F48(void)
 {
-}
-END_NONMATCH
+    ExtraBoss *boss = TASK_DATA(gCurTask);
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8086FF8.inc", void sub_8086FF8(void))
-{
+    sub_8087174(boss);
+    sub_808211C(boss);
+    gUnknown_08E2ED50[boss->unk1](boss);
+    sub_80862D8(boss);
+    sub_8084EB4(boss);
+    sub_8082428(boss);
+    sub_8082388(boss);
+    sub_8082794(boss);
+    sub_8081EFC(boss);
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087038.inc", void sub_8087038(void))
+void Task_878_2_8086FA4(void)
 {
-}
-END_NONMATCH
+    ExtraBoss *boss = TASK_DATA(gCurTask);
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087040.inc", void sub_8087040(void))
-{
+    sub_808211C(boss);
+    gUnknown_08E2ED50[boss->unk1](boss);
+    sub_8082388(boss);
+    sub_8082D08(boss);
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087044.inc", void sub_8087044(void))
+void sub_8086FE4(void)
 {
+    TaskDestroy(gCurTask);
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_808706C.inc", void sub_808706C(void))
+void sub_8086FF8(ExtraBoss *boss, u8 arg1)
 {
-}
-END_NONMATCH
+    boss->unkED = arg1;
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__TaskDestructor_50_80870AC.inc", void TaskDestructor_50_80870AC(void))
-{
+    switch (boss->unkED) {
+        case 7:
+            boss->unkB0 = Q(120);
+            boss->unkB4 = 0;
+            break;
+        case 8:
+            boss->unkA4 = -Q(2);
+            boss->unkA8 = -Q(1);
+            break;
+    }
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_80870B0.inc", void sub_80870B0(void))
+void sub_8087038(ExtraBoss *boss, s8 arg1)
+{
+    boss->unkEF = arg1;
+}
+
+void sub_8087040(void)
 {
 }
-END_NONMATCH
+
+void sub_8087044(ExtraBoss *boss, u8 arg1)
+{
+    Sprite *s = &boss->s814;
+    s->anim = gUnknown_080D5D0C[arg1][0];
+    s->variant = gUnknown_080D5D0C[arg1][1];
+    s->prevVariant = -1;
+}
+
+void sub_808706C(ExtraBoss *boss, u8 arg1)
+{
+    u8 i;
+
+    for (i = 0; i < ARRAY_COUNT(boss->s3B4); i++) {
+        Sprite *s = &boss->s3B4[i];
+        if (arg1 == 0) {
+            s->anim = 1278;
+            s->variant = 1;
+        } else {
+            s->anim = 1278;
+            s->variant = 0;
+        }
+    }
+}
+
+void TaskDestructor_50_80870AC(struct Task *t)
+{
+}
+
+void sub_80870B0(ExtraBoss *boss)
+{
+    boss->unk1 = gUnknown_080D5D18[boss->unkA];
+    if (++boss->unkA > 4) {
+        boss->unkA = 0;
+    }
+    boss->unk4 = 1;
+    boss->unk8 = 0;
+}
 
 NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_80870E0.inc", void sub_80870E0(void))
 {
@@ -442,7 +522,7 @@ NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087140.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087174.inc", void sub_8087174(void))
+NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_8087174.inc", void sub_8087174(ExtraBoss *boss))
 {
 }
 END_NONMATCH
