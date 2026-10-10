@@ -821,13 +821,15 @@ void Task_80A14AC(void)
     gCurTask->main = Task_CallDestroy_80A1498;
 }
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A14E4.inc", bool32 sub_80A14E4(MpCharSelect *mcs))
+bool32 sub_80A14E4(MpCharSelect *mcs)
 {
     u8 count = 0;
 
     if ((mcs->unk4C >= Q(300)) || ((mcs->unk4C += 0xE00) >= Q(300))) {
-        mcs->unk4C = Q(300);
-        count = 1;
+        do {
+            mcs->unk4C = Q(300);
+            count = 1;
+        } while (0);
     }
 
     if ((mcs->unk6C >= Q(330)) || ((mcs->unk6C += 0xE00) >= Q(330))) {
@@ -841,7 +843,6 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A14E4.inc", bool32 s
         return FALSE;
     }
 }
-END_NONMATCH
 
 bool32 sub_80A1540(MpCharSelect *mcs)
 {
@@ -928,13 +929,15 @@ bool32 sub_80A1668(MpCharSelect *mcs)
     return FALSE;
 }
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1694.inc", bool32 sub_80A1694(MpCharSelect *mcs))
+bool32 sub_80A1694(MpCharSelect *mcs)
 {
     u8 count = 0;
 
     if ((mcs->unk4C >= Q(300)) || ((mcs->unk4C += 0x8C0) >= Q(300))) {
-        mcs->unk4C = Q(300);
-        count = 1;
+        do {
+            mcs->unk4C = Q(300);
+            count = 1;
+        } while (0);
     }
 
     if ((mcs->unk6C >= Q(300)) || ((mcs->unk6C += 0x840) >= Q(300))) {
@@ -948,7 +951,6 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1694.inc", bool32 s
         return FALSE;
     }
 }
-END_NONMATCH
 
 bool32 sub_80A16EC(MpCharSelect *mcs)
 {
