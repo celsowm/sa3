@@ -5,6 +5,7 @@
 #include "game/save.h"
 #include "game/screen_fade.h"
 #include "game/stage.h" // gStageData
+#include "game/shared/stage/player.h"
 #include "constants/songs.h"
 
 // Same layout as SDC_EC in sio_debug_code_maybe.c
@@ -63,7 +64,7 @@ typedef struct {
     /* 0x07C */ s32 unk7C;
     /* 0x080 */ s32 unk80;
     /* 0x084 */ u8 *tiles;
-    /* 0x088 */ u32 unk88;
+    /* 0x088 */ void *unk88;
     /* 0x08C */ Sprite s8C;
     /* 0x0B4 */ Sprite sB4;
     /* 0x0DC */ Sprite sDC;
@@ -82,6 +83,16 @@ void Task_809FCFC(void);
 void TaskDestructor_80A13B0(struct Task *t);
 void sub_809F964(MpCharSelect *mcs);
 void sub_809FBD0(MpCharSelect *mcs);
+void Task_809FEB0(void);
+void Task_80A13F4(void);
+void Task_80A14AC(void);
+void sub_80A1030(MpCharSelect *mcs);
+void sub_80A10B0(MpCharSelect *mcs);
+void sub_80A1110(MpCharSelect *mcs);
+void sub_80A11B8(MpCharSelect *mcs);
+void sub_80A19C0(MpCharSelect *mcs);
+extern void *CreateSomeTask_809BF3C(void *param0, void *param1, void *param2, void *param3, void *tiles);
+extern const u16 gUnknown_080D8CDC[];
 
 extern const TileInfo2 gUnknown_080D8D00;
 extern const TileInfo2 gUnknown_080D8D08[][8];
@@ -297,15 +308,120 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_809F964.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_809FBD0.inc", void sub_809FBD0(MpCharSelect *mcs))
+void sub_809FBD0(MpCharSelect *mcs)
 {
-}
-END_NONMATCH
+    gBgCntRegs[0] = 0x4E07;
+    gBgScrollRegs[0][0] = 0;
+    gBgScrollRegs[0][1] = 0;
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__Task_809FCFC.inc", void Task_809FCFC(void))
-{
+    {
+        Background *bg = &mcs->bg1F4;
+        bg->graphics.dest = BG_CHAR_ADDR(1);
+        bg->graphics.anim = 0;
+        bg->layoutVram = BG_SCREEN_ADDR(14);
+        bg->unk18 = 0;
+        bg->unk1A = 0;
+        bg->tilemapId = gUnknown_080D8CDC[0];
+        bg->unk1E = 0;
+        bg->unk20 = 0;
+        bg->unk22 = 0;
+        bg->unk24 = 0;
+        bg->targetTilesX = 45;
+        bg->targetTilesY = 20;
+        mcs->bg1F4.paletteOffset = 0;
+        bg->flags = 0;
+        DrawBackground(bg);
+    }
+
+    gBgCntRegs[1] = 0x30E;
+    gBgScrollRegs[1][0] = 0;
+    gBgScrollRegs[1][1] = 0;
+
+    {
+        Background *bg = &mcs->bg234;
+        bg->graphics.dest = BG_CHAR_ADDR(3);
+        bg->graphics.anim = 0;
+        bg->layoutVram = BG_SCREEN_ADDR(3);
+        bg->unk18 = 0;
+        bg->unk1A = 0;
+        bg->tilemapId = gUnknown_080D8CDC[11];
+        bg->unk1E = 0;
+        bg->unk20 = 0;
+        bg->unk22 = 0;
+        bg->unk24 = 0;
+        bg->targetTilesX = 16;
+        bg->targetTilesY = 16;
+        mcs->bg234.paletteOffset = 0;
+        bg->flags = 1;
+        DrawBackground(bg);
+    }
+
+    gBgCntRegs[2] = 0x1B89;
+    gBgScrollRegs[2][0] = 0;
+    gBgScrollRegs[2][1] = 0;
+
+    {
+        Background *bg = &mcs->bg274;
+        bg->graphics.dest = BG_CHAR_ADDR(2);
+        bg->graphics.anim = 0;
+        bg->layoutVram = BG_SCREEN_ADDR(27);
+        bg->unk18 = 0;
+        bg->unk1A = 0;
+        bg->tilemapId = gUnknown_080D8CDC[mcs->unk1 + 5];
+        bg->unk1E = 0;
+        bg->unk20 = 0;
+        bg->unk22 = 0;
+        bg->unk24 = 0;
+        bg->targetTilesX = 16;
+        bg->targetTilesY = 16;
+        mcs->bg274.paletteOffset = 0;
+        bg->flags = 6;
+        DrawBackground(bg);
+    }
 }
-END_NONMATCH
+
+void Task_809FCFC(void)
+{
+    MpCharSelect *mcs = TASK_DATA(gCurTask);
+    u8 i;
+
+    sub_80A19C0(mcs);
+    sub_80A1030(mcs);
+    sub_80A10B0(mcs);
+    sub_80A1110(mcs);
+    sub_80A11B8(mcs);
+    mcs->unk88 = CreateSomeTask_809BF3C(&mcs->unk1, &mcs->unk3, &mcs->unk4C, &mcs->unk50, mcs->tiles);
+
+    gPlayers[PLAYER_1].charFlags.character = 0;
+    gPlayers[PLAYER_1].charFlags.partnerIndex = PLAYER_3;
+    gPlayers[PLAYER_2].charFlags.character = 0;
+    gPlayers[PLAYER_2].charFlags.partnerIndex = PLAYER_4;
+    gPlayers[PLAYER_3].charFlags.character = 2;
+    gPlayers[PLAYER_3].charFlags.partnerIndex = PLAYER_1;
+    gPlayers[PLAYER_4].charFlags.character = 2;
+    gPlayers[PLAYER_4].charFlags.partnerIndex = PLAYER_2;
+
+    for (i = 0; i < 4; i++) {
+        if (gStageData.playerIndex == i) {
+            gPlayers[i].charFlags.someIndex = 1;
+        } else {
+            gPlayers[i].charFlags.someIndex = 3;
+            gPlayers[i].charFlags.padding1 = i;
+        }
+    }
+
+    if (*mcs->unk18 == 35) {
+        *mcs->unk18 = 29;
+        mcs->unk3 = *mcs->unk18;
+        mcs->unk4C = Q(310);
+        mcs->unk54 = Q(310);
+        gCurTask->main = Task_80A13F4;
+    } else if (*mcs->unk18 == 34) {
+        gCurTask->main = Task_80A14AC;
+    } else {
+        gCurTask->main = Task_809FEB0;
+    }
+}
 
 NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__Task_809FEB0.inc", void Task_809FEB0(void))
 {
@@ -407,22 +523,22 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0EA8.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1030.inc", void sub_80A1030(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1030.inc", void sub_80A1030(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A10B0.inc", void sub_80A10B0(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A10B0.inc", void sub_80A10B0(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1110.inc", void sub_80A1110(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1110.inc", void sub_80A1110(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A11B8.inc", void sub_80A11B8(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A11B8.inc", void sub_80A11B8(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
@@ -567,7 +683,7 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A1968.inc", void sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A19C0.inc", void sub_80A19C0(void))
+NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A19C0.inc", void sub_80A19C0(MpCharSelect *mcs))
 {
 }
 END_NONMATCH
