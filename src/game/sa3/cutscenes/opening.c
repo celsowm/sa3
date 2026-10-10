@@ -52,7 +52,33 @@ typedef struct {
     /* 0x60 */ Background bg60;
 } IntroA0; /* 0xA0 */
 
+typedef struct {
+    /* 0x000 */ u8 unk0;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u16 unk2;
+    /* 0x004 */ u16 unk4;
+    /* 0x006 */ u16 unk6;
+    /* 0x008 */ s32 unk8;
+    /* 0x00C */ s32 unkC;
+    /* 0x010 */ s32 unk10;
+    /* 0x014 */ s32 unk14;
+    /* 0x018 */ s32 unk18;
+    /* 0x01C */ s32 unk1C;
+    /* 0x020 */ s32 unk20;
+    /* 0x024 */ s32 unk24;
+    /* 0x028 */ s32 unk28;
+    /* 0x02C */ Background bg2C;
+    /* 0x06C */ Background bg6C;
+    /* 0x0AC */ Sprite sAC;
+    /* 0x0D4 */ Sprite sD4[2];
+    /* 0x124 */ Sprite s124[2];
+} Intro174; /* 0x174 */
+
 void Task_170_GameIntroInit(void);
+void Task_174_80A3444(void);
+void TaskDestructor_174_80A3E38(struct Task *t);
+void sub_80A3228(Intro174 *strc);
+void sub_80A3354(Intro174 *strc);
 void Task_A0_80A2FF4(void);
 void Task_A0_80A3074(void);
 void TaskDestructor_A0_80A3E34(struct Task *t);
@@ -77,6 +103,7 @@ s16 sub_80A2DD8(void);
 
 extern ColorRaw sub_80C4C0C(ColorRaw color);
 extern const u16 Palette_unknown_424[];
+extern const TileInfo2 gUnknown_080D9980[5];
 void TaskDestructor_GameIntro(struct Task *t);
 
 void CreateGameIntroState(s16 state)
@@ -804,18 +831,158 @@ void Task_A0_80A3074(void)
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__CreateIntroEggmanCutscene.inc", void CreateIntroEggmanCutscene(u8 arg0))
 {
+    Intro174 *strc;
+
+    gDispCnt = 0x7140;
+    strc = TASK_DATA(TaskCreate(Task_174_80A3444, sizeof(Intro174), 0x100, 0, TaskDestructor_174_80A3E38));
+    strc->unk0 = arg0;
+    strc->unk10 = Q(64);
+    strc->unk8 = Q(32);
+    strc->unk14 = 0;
+    strc->unk18 = -Q(100);
+    strc->unk24 = Q(230);
+    strc->unk28 = Q(130);
+    strc->unk1C = Q(180);
+    strc->unk20 = Q(160);
+    strc->unk1 = 1;
+    strc->unk6 = 0;
+    strc->unk4 = 0;
+    strc->unk2 = 0;
+
+    DmaFill32(3, 0, BG_CHAR_ADDR_FROM_BGCNT(0), 0x40);
+
+    gBgSprites_Unknown1[1] = 0;
+    gBgSprites_Unknown2[1][0] = 0;
+    gBgSprites_Unknown2[1][1] = 0;
+    gBgSprites_Unknown2[1][2] = 0xFF;
+    gBgSprites_Unknown2[1][3] = 0x40;
+    gBgSprites_Unknown1[2] = 0;
+    gBgSprites_Unknown2[2][0] = 0;
+    gBgSprites_Unknown2[2][1] = 0;
+    gBgSprites_Unknown2[2][2] = -1;
+    gBgSprites_Unknown2[2][3] = 0x40;
+
+    sub_80A3354(strc);
+
+    gWinRegs[WINREG_WIN0V] = (I(strc->unk10) << 8) + I(strc->unk10) + I(strc->unk8);
+
+    if (strc->unk0 != 0) {
+        gBgPalette[0] = sub_80C4C0C(RGB_BLACK);
+    } else {
+        gBgPalette[0] = sub_80C4C0C(RGB_WHITE);
+    }
+    gFlags |= FLAGS_UPDATE_BACKGROUND_PALETTES;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3228.inc", void sub_80A3228(void))
+void sub_80A3228(Intro174 *strc)
 {
-}
-END_NONMATCH
+    u8 i = 0;
+    u8 *tiles = OBJ_VRAM0;
+    Sprite *s = &strc->sAC;
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A3354.inc", void sub_80A3354(void))
-{
+    s->tiles = tiles;
+    tiles += gUnknown_080D9980[0].numTiles * TILE_SIZE_4BPP;
+    s->anim = gUnknown_080D9980[0].anim;
+    s->variant = gUnknown_080D9980[0].variant;
+    s->prevVariant = -1;
+    s->x = I(strc->unk24);
+    s->y = I(strc->unk28);
+    s->oamFlags = SPRITE_OAM_ORDER(0);
+    s->animCursor = 0;
+    s->qAnimDelay = 0;
+    s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+    s->palId = 0;
+    s->frameFlags = 0;
+    UpdateSpriteAnimation(s);
+
+    for (; i < ARRAY_COUNT(strc->sD4); i++) {
+        Sprite *s = &strc->sD4[i];
+        s->tiles = tiles;
+        tiles += gUnknown_080D9980[i + 1].numTiles * TILE_SIZE_4BPP;
+        s->anim = gUnknown_080D9980[i + 1].anim;
+        s->variant = gUnknown_080D9980[i + 1].variant;
+        s->prevVariant = -1;
+        s->x = I(strc->unk1C);
+        s->y = I(strc->unk20);
+        s->oamFlags = SPRITE_OAM_ORDER(1);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
+
+    for (i = 0; i < ARRAY_COUNT(strc->s124); i++) {
+        Sprite *s = &strc->s124[i];
+        s->tiles = tiles;
+        tiles += gUnknown_080D9980[i + 3].numTiles * TILE_SIZE_4BPP;
+        s->anim = gUnknown_080D9980[i + 3].anim;
+        s->variant = gUnknown_080D9980[i + 3].variant;
+        s->prevVariant = -1;
+        s->x = I(strc->unk1C);
+        s->y = I(strc->unk20);
+        s->oamFlags = SPRITE_OAM_ORDER(1);
+        s->animCursor = 0;
+        s->qAnimDelay = 0;
+        s->animSpeed = SPRITE_ANIM_SPEED(1.0);
+        s->palId = 0;
+        s->frameFlags = 0;
+        UpdateSpriteAnimation(s);
+    }
 }
-END_NONMATCH
+
+void sub_80A3354(Intro174 *strc)
+{
+    gDispCnt |= DISPCNT_BG2_ON;
+    gBgCntRegs[2] = 0x5888;
+    gBgScrollRegs[2][0] = I(strc->unk14);
+    gBgScrollRegs[2][1] = I(strc->unk18);
+
+    {
+        Background *bg = &strc->bg2C;
+        bg->graphics.dest = BG_CHAR_ADDR(2);
+        bg->graphics.anim = 0;
+        bg->layoutVram = BG_SCREEN_ADDR(24);
+        bg->unk18 = 0;
+        bg->unk1A = 0;
+        bg->tilemapId = TM_UNKNOWN_300;
+        bg->unk1E = 0;
+        bg->unk20 = 0;
+        bg->unk22 = 0;
+        bg->unk24 = 0;
+        bg->targetTilesX = 32;
+        bg->targetTilesY = 32;
+        strc->bg2C.paletteOffset = 0;
+        bg->flags = 6;
+        DrawBackground(bg);
+    }
+
+    gDispCnt |= DISPCNT_BG1_ON;
+    gBgCntRegs[1] = 0x681;
+    gBgScrollRegs[1][0] = 0;
+    gBgScrollRegs[1][1] = 0;
+
+    {
+        Background *bg = &strc->bg6C;
+        bg->graphics.dest = BG_CHAR_ADDR(0);
+        bg->graphics.anim = 0;
+        bg->layoutVram = BG_SCREEN_ADDR(6);
+        bg->unk18 = 0;
+        bg->unk1A = 0;
+        bg->tilemapId = TM_UNKNOWN_299;
+        bg->unk1E = 0;
+        bg->unk20 = 0;
+        bg->unk22 = 0;
+        bg->unk24 = 0;
+        bg->targetTilesX = 32;
+        bg->targetTilesY = 32;
+        strc->bg6C.paletteOffset = 0;
+        bg->flags = 5;
+        DrawBackground(bg);
+    }
+}
 
 NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_174_80A3444.inc", void Task_174_80A3444(void))
 {
