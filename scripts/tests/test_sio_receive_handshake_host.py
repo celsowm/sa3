@@ -109,7 +109,7 @@ int main(void) {
     // updating the state while still returning zero.
     for (st=0; st<6; st++) for (flags=0; flags<2; flags++)
     for (kind=0; kind<8; kind++) for (n=0; n<256; n++) {
-        int linked=flags!=0, success=mockStatus>=0, accept, affirmative;
+        int linked=flags!=0, success=statuses[st]>=0, accept, affirmative;
         u8 old=0xAB;
         reset();
         mockStatus=statuses[st];
