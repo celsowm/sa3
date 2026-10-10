@@ -18,7 +18,10 @@ def check(root: Path, rom: Path, build: bool = False) -> dict:
     result = {"rom": {"exists": rom.is_file()}, "toolchain": {}, "checks": {}, "build": None}
     if rom.is_file():
         with rom.open("rb") as stream:
-            digest = hashlib.file_digest(stream, "sha1").hexdigest()
+            hasher = hashlib.sha1()
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                hasher.update(block)
+            digest = hasher.hexdigest()
         result["rom"].update({
             "bytes": rom.stat().st_size, "sha1": digest,
             "matches_europe": digest == TARGET_SHA1,
