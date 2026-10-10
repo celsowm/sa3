@@ -34,6 +34,11 @@ void sub_8025C64(u8 value);
 void sub_8025D20(u8 value);
 void sub_8025CD8(void);
 void sub_8026AB8(const u8 *packet);
+u16 sub_80248F4(void);
+u16 sub_80247D4(void);
+void sub_8025808(u8 value);
+void sub_8025C20(u8 value);
+void sub_8025C8C(u8 value);
 void sub_8025D10(void);
 void sub_802613C(void);
 void sub_80296F8(u8 value);
@@ -448,13 +453,59 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024984.inc", void sub_8024984(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024A4C.inc", void sub_8024A4C(void))
+// Reconstruction of the Thumb SIO sync/acknowledgement logic.
+// Matching builds keep the original ASM until whole-ROM comparison succeeds.
+NONMATCH("asm/non_matching/sio/sio__sub_8024A4C.inc", s16 sub_8024A4C(u16 value))
 {
+    s16 status = sub_802610C();
+
+    if (status < 0) {
+        return status;
+    }
+    if (gMultiSioStatusFlags & 1) {
+        u16 type = gMultiSioRecv[0].raw[0] | ((u16)gMultiSioRecv[0].raw[1] << 8);
+        if (type == 0x6603 || type == 0x6604) {
+            u8 i;
+            for (i = 0; i < 4; i++) {
+                gMultiSioSend.raw[15 + i] = gMultiSioRecv[0].raw[15 + i];
+            }
+        }
+    }
+    sub_8025BEC(value);
+    return 0;
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024AC0.inc", void sub_8024AC0(void))
+// Reconstruction of the Thumb SIO sync/acknowledgement logic.
+// Matching builds keep the original ASM until whole-ROM comparison succeeds.
+NONMATCH("asm/non_matching/sio/sio__sub_8024AC0.inc", s16 sub_8024AC0(u16 value))
 {
+    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    s16 status = sub_802610C();
+    s16 result = 0;
+
+    gStageData.playerIndex = player;
+    if (status < 0) {
+        return status;
+    }
+    if (gMultiSioStatusFlags & 1) {
+        u16 type = gMultiSioRecv[0].raw[0] | ((u16)gMultiSioRecv[0].raw[1] << 8);
+        if (type == 0x6603 || type == 0x6604 || type == 0x6606) {
+            u8 i;
+            u16 flags;
+            for (i = 0; i < 4; i++) {
+                gUnknown_030010AC[i] = gMultiSioRecv[0].raw[15 + i];
+            }
+            flags = gMultiSioRecv[0].raw[12] | ((u16)gMultiSioRecv[0].raw[13] << 8);
+            if (!(flags & (1u << player)) && (flags & (0x10u << player))) {
+                gMultiSioSend.raw[15 + player] = 0xFF;
+                return 2;
+            }
+            result = 1;
+        }
+    }
+    sub_8025C20(value);
+    return result;
 }
 END_NONMATCH
 
@@ -497,8 +548,33 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024E1C.inc", void sub_8024E1C(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024F1C.inc", void sub_8024F1C(void))
+// Reconstruction of the Thumb SIO sync/acknowledgement logic.
+// Matching builds keep the original ASM until whole-ROM comparison succeeds.
+NONMATCH("asm/non_matching/sio/sio__sub_8024F1C.inc", s16 sub_8024F1C(u8 value))
 {
+    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    u8 slot = player;
+    s16 status;
+
+    gStageData.playerIndex = player;
+    if (slot <= 1) {
+        slot += 2;
+    }
+    status = sub_802610C();
+    if (status < 0) {
+        return status;
+    }
+    gMultiSioSend.raw[15 + slot] = 0xFF;
+    gMultiSioSend.raw[12] = 0;
+    gMultiSioSend.raw[13] = 0;
+    {
+        u16 mask = sub_80247D4();
+        mask |= sub_80248F4();
+        gMultiSioSend.raw[12] = (u8)mask;
+        gMultiSioSend.raw[13] = (u8)(mask >> 8);
+    }
+    sub_8025C8C(value);
+    return 1;
 }
 END_NONMATCH
 
@@ -507,8 +583,41 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024F84.inc", void sub_8024F84(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025024.inc", void sub_8025024(void))
+// Reconstruction of the Thumb SIO sync/acknowledgement logic.
+// Matching builds keep the original ASM until whole-ROM comparison succeeds.
+NONMATCH("asm/non_matching/sio/sio__sub_8025024.inc", s16 sub_8025024(u16 value))
 {
+    u8 player = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    u8 slot = player;
+    s16 status;
+    s16 result = 0;
+
+    gStageData.playerIndex = player;
+    if (slot <= 1) {
+        slot += 2;
+    }
+    status = sub_802610C();
+    if (status < 0) {
+        return status;
+    }
+    if (gMultiSioStatusFlags & 1) {
+        u16 type = gMultiSioRecv[0].raw[0] | ((u16)gMultiSioRecv[0].raw[1] << 8);
+        if (type == 0x6607 || type == 0x6608) {
+            u8 i;
+            u16 flags;
+            for (i = 0; i < 4; i++) {
+                gMultiSioSend.raw[15 + i] = gUnknown_030010AC[i];
+            }
+            flags = gMultiSioRecv[0].raw[12] | ((u16)gMultiSioRecv[0].raw[13] << 8);
+            if (!(flags & (1u << slot)) && (flags & (0x10u << slot))) {
+                gMultiSioSend.raw[15 + slot] = 0xFF;
+                return 2;
+            }
+            result = 1;
+        }
+    }
+    sub_8025808(value);
+    return result;
 }
 END_NONMATCH
 
