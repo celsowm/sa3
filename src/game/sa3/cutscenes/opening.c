@@ -89,6 +89,18 @@ bool32 sub_80A3E60(Intro174 *strc);
 void sub_80A3E90(Intro174 *strc);
 void sub_80A3EAC(Intro174 *strc);
 void sub_80A3EDC(Intro174 *strc);
+void sub_80A38C0(u8 arg0);
+
+#define INTRO174_UPDATE_WINDOW_AND_SKIP(strc)                                                                                              \
+    {                                                                                                                                      \
+        gWinRegs[WINREG_WIN0V] = (I((strc)->unk10) << 8) + I((strc)->unk10) + I((strc)->unk8);                                             \
+        gBgScrollRegs[2][0] = I((strc)->unk14);                                                                                            \
+        gBgScrollRegs[2][1] = I((strc)->unk18);                                                                                            \
+                                                                                                                                           \
+        if ((strc)->unk0 == 0 && (gPressedKeys & START_BUTTON)) {                                                                          \
+            sub_808ADF0(2);                                                                                                                \
+        }                                                                                                                                  \
+    }
 void Task_A0_80A2FF4(void);
 void Task_A0_80A3074(void);
 void TaskDestructor_A0_80A3E34(struct Task *t);
@@ -1087,27 +1099,80 @@ void Task_174_80A3564(void)
     }
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_174_80A3664.inc", void Task_174_80A3664(void))
+void Task_174_80A3664(void)
 {
-}
-END_NONMATCH
+    Intro174 *strc = TASK_DATA(gCurTask);
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_174_80A3710.inc", void Task_174_80A3710(void))
+    if (strc->unk0 == 0) {
+        sub_80A3E90(strc);
+    }
+
+    if (gBldRegs.bldY == 0) {
+        gBldRegs.bldY = 0;
+        if (++strc->unk2 > 60) {
+            strc->unk2 = 0;
+            strc->unk4 = 0;
+            gCurTask->main = Task_174_80A3710;
+            return;
+        }
+    } else {
+        strc->unk4 -= Q(1);
+        gBldRegs.bldY = strc->unk4 >> 8;
+    }
+
+    INTRO174_UPDATE_WINDOW_AND_SKIP(strc);
+}
+
+void Task_174_80A3710(void)
 {
-}
-END_NONMATCH
+    Intro174 *strc = TASK_DATA(gCurTask);
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_174_80A37B8.inc", void Task_174_80A37B8(void))
+    if (strc->unk0 == 0) {
+        sub_80A3E90(strc);
+    }
+
+    if (gBldRegs.bldY >= 16) {
+        gBldRegs.bldY = 16;
+        gWinRegs[WINREG_WININ] = 0x2017;
+        strc->unk2 = 0;
+        gCurTask->main = Task_174_80A37B8;
+    } else {
+        strc->unk4 += Q(1);
+        gBldRegs.bldY = strc->unk4 >> 8;
+        INTRO174_UPDATE_WINDOW_AND_SKIP(strc);
+    }
+}
+
+void Task_174_80A37B8(void)
 {
-}
-END_NONMATCH
+    Intro174 *strc = TASK_DATA(gCurTask);
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__Task_174_80A3844.inc", void Task_174_80A3844(void))
+    sub_80A3EAC(strc);
+
+    if (sub_80A3E60(strc) == TRUE && ++strc->unk2 > 60) {
+        strc->unk2 = 0;
+        gCurTask->main = Task_174_80A3844;
+    } else {
+        INTRO174_UPDATE_WINDOW_AND_SKIP(strc);
+    }
+}
+
+void Task_174_80A3844(void)
 {
-}
-END_NONMATCH
+    Intro174 *strc = TASK_DATA(gCurTask);
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A38C0.inc", void sub_80A38C0(void))
+    sub_80A3EDC(strc);
+
+    if (strc->unk2 >= 20) {
+        sub_80A38C0(strc->unk0);
+        TaskDestroy(gCurTask);
+    } else {
+        strc->unk2++;
+        INTRO174_UPDATE_WINDOW_AND_SKIP(strc);
+    }
+}
+
+NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__sub_80A38C0.inc", void sub_80A38C0(u8 arg0))
 {
 }
 END_NONMATCH
@@ -1156,10 +1221,9 @@ void TaskDestructor_A0_80A3E34(struct Task *t)
 {
 }
 
-NONMATCH("asm/non_matching/game/sa3/cutscenes/opening__TaskDestructor_174_80A3E38.inc", void TaskDestructor_174_80A3E38(struct Task *t))
+void TaskDestructor_174_80A3E38(struct Task *t)
 {
 }
-END_NONMATCH
 
 bool32 sub_80A3E3C(Intro174 *strc)
 {
