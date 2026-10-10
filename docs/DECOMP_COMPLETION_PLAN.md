@@ -255,3 +255,20 @@ claim of successful compilation, 100% match, increased matching percentage,
 or emulator runtime validation has been made. Next work: provision exact
 toolchain, reproduce `make compare`, measure the current map, then start
 verified leaf-function matching. 
+
+
+## 11. First ROM-backed executable tooling batch — 2026-10-10
+
+Work was committed directly to `main` in this independent fork:
+
+- `docs/asm_standalone_function_inventory.csv`: **448 named ASM function entry labels** across six standalone `asm/*.s` sources. Of 442 upper-bounded intervals, 57 are at most 32 bytes and 244 at most 128 bytes. **These spans are NOT exact function sizes**; they may include literal pools and padding.
+- `scripts/asm_function_backlog.py`: reproducible inventory of standalone labels and `ASM_FUNC`/`NONMATCH` fallback `.inc` ownership from the checked-out source. With the private exact EU ROM, optionally records metadata-only SHA-256 hashes of bounded intervals. Adds synthetic tests.
+- `scripts/asm_leaf_candidates.py`: requires SHA-1-identical European ROM and cross-references the committed CSV, finding Thumb-only `bx lr` leaf candidates without dumping ROM content; adds synthetic tests.
+- `docs/asm_thumb_leaf_candidates.json` and `docs/ASM_VERIFIED_LEAF_CANDIDATES.md`: **17 of 17** source intervals of four bytes verified on the European ROM. Each contains `70 47 00 00` (`bx lr` plus padding). **Eight TaskDestructor callbacks** are the first proposed actual-C migration batch, subject to ABI/linker and agbcc proof.
+- `.github/workflows/build.yml`: removed unsafe `pull_request_target` execution/checkout; tests run without private ROM on push/PR. ROM-backed job is opt-in for trusted pushes via repository variable `ENABLE_ROM_BUILD=true`, with `STORAGE_URL`, `STORAGE_USERNAME`, and `STORAGE_PASSWORD` configured privately. No secrets on PR jobs.
+- The local sandbox ran **20 offline unit tests** from the synthetic triage and ROM-audit suite using the corresponding local module implementations. GitHub Actions has **zero recorded runs** at this writing, so hosted CI success is not claimed.
+- A local Clang 17 `armv4t-none-eabi -mthumb -O2` compilation of two experimental empty callbacks emitted `bx lr`, corroborating the candidate codegen pattern. **This is not an agbcc matching result.**
+
+**Current gate:** the European reference ROM exists and is SHA-verified, but `SAT-R/agbcc` and ARM binutils are not available in the current sandbox; `make compare` was not executed. The legacy matching percentage (about 77.97%) remains unchanged. No candidate was removed from ASM or declared matching without the exact build.
+
+For the next implementation commit, inspect each destructor's signature and its place within the explicitly ordered `ldscript.txt` `.text` units before editing source. Changing C-object/ASM-object ordering will otherwise shift downstream ROM addresses and break matching even if a generated stub instruction is correct.
