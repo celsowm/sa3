@@ -24,6 +24,9 @@ void sub_80243C4(u8 player, u8 value);
 void sub_80243B4(void);
 void sub_80243E4(u8 value);
 void MultiSio_SendPlayerName(void);
+void sub_8025770(void);
+void sub_8025D00(void);
+void sub_8025D48(void);
 
 NONMATCH("asm/non_matching/sio/sio__sub_8023A88.inc", void sub_8023A88(void))
 {
@@ -512,8 +515,27 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025948.inc", void sub_8025948(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025998.inc", void sub_8025998(void))
+// Verified against the Thumb control flow; retain ASM until agbcc/ROM matching.
+NONMATCH("asm/non_matching/sio/sio__sub_8025998.inc", s16 sub_8025998(void))
 {
+    u8 status = gUnknown_03001060[7];
+    s16 result = sub_802610C();
+    u16 packetType;
+
+    if (result < 0) {
+        return result;
+    }
+    sub_8025770();
+    if (status != 3 && status != 7 && status != 15) {
+        return 0;
+    }
+
+    gUnknown_03001060[0x4D] = gMultiSioRecv[1].raw[4];
+    packetType = *(u16 *)&gMultiSioRecv[1].raw[0];
+    if (packetType == 0x6606 || packetType == 0x6607) {
+        return 1;
+    }
+    return 0;
 }
 END_NONMATCH
 
@@ -534,8 +556,15 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025A38.inc", void sub_8025A38(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025A90.inc", void sub_8025A90(void))
+// Verified against the Thumb control flow; retain ASM until agbcc/ROM matching.
+NONMATCH("asm/non_matching/sio/sio__sub_8025A90.inc", s16 sub_8025A90(void))
 {
+    s16 result = sub_802610C();
+    if (result < 0) {
+        return result;
+    }
+    sub_8025D00();
+    return 0;
 }
 END_NONMATCH
 
@@ -549,8 +578,15 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025AFC.inc", void sub_8025AFC(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025B48.inc", void sub_8025B48(void))
+// Verified against the Thumb control flow; retain ASM until agbcc/ROM matching.
+NONMATCH("asm/non_matching/sio/sio__sub_8025B48.inc", s16 sub_8025B48(void))
 {
+    s16 result = sub_802610C();
+    if (result < 0) {
+        return result;
+    }
+    sub_8025D48();
+    return *(u16 *)&gMultiSioRecv[0].raw[0] > 0x660F;
 }
 END_NONMATCH
 
