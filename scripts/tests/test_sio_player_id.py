@@ -21,6 +21,7 @@ ID_READERS = (
     "sub_8025C20",
     "sub_8025C64",
     "sub_8025CD8",
+    "sub_8025D58",
     "sub_802610C",
 )
 CORRECT_EXPR = "(*(volatile u32 *)0x04000128 >> 4) & 3"
