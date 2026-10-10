@@ -1,7 +1,7 @@
 """Native tests of the ACTUAL C fallback bodies in src/game/math.c.
 
 The original GBA build still uses the ASM through NONMATCH. This test extracts
-the five newly written C implementations, compiles them with the host C
+the newly written C implementations, compiles them with the host C
 compiler and independently checks their fixed-point behavior against formulas
 transcribed from the ASM. It DOES NOT establish agbcc/ROM byte matching.
 """
@@ -25,6 +25,10 @@ FUNCTIONS = (
     "sa2__unused_sub_8084EAC",
     "sa2__unused_sub_8085314",
     "sa2__sub_8083B88",
+    "sa2__unused_sub_8083E44",
+    "sa2__unused_sub_8084090",
+    "sa2__unused_sub_80842E4",
+    "sa2__unused_sub_80851E0",
 )
 C_HEADER = r"""
 #include <math.h>
@@ -159,10 +163,17 @@ class MathFallbackNativeTests(unittest.TestCase):
             ("sa2__sub_8084EAC", 1, Matrix),
             ("sa2__sub_8085314", 2, Matrix),
             ("sa2__sub_8083B88", 3, Matrix),
+            ("sa2__sub_8083E44", 2, Matrix),
+            ("sa2__sub_8084090", 2, Matrix),
+            ("sa2__sub_80851E0", 1, Matrix),
         ):
             fn = getattr(cls.library, name)
             fn.argtypes = [ctypes.POINTER(type_)] * arity
             fn.restype = None
+        vector_fn = cls.library.sa2__sub_80842E4
+        vector_fn.argtypes = [ctypes.POINTER(ctypes.c_int32), ctypes.POINTER(Matrix),
+                              ctypes.POINTER(ctypes.c_int32)]
+        vector_fn.restype = None
 
     @classmethod
     def tearDownClass(cls):
@@ -264,6 +275,103 @@ class MathFallbackNativeTests(unittest.TestCase):
                 (c.unk14, c.unk18, c.unk1C), tuple(expected_translation))
             self.assertEqual(tuple(a.unk2), a_basis)
             self.assertEqual(tuple(b.unk2), b_basis)
+
+
+    def test_in_place_affine_product_lhs_500_cases(self):
+        """8083E44 overwrites lhs row-by-row, leaving rhs unchanged."""
+        rng = random.Random(0x3E44)
+        for _ in range(500):
+            a, b = Matrix(), Matrix()
+            for i in range(9):
+                a.unk2[i] = rng.randrange(-1100, 1101)
+                b.unk2[i] = rng.randrange(-1100, 1101)
+            for key in ("unk14", "unk18", "unk1C"):
+                setattr(a, key, rng.randrange(-200000, 200001))
+                setattr(b, key, rng.randrange(-200000, 200001))
+            ab, bb = list(a.unk2), list(b.unk2)
+            at = (a.unk14, a.unk18, a.unk1C)
+            bt = (b.unk14, b.unk18, b.unk1C)
+            self.library.sa2__sub_8083E44(ctypes.byref(a), ctypes.byref(b))
+            expected_basis = [
+                signed16(sum(ab[row * 3 + k] * bb[k * 3 + col]
+                             for k in range(3)) >> 10)
+                for row in range(3) for col in range(3)
+            ]
+            expected_t = [
+                (sum(at[k] * bb[k * 3 + col] for k in range(3)) + bt[col]) >> 10
+                for col in range(3)
+            ]
+            self.assertEqual(list(a.unk2), expected_basis)
+            self.assertEqual((a.unk14, a.unk18, a.unk1C), tuple(expected_t))
+            self.assertEqual(list(b.unk2), bb)
+
+    def test_in_place_affine_product_rhs_500_cases(self):
+        """8084090 writes output column by column, retaining each source."""
+        rng = random.Random(0x4090)
+        for _ in range(500):
+            a, b = Matrix(), Matrix()
+            for i in range(9):
+                a.unk2[i] = rng.randrange(-1000, 1001)
+                b.unk2[i] = rng.randrange(-1000, 1001)
+            for key in ("unk14", "unk18", "unk1C"):
+                setattr(a, key, rng.randrange(-100000, 100001))
+                setattr(b, key, rng.randrange(-100000, 100001))
+            ab, bb = list(a.unk2), list(b.unk2)
+            at = (a.unk14, a.unk18, a.unk1C)
+            bt = (b.unk14, b.unk18, b.unk1C)
+            self.library.sa2__sub_8084090(ctypes.byref(a), ctypes.byref(b))
+            self.assertEqual(list(b.unk2), [
+                signed16(sum(ab[row * 3 + k] * bb[k * 3 + col]
+                             for k in range(3)) >> 10)
+                for row in range(3) for col in range(3)
+            ])
+            self.assertEqual((b.unk14, b.unk18, b.unk1C), tuple(
+                (sum(at[k] * bb[k * 3 + col] for k in range(3)) + bt[col]) >> 10
+                for col in range(3)
+            ))
+            self.assertEqual(list(a.unk2), ab)
+
+    def test_transform_vector_500_cases(self):
+        rng = random.Random(0x42E4)
+        for _ in range(500):
+            vec = [rng.randrange(-100000, 100001) for _ in range(3)]
+            matrix = Matrix()
+            for i in range(9):
+                matrix.unk2[i] = rng.randrange(-1200, 1201)
+            for key in ("unk14", "unk18", "unk1C"):
+                setattr(matrix, key, rng.randrange(-500000, 500001))
+            vec_in = (ctypes.c_int32 * 3)(*vec)
+            vec_out = (ctypes.c_int32 * 3)()
+            self.library.sa2__sub_80842E4(ctypes.cast(vec_in, ctypes.POINTER(ctypes.c_int32)),
+                                            ctypes.byref(matrix), vec_out)
+            translation = [matrix.unk14, matrix.unk18, matrix.unk1C]
+            expected = [
+                (sum(vec[k] * matrix.unk2[k * 3 + col] for k in range(3))
+                 + translation[col]) >> 10
+                for col in range(3)
+            ]
+            self.assertEqual(list(vec_out), expected)
+            self.assertEqual(list(vec_in), vec)
+
+    def test_inverse_affine_500_cases(self):
+        rng = random.Random(0x51E0)
+        for _ in range(500):
+            mat = Matrix()
+            for i in range(9):
+                mat.unk2[i] = rng.randrange(-1024, 1025)
+            for key in ("unk14", "unk18", "unk1C"):
+                setattr(mat, key, rng.randrange(-100000, 100001))
+            basis = list(mat.unk2)
+            old_t = (mat.unk14, mat.unk18, mat.unk1C)
+            self.library.sa2__sub_80851E0(ctypes.byref(mat))
+            transposed = [basis[3 * col + row]
+                          for row in range(3) for col in range(3)]
+            self.assertEqual(list(mat.unk2), transposed)
+            expected_t = [
+                sum(-old_t[k] * transposed[k * 3 + col] for k in range(3)) >> 10
+                for col in range(3)
+            ]
+            self.assertEqual((mat.unk14, mat.unk18, mat.unk1C), tuple(expected_t))
 
 
 if __name__ == "__main__":
