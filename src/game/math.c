@@ -171,7 +171,22 @@ void SA2_LABEL(sub_8083798)(UNK_8085D14_2 *arg0)
     arg0->unkC = (0 - arg0->unkC);
 }
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083858.inc", void sa2__sub_8083858()) { }
+// Normalize a Q6.10 four-component rotation value in place.
+// The original routine computes 0x100000 / (u16)Sqrt(sum of squares).
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083858.inc", void sa2__sub_8083858(UNK_8085D14 *rotation))
+{
+    s32 a = rotation->unk0;
+    s32 b = rotation->unk2;
+    s32 c = rotation->unk4;
+    s32 d = rotation->unk6;
+    u16 magnitude = Sqrt(a * a + b * b + c * c + d * d);
+    s32 scale = 0x100000 / magnitude;
+
+    rotation->unk0 = (scale * a) >> 10;
+    rotation->unk2 = (scale * b) >> 10;
+    rotation->unk4 = (scale * c) >> 10;
+    rotation->unk6 = (scale * d) >> 10;
+}
 END_NONMATCH
 
 void SA2_LABEL(sub_80838CC)(UNK_8085D14 *arg0, UNK_8085D14 *arg1, UNK_8085D14 *arg2)
@@ -193,10 +208,41 @@ void SA2_LABEL(sub_808399C)(UNK_8085D14 *arg0, UNK_8085D14 *arg1)
     arg0->unk6 = ((((arg0->unk6 * arg1->unk6) - (r6 * arg1->unk0)) - (r5 * arg1->unk2)) - (r4 * arg1->unk4)) >> 10;
 }
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083A48.inc", void sa2__sub_8083A48()) { }
+// Multiply two Q6.10 four-component rotations, updating the second.
+// Snapshot the destination first: the ASM reads all four old components.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083A48.inc", void sa2__sub_8083A48(UNK_8085D14 *lhs, UNK_8085D14 *rhs))
+{
+    s32 a0 = lhs->unk0;
+    s32 a1 = lhs->unk2;
+    s32 a2 = lhs->unk4;
+    s32 a3 = lhs->unk6;
+    s32 b0 = rhs->unk0;
+    s32 b1 = rhs->unk2;
+    s32 b2 = rhs->unk4;
+    s32 b3 = rhs->unk6;
+
+    rhs->unk0 = ((a3 * b0) + (a0 * b3) + (a1 * b2) - (a2 * b1)) >> 10;
+    rhs->unk2 = ((a3 * b1) - (a0 * b2) + (a1 * b3) + (a2 * b0)) >> 10;
+    rhs->unk4 = ((a3 * b2) + (a0 * b1) - (a1 * b0) + (a2 * b3)) >> 10;
+    rhs->unk6 = ((a3 * b3) - (a0 * b0) - (a1 * b1) - (a2 * b2)) >> 10;
+}
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083B10.inc", void sa2__sub_8083B10()) { }
+// Normalize and conjugate the first three Q6.10 rotation components.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8083B10.inc", void sa2__sub_8083B10(UNK_8085D14 *rotation))
+{
+    s32 a = rotation->unk0;
+    s32 b = rotation->unk2;
+    s32 c = rotation->unk4;
+    s32 d = rotation->unk6;
+    u16 magnitude = Sqrt(a * a + b * b + c * c + d * d);
+    s32 scale = 0x100000 / magnitude;
+
+    rotation->unk0 = (scale * -a) >> 10;
+    rotation->unk2 = (scale * -b) >> 10;
+    rotation->unk4 = (scale * -c) >> 10;
+    rotation->unk6 = (scale * d) >> 10;
+}
 END_NONMATCH
 
 // TODO: match this
@@ -320,7 +366,23 @@ void SA2_LABEL(sub_8084B54)(struct UNK_8085F1C_1 *matrix, u16 anglez, u16 angley
 NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084C70.inc", void sa2__sub_8084C70()) { }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084EAC.inc", void sa2__sub_8084EAC()) { }
+// Swap the three off-diagonal pairs of a Q6.10 3x3 matrix in place.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084EAC.inc", void sa2__sub_8084EAC(struct UNK_8085F1C_1 *matrix))
+{
+    s16 temp;
+
+    temp = matrix->unk2[1];
+    matrix->unk2[1] = matrix->unk2[3];
+    matrix->unk2[3] = temp;
+
+    temp = matrix->unk2[2];
+    matrix->unk2[2] = matrix->unk2[6];
+    matrix->unk2[6] = temp;
+
+    temp = matrix->unk2[5];
+    matrix->unk2[5] = matrix->unk2[7];
+    matrix->unk2[7] = temp;
+}
 END_NONMATCH
 
 NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084EE0.inc", void sa2__sub_8084EE0()) { }
@@ -329,7 +391,40 @@ END_NONMATCH
 NONMATCH("asm/non_matching/game/math/sa2__unused_sub_80851E0.inc", void sa2__sub_80851E0()) { }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8085314.inc", void sa2__sub_8085314()) { }
+// Expand a Q6.10 rotation into its 3x3 matrix representation.
+// The ASM stores matrix entries at offsets 2..18 and clears 20, 24, 28.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8085314.inc",
+         void sa2__sub_8085314(struct UNK_8085F1C_1 *matrix, struct UNK_8085F1C_1 *rotation))
+{
+    s32 w = rotation->unk0;
+    s32 x = rotation->unk2[0];
+    s32 y = rotation->unk2[1];
+    s32 z = rotation->unk2[2];
+    s32 w2 = w * 2;
+    s32 x2 = x * 2;
+    s32 y2 = y * 2;
+    s32 wx = (w2 * x) >> 10;
+    s32 wy = (w2 * y) >> 10;
+    s32 wz = (w2 * z) >> 10;
+    s32 xx = (x2 * x) >> 10;
+    s32 xy = (x2 * y) >> 10;
+    s32 xz = (x2 * z) >> 10;
+    s32 yy = (y2 * y) >> 10;
+    s32 yz = (y2 * z) >> 10;
+
+    matrix->unk2[0] = 0x400 - (xx + yy);
+    matrix->unk2[1] = wx - yz;
+    matrix->unk2[2] = wy + xz;
+    matrix->unk2[3] = wx + yz;
+    matrix->unk2[4] = 0x400 - (yy + (w2 * w >> 10));
+    matrix->unk2[5] = xy - wz;
+    matrix->unk2[6] = wy - xz;
+    matrix->unk2[7] = xy + wz;
+    matrix->unk2[8] = 0x400 - ((w2 * w >> 10) + xx);
+    matrix->unk14 = 0;
+    matrix->unk18 = 0;
+    matrix->unk1C = 0;
+}
 END_NONMATCH
 
 // void sub_8085314(struct UNK_8085F1C_1 *p1, struct UNK_8085F1C_1 *p2)
