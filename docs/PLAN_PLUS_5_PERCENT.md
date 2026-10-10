@@ -50,6 +50,7 @@ então mantenho só o estilo das linhas alteradas.
 |---|---:|---|
 | 2026-10-10 15:53 | 78,1590% | Início (main `30c9858`) |
 | 2026-10-10 17:05 | 78,6714% | +4.184 B, 16 funções |
+| 2026-10-10 (noite) | 80,8831% | `opening.c` e `mp_char_select.c` decompilados a partir do asm puro |
 
 Funções que passaram a bater: `sub_8034A20`, `sub_807AC48`, `Task_FerrisWheel`,
 `Task_809947C`, `sub_80B3C28`, `sub_803D4C8`, `sub_80B7E1C`, `sub_8003BD8`,
@@ -61,6 +62,26 @@ Também foram corrigidos erros de lógica em corpos que ainda não batem
 (`Task_RingsMgrStage`, `CreateEntity_MazeCorner`, `sub_8012550`,
 `sub_8097E5C`, `Task_270_809B8C8`, `Options_ButtonConfig`) e vários
 outros foram aproximados.
+
+### Mudança de estratégia: asm puro → C
+
+Os ~89 KB restantes em `asm/*.s` (sem nenhum C ainda) rendem mais por hora
+do que os `NONMATCH` antigos. `scripts/asm2nonmatch.py` converte um `.s`
+inteiro num `.c` onde cada função vira um `NONMATCH` com o próprio `.inc`
+(ROM idêntica). Depois cada função é escrita em C (m2c ajuda a montar as
+structs) e promovida com o fluxo normal. Assim foram feitos
+`asm/game__opening.s` → `src/game/sa3/cutscenes/opening.c` e
+`asm/game__mp_char_select.s` → `src/game/sa3/multiplayer/mp_char_select.c`.
+
+Cuidados aprendidos:
+
+- `nonmatch_triage.py --show` normaliza literais: constantes erradas
+  (`0xEFFF` × `0xFEFF`, `RGB_WHITE` × `0xFFFF`) só aparecem no build
+  completo. Rodar sempre `make compare` antes do commit.
+- O agbcc arredonda structs para múltiplo de 4 bytes: embrulhar um
+  `SpriteTransform` (0xA) numa struct muda o tamanho.
+- Em agbcc, `x >= N` vira `x > N-1`; quando o alvo compara com `N`
+  direto, o limite vinha de uma variável (`s32 lim = 120; Q(lim)`).
 
 ### O que funcionou
 
