@@ -1,4 +1,4 @@
-"""Compile and execute the REAL five recovered SIO C bodies from src/sio_stuff_x.c.
+"""Compile and execute the REAL nine recovered SIO C bodies from src/sio_stuff_x.c.
 
 The independent test driver checks the original Thumb packet field contract
 and bounds (including the full five bytes copied by sub_8026AB8).
@@ -19,6 +19,10 @@ FUNCTIONS = {
     "sub_8027878": "void sub_8027878(u8 value)",
     "sub_802789C": "void sub_802789C(void)",
     "sub_80278C4": "void sub_80278C4(void)",
+    "sub_80274AC": "void sub_80274AC(u16 first, u16 second)",
+    "sub_80274F4": "void sub_80274F4(u8 flags, u16 first, u16 second)",
+    "sub_80276A8": "void sub_80276A8(u8 value)",
+    "sub_80276F4": "void sub_80276F4(u16 first, u16 second)",
 }
 
 HEADER = r"""
@@ -99,6 +103,72 @@ int main(void) {
         CHECK(memcmp(snapshot, gMultiSioSend.raw, sizeof snapshot) == 0);
     }
     CHECK(queueCalls == 65536 + 3 * 256);
+
+    // Verify complete five-byte packet layouts for all 16-bit values.
+    for (n = 0; n < 65536; ++n) {
+        u16 first = (u16)n;
+        u16 second = (u16)(n ^ 0xBEEF);
+        before = queueCalls;
+        gStageData.raw[0xBB] = 0;
+        sub_80274AC(first, second);
+        CHECK(queueCalls == before + 1 && gStageData.raw[0xBB] == 7);
+        CHECK(queued[0] == 8 && queued[1] == (u8)first);
+        CHECK(queued[2] == (u8)(first >> 8) &&
+              queued[3] == (u8)second && queued[4] == (u8)(second >> 8));
+
+        before = queueCalls;
+        sub_80274F4((u8)n, first, second);
+        CHECK(queueCalls == before + 1);
+        CHECK(queued[0] == (((u8)n & 7) | 0x10));
+        CHECK(queued[1] == (u8)first && queued[2] == (u8)(first >> 8));
+        CHECK(queued[3] == (u8)second && queued[4] == (u8)(second >> 8));
+
+        gStageData.raw[0x8F] = 0;
+        before = queueCalls;
+        sub_80276F4(first, second);
+        CHECK(queueCalls == before + 1 && gStageData.raw[0x8F] == 1);
+        CHECK(queued[0] == 0x28 && queued[1] == (u8)first);
+        CHECK(queued[2] == (u8)(first >> 8));
+        CHECK(queued[3] == (u8)second && queued[4] == (u8)(second >> 8));
+    }
+
+    // Thumb branch: reuse cached field only if byte6=0 AND both
+    // bytes at 0xAE/0xAF are zero; otherwise update cache.
+    for (n = 0; n < 256; ++n) {
+        gStageData.raw[0x8E] = (u8)(n ^ 0x5A);
+        gStageData.raw[6] = 0;
+        gStageData.raw[0xAE] = gStageData.raw[0xAF] = 0;
+        before = queueCalls;
+        sub_80276A8((u8)n);
+        CHECK(queueCalls == before + 1);
+        CHECK(queued[0] == 0x38 && queued[1] == 6);
+        CHECK(queued[2] == (u8)(n ^ 0x5A));
+        CHECK(queued[3] == 0 && queued[4] == 0);
+        CHECK(gStageData.raw[0x8E] == (u8)(n ^ 0x5A));
+
+        gStageData.raw[6] = 1;
+        before = queueCalls;
+        sub_80276A8((u8)n);
+        CHECK(queueCalls == before + 1 && queued[2] == (u8)n);
+        CHECK(gStageData.raw[0x8E] == (u8)n);
+
+        gStageData.raw[6] = 0;
+        gStageData.raw[0xAE] = 1;
+        before = queueCalls;
+        sub_80276A8((u8)(n ^ 0xAA));
+        CHECK(queueCalls == before + 1);
+        CHECK(queued[2] == (u8)(n ^ 0xAA));
+        CHECK(gStageData.raw[0x8E] == (u8)(n ^ 0xAA));
+
+        gStageData.raw[0xAE] = 0;
+        gStageData.raw[0xAF] = 1;
+        before = queueCalls;
+        sub_80276A8((u8)(n ^ 0x37));
+        CHECK(queueCalls == before + 1);
+        CHECK(queued[2] == (u8)(n ^ 0x37));
+        CHECK(gStageData.raw[0x8E] == (u8)(n ^ 0x37));
+    }
+    CHECK(queueCalls == 65536 * 4 + 3 * 256 + 4 * 256);
     return 0;
 }
 """
