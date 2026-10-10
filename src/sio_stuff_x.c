@@ -676,7 +676,7 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025D48.inc", void sub_8025D48(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025D58.inc", void sub_8025D58(void))
+NONMATCH("asm/non_matching/sio/sio__sub_8025D58.inc", s16 sub_8025D58(void))
 {
 }
 END_NONMATCH
