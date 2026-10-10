@@ -60,9 +60,17 @@ def main():
     cc = next(c for c in cmds if "agbcc" in c and "preproc" in c)
     as_cmd = next(c for c in cmds if c.startswith("arm-none-eabi-as"))
 
-    # Preprocessed C with the C body enabled.
-    cpp = cpp.replace(" -D DEBUG=0", " -D NON_MATCHING=1 -D DEBUG=0", 1).replace(base + ".i", f"{out}/full.i")
-    subprocess.run(cpp, shell=True, cwd=ROOT, check=True)
+    # Preprocessed C with every NONMATCH body as plain C (the promoted state).
+    tmp_src = os.path.join(os.path.dirname(src), ".triage_" + os.path.basename(src))
+    with open(os.path.join(ROOT, src), encoding="utf-8") as f:
+        text = triage.as_plain_c(f.read())
+    with open(os.path.join(ROOT, tmp_src), "w", encoding="utf-8") as f:
+        f.write(text)
+    cpp = cpp.replace(base + ".i", f"{out}/full.i").replace(" " + src + " ", " " + tmp_src + " ")
+    try:
+        subprocess.run(cpp, shell=True, cwd=ROOT, check=True)
+    finally:
+        os.remove(os.path.join(ROOT, tmp_src))
     preproc, agbcc = (p.strip() for p in cc.split("|", 1))
     preproc = preproc.replace(base + ".i", f"{out}/full.i")
     with open(f"{out}/full.c", "w") as f:

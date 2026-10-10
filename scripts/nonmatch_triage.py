@@ -52,20 +52,60 @@ def build_commands(src):
     return obj, cmds
 
 
+def as_plain_c(text):
+    """Turn every NONMATCH(path, decl) ... END_NONMATCH into plain C.
+
+    This is the state after promoting all of them, and unlike defining
+    NON_MATCHING it keeps `#ifndef NON_MATCHING` matching hacks active."""
+    out, i = [], 0
+    while True:
+        j = text.find("NONMATCH(", i)
+        if j < 0 or (j > 0 and (text[j - 1].isalnum() or text[j - 1] == "_")):
+            if j < 0:
+                break
+            out.append(text[i : j + 1])
+            i = j + 1
+            continue
+        k, depth = j + len("NONMATCH"), 0
+        while True:
+            depth += {"(": 1, ")": -1}.get(text[k], 0)
+            k += 1
+            if depth == 0:
+                break
+        inner = text[j + len("NONMATCH(") : k - 1]
+        decl = inner[inner.index('"', inner.index('"') + 1) + 1 :].lstrip().lstrip(",")
+        out.append(text[i:j] + decl.strip())
+        i = k
+    out.append(text[i:])
+    return "".join(out).replace("END_NONMATCH", "")
+
+
 def compile_variant(src, workdir, non_matching):
     obj, cmds = build_commands(src)
     base = obj[:-2]
     tag = "nm" if non_matching else "asm"
     new_base = os.path.join(workdir, tag, src[:-2])
     os.makedirs(os.path.dirname(new_base), exist_ok=True)
-    for cmd in cmds:
-        cmd = cmd.replace(base + ".", new_base + ".")
-        if non_matching and cmd.startswith("arm-none-eabi-cpp"):
-            cmd = cmd.replace(" -D DEBUG=0", " -D NON_MATCHING=1 -D DEBUG=0", 1)
-        r = subprocess.run(cmd, shell=True, cwd=ROOT, capture_output=True, text=True)
-        if r.returncode != 0:
-            errs = [l for l in r.stderr.splitlines() if "rror" in l] or r.stderr.strip().splitlines()[-1:]
-            return None, errs or ["compile failed"]
+    tmp_src = None
+    if non_matching:
+        # Next to the original so relative includes still resolve.
+        tmp_src = os.path.join(os.path.dirname(src), ".triage_" + os.path.basename(src))
+        with open(os.path.join(ROOT, src), encoding="utf-8") as f:
+            text = as_plain_c(f.read())
+        with open(os.path.join(ROOT, tmp_src), "w", encoding="utf-8") as f:
+            f.write(text)
+    try:
+        for cmd in cmds:
+            cmd = cmd.replace(base + ".", new_base + ".")
+            if tmp_src and cmd.startswith("arm-none-eabi-cpp"):
+                cmd = cmd.replace(" " + src + " ", " " + tmp_src + " ")
+            r = subprocess.run(cmd, shell=True, cwd=ROOT, capture_output=True, text=True)
+            if r.returncode != 0:
+                errs = [l for l in r.stderr.splitlines() if "rror" in l] or r.stderr.strip().splitlines()[-1:]
+                return None, errs or ["compile failed"]
+    finally:
+        if tmp_src:
+            os.remove(os.path.join(ROOT, tmp_src))
     return new_base + ".o", None
 
 
@@ -74,19 +114,22 @@ def global_funcs(obj):
     return {l.split()[-1] for l in out.splitlines() if " T " in l}
 
 
-def disasm(obj):
-    """Return {global function: [normalized insn]} for an object."""
+def disasm(obj, targets=False):
+    """Return {global function: [normalized insn]} for an object.
+
+    With targets=True, branches keep their destination as an instruction
+    index within the function (for --show)."""
     out = subprocess.run(
         ["arm-none-eabi-objdump", "-dzr", "--no-show-raw-insn", obj], capture_output=True, text=True
     ).stdout
     globs = global_funcs(obj)
-    funcs, cur = {}, None
+    funcs, addrs, cur = {}, {}, None
     for line in out.splitlines():
         m = FUNC_HDR_RE.match(line)
         if m:
             if m.group(1) in globs:
                 cur = m.group(1)
-                funcs[cur] = []
+                funcs[cur], addrs[cur] = [], []
             continue
         m = RELOC_RE.match(line)
         if m and cur and funcs[cur] and funcs[cur][-1] == ".word":
@@ -97,6 +140,15 @@ def disasm(obj):
             insn = normalize(m.group(1))
             if insn != ".short 0x0000":  # alignment padding varies with earlier functions
                 funcs[cur].append(insn)
+                addrs[cur].append((int(line.split(":")[0], 16), m.group(1)))
+    if targets:
+        for name, insns in funcs.items():
+            index = {a: i for i, (a, _) in enumerate(addrs[name])}
+            for i, (_, raw) in enumerate(addrs[name]):
+                b = re.match(r"(b\w*(?:\.n|\.w)?)\s+([0-9a-f]+)\b", raw)
+                if b and int(b.group(2), 16) in index:
+                    insns[i] = f"{insns[i]} ->{index[int(b.group(2), 16)]}"
+            insns[:] = [f"{i:3} {x}" for i, x in enumerate(insns)]
     return funcs
 
 
@@ -144,7 +196,7 @@ def triage_file(src, funcs, workdir):
     return rows
 
 
-def show(func, workdir):
+def show(func, workdir, verbose=False):
     for src, funcs in find_nonmatch_files().items():
         if func in (f for f, _ in funcs):
             break
@@ -157,8 +209,25 @@ def show(func, workdir):
             sys.exit(f"compile failed: {err[0]}")
         objs.append(obj)
     target, cand = (disasm(o)[func] for o in objs)
-    for line in difflib.unified_diff(target, cand, "target", "c", n=4, lineterm=""):
-        print(line)
+    if verbose:
+        t2, c2 = (disasm(o, targets=True)[func] for o in objs)
+        strip = lambda x: x.split(None, 1)[1]
+        sm = difflib.SequenceMatcher(None, [strip(x) for x in t2], [strip(x) for x in c2], autojunk=False)
+        for tag, i1, i2, j1, j2 in sm.get_opcodes():
+            if tag == "equal":
+                continue
+            lo, hi = max(i1 - 4, 0), i2 + 4
+            print(f"@@ target {i1}-{i2} / c {j1}-{j2} ({tag})")
+            for k in range(lo, hi):
+                if k >= len(t2):
+                    break
+                mark = "-" if i1 <= k < i2 else " "
+                print(f"{mark} {t2[k]}")
+            for k in range(j1, j2):
+                print(f"+ {c2[k]}")
+    else:
+        for line in difflib.unified_diff(target, cand, "target", "c", n=4, lineterm=""):
+            print(line)
     print(f"edits={score(target, cand)[0]}", file=sys.stderr)
 
 
@@ -188,6 +257,7 @@ def main():
     ap.add_argument("-j", "--jobs", type=int, default=os.cpu_count())
     ap.add_argument("--workdir", default="build/triage")
     ap.add_argument("--show", metavar="FUNC", help="print a diff for one function instead of a CSV")
+    ap.add_argument("-v", "--verbose", action="store_true", help="with --show: indexed diff with branch targets")
     ap.add_argument("--promote", metavar="FUNC",
                     help="turn a NONMATCH into plain C and delete its .inc (verify with make compare!)")
     ap.add_argument("files", nargs="*", help="limit to these C files")
@@ -197,7 +267,7 @@ def main():
         return promote(args.promote)
 
     if args.show:
-        return show(args.show, os.path.join(ROOT, args.workdir))
+        return show(args.show, os.path.join(ROOT, args.workdir), args.verbose)
 
     files = find_nonmatch_files()
     if args.files:

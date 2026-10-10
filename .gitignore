@@ -90,3 +90,4 @@ libagbsyscall/*.s
 # third party deps
 /ext
 __pycache__/
+src/**/.triage_*.c
