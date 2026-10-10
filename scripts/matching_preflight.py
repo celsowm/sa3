@@ -25,11 +25,13 @@ def check(root: Path, rom: Path, build: bool = False) -> dict:
         })
     else:
         result["rom"]["matches_europe"] = False
-    for executable in ("make", "arm-none-eabi-as", "arm-none-eabi-ld",
-                       "arm-none-eabi-objcopy", "sha1sum"):
+    for executable in ("make", "arm-none-eabi-cpp", "arm-none-eabi-as",
+                       "arm-none-eabi-ld", "arm-none-eabi-objcopy", "sha1sum"):
         result["toolchain"][executable] = shutil.which(executable)
     agbcc = root / "tools/agbcc/bin/agbcc"
     result["toolchain"]["agbcc"] = str(agbcc) if agbcc.is_file() else None
+    old_agbcc = root / "tools/agbcc/bin/old_agbcc"
+    result["toolchain"]["old_agbcc"] = str(old_agbcc) if old_agbcc.is_file() else None
     for file in ("Makefile", "config.mk", "ldscript.txt", "sa3.sha1"):
         result["checks"][file] = (root / file).is_file()
     ready = (result["rom"]["matches_europe"] and all(result["toolchain"].values())
@@ -43,8 +45,13 @@ def check(root: Path, rom: Path, build: bool = False) -> dict:
                 "reason": "Place the verified ROM at <repo>/baserom_sa3.gba; no automatic ROM copies.",
             }
         else:
-            run = subprocess.run(["make", "compare"], cwd=root, capture_output=True,
-                                 text=True, timeout=1200)
+            try:
+                run = subprocess.run(["make", "compare"], cwd=root, capture_output=True,
+                                     text=True, timeout=1200)
+            except subprocess.TimeoutExpired:
+                result["build"] = {"status": "timeout", "timeout_seconds": 1200}
+                result["passed"] = False
+                return result
             result["build"] = {
                 "exit_code": run.returncode,
                 "status": "passed" if run.returncode == 0 else "failed",
