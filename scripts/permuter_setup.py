@@ -10,6 +10,7 @@ compile.sh that runs the same agbcc command line as the Makefile.
 """
 
 import argparse
+import re
 import os
 import shlex
 import stat
@@ -37,6 +38,40 @@ def strip_attributes(text):
             if depth == 0:
                 break
         i = k
+
+
+def externalize_designated_initializers(text):
+    """Turn top-level definitions with designated array initializers
+    ([ENUM] = ...) into extern declarations; the permuter's C printer
+    mangles them and the function under test doesn't need their data."""
+    out, i, n = [], 0, len(text)
+    start = 0
+    depth = 0
+    while i < n:
+        c = text[i]
+        if c in "({[":
+            depth += 1
+        elif c in ")}]":
+            depth -= 1
+        elif c == ";" and depth == 0:
+            stmt = text[start : i + 1]
+            eq = stmt.find("=")
+            if eq >= 0 and "{" in stmt[eq:] and re.search(r"\[\s*[A-Za-z_]\w*\s*\]\s*=", stmt[eq:]):
+                decl = stmt[:eq].strip()
+                decl = re.sub(r"^\s*static\s+", "", decl)
+                stmt = "\nextern " + decl + ";"
+            out.append(stmt)
+            start = i + 1
+        elif c == "}" and depth == 0:
+            pass
+        i += 1
+        if depth == 0 and c == "}" and text[start:i].lstrip().startswith(("struct", "union", "enum", "typedef")) is False:
+            # end of a function body: flush it unchanged
+            if re.search(r"\)\s*\{", text[start:i]):
+                out.append(text[start:i])
+                start = i
+    out.append(text[start:])
+    return "".join(out)
 
 
 def main():
@@ -83,6 +118,10 @@ def main():
         f.write(strip_attributes(text))
     subprocess.run([sys.executable, os.path.join(args.permuter, "strip_other_fns.py"), f"{out}/base.c", args.func],
                    check=True)
+    with open(f"{out}/base.c") as f:
+        text = externalize_designated_initializers(f.read())
+    with open(f"{out}/base.c", "w") as f:
+        f.write(text)
 
     # compile.sh: input.c -o output.o
     agbcc_bin = os.path.join(ROOT, agbcc.split()[0])
