@@ -448,7 +448,7 @@ NONMATCH("asm/non_matching/game/shared/rm__Task_RingsMgrStage.inc", void Task_Ri
             u8 sp28 = 0;
             p = &gPlayers[i];
             if (p->charFlags.someIndex != 5 && p->charFlags.someIndex != 2) {
-                if (p == GET_SP_PLAYER_V0(PLAYER_1) || p == GET_SP_PLAYER_V0(PLAYER_2)) {
+                if (p == &gPlayers[gStageData.playerIndex] || p == &gPlayers[gPlayers[gStageData.playerIndex].charFlags.partnerIndex]) {
                     sp28 = 1;
                 }
                 if (!(p->moveState & MOVESTATE_DEAD) && (p->charFlags.anim0 != 0x66) && (p->unk48 == 0)) {
