@@ -34,6 +34,8 @@ void sub_8025C64(u8 value);
 void sub_8025D20(u8 value);
 void sub_8025CD8(void);
 void sub_8026AB8(const u8 *packet);
+void sub_8025D10(void);
+void sub_802613C(void);
 
 NONMATCH("asm/non_matching/sio/sio__sub_8023A88.inc", void sub_8023A88(void))
 {
@@ -464,8 +466,27 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024C68.inc", void sub_8024C68(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8024DC8.inc", void sub_8024DC8(void))
+// Reconstructed from the reference GBA Thumb instructions.
+// Keep original NONMATCH ASM for the bit-identical matching build.
+NONMATCH("asm/non_matching/sio/sio__sub_8024DC8.inc", // Read SIO player ID from hardware; then process the status handshake.
+// A negative link error returns immediately, without resetting the state.
+s16 sub_8024DC8(void))
 {
+    s16 status;
+    u16 packetType;
+    gStageData.playerIndex = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    status = sub_802610C();
+    if (status < 0) {
+        return status;
+    }
+    if ((gMultiSioStatusFlags & 1) != 0) {
+        packetType = (u16)gMultiSioRecv[0].raw[0]
+                     | ((u16)gMultiSioRecv[0].raw[1] << 8);
+    } else {
+        packetType = 0;
+    }
+    sub_8025770();
+    return (packetType == 0x6606) ? 1 : 0;
 }
 END_NONMATCH
 
@@ -752,8 +773,26 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025A90.inc", s16 sub_8025A90(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025AA8.inc", void sub_8025AA8(void))
+// Reconstructed from the reference GBA Thumb instructions.
+// Keep original NONMATCH ASM for the bit-identical matching build.
+NONMATCH("asm/non_matching/sio/sio__sub_8025AA8.inc", // Check whether the first receive packet is the 0x660D handshake
+// response, after updating our hardware player index and transmit state.
+s16 sub_8025AA8(void))
 {
+    s16 status;
+    u16 packetType;
+    gStageData.playerIndex = (*(vu32 *)REG_ADDR_SIOCNT >> 6) & 3;
+    status = sub_802610C();
+    if (status < 0) {
+        return status;
+    }
+    sub_8025D10();
+    if ((gMultiSioStatusFlags & 1) == 0) {
+        return 0;
+    }
+    packetType = (u16)gMultiSioRecv[0].raw[0]
+                 | ((u16)gMultiSioRecv[0].raw[1] << 8);
+    return (packetType == 0x660D) ? 1 : 0;
 }
 END_NONMATCH
 
@@ -1055,8 +1094,27 @@ NONMATCH("asm/non_matching/sio/sio__sub_802618C.inc", void sub_802618C(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_80261B0.inc", void sub_80261B0(void))
+// Reconstructed from the reference GBA Thumb instructions.
+// Keep original NONMATCH ASM for the bit-identical matching build.
+NONMATCH("asm/non_matching/sio/sio__sub_80261B0.inc", // Reset the eight five-byte receive-command slots and resynchronize the
+// four players' state bits and all 4 SIO receive status bytes.
+void sub_80261B0(void))
 {
+    s32 i;
+    gUnknown_03001CC0[0] = (gUnknown_03001CC0[0] + 1) & 3;
+    gUnknown_03001CC0[1] = 0;
+
+    for (i = 0; i < 8; i++) {
+        gUnknown_03001CC0[2 + 5 * i] = 0xFF;
+    }
+    for (i = 0; i < 4; i++) {
+        u8 *state = (u8 *)&gPlayers[i];
+        state[0x2C] = (state[0x2C] & (u8)~0x39) | 0x20;
+    }
+    gMultiSioSend.raw[0x12] = 0xFF;
+    for (i = 0; i < 4; i++) {
+        gMultiSioRecv[i].raw[0x12] = 0xFF;
+    }
 }
 END_NONMATCH
 
