@@ -521,7 +521,44 @@ NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084EAC.inc", void sa2__sub
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084EE0.inc", void sa2__sub_8084EE0()) { }
+// Calculate the inverse of a Q6.10 3x3 basis through its adjugate.
+// This preserves the original Thumb routine's unusual three HALFWORD
+// writes at offsets 0x14, 0x16 and 0x18; the matrix struct defines those
+// bytes as parts of 32-bit fields. Do not change to s32 stores.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_8084EE0.inc",
+         void sa2__sub_8084EE0(struct UNK_8085F1C_1 *matrix))
+{
+    s32 a = matrix->unk2[0], b = matrix->unk2[1], c = matrix->unk2[2];
+    s32 d = matrix->unk2[3], e = matrix->unk2[4], f = matrix->unk2[5];
+    s32 g = matrix->unk2[6], h = matrix->unk2[7], i = matrix->unk2[8];
+    s32 tx = matrix->unk14, ty = matrix->unk18, tz = matrix->unk1C;
+    s32 det = a * ((e * i - f * h) >> 10)
+              - b * ((d * i - f * g) >> 10)
+              + c * ((d * h - e * g) >> 10);
+    s32 scale = 0x100000 / det;
+    s32 negativeScale = -scale;
+    s16 translation[3];
+
+    matrix->unk2[0] = (scale * ((e * i - f * h) >> 10)) >> 10;
+    matrix->unk2[1] = (negativeScale * ((b * i - c * h) >> 10)) >> 10;
+    matrix->unk2[2] = (scale * ((b * f - c * e) >> 10)) >> 10;
+    matrix->unk2[3] = (negativeScale * ((d * i - f * g) >> 10)) >> 10;
+    matrix->unk2[4] = (scale * ((a * i - c * g) >> 10)) >> 10;
+    matrix->unk2[5] = (negativeScale * ((a * f - c * d) >> 10)) >> 10;
+    matrix->unk2[6] = (scale * ((d * h - e * g) >> 10)) >> 10;
+    matrix->unk2[7] = (negativeScale * ((a * h - b * g) >> 10)) >> 10;
+    matrix->unk2[8] = (scale * ((a * e - b * d) >> 10)) >> 10;
+
+    // The ASM uses the ORIGINAL basis and translation for these values,
+    // negates the accumulated signed 64-bit product, then shifts by ten.
+    translation[0] = -(((s64)tx * a + (s64)ty * d + (s64)tz * g)) >> 10;
+    translation[1] = -(((s64)tx * b + (s64)ty * e + (s64)tz * h)) >> 10;
+    translation[2] = -(((s64)tx * c + (s64)ty * f + (s64)tz * i)) >> 10;
+
+    memcpy((u8 *)matrix + 0x14, &translation[0], sizeof(s16));
+    memcpy((u8 *)matrix + 0x16, &translation[1], sizeof(s16));
+    memcpy((u8 *)matrix + 0x18, &translation[2], sizeof(s16));
+}
 END_NONMATCH
 
 // Invert a Q6.10 orthonormal affine transform in place.
