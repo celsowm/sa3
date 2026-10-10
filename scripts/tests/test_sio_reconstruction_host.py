@@ -149,12 +149,13 @@ int main(void) {
     CHECK(gMultiSioSend.raw[16] == 3, 29);
     CHECK(gUnknown_030010AC[1] == 3, 30);
 
-    // 0xFF marks a missing player without changing the ID map.
+    // Thumb treats 0xFF as an invalid ID in the local cache only.
+    // The send packet is *not* overwritten by this branch.
     gUnknown_030010AC[1] = 6;
     gMultiSioRecv[1].raw[16] = 0xFF;
     CHECK(sub_80247D4() == 0, 31);
-    CHECK(gMultiSioSend.raw[16] == 0xFF, 32);
-    CHECK(gUnknown_030010AC[1] == 6, 33);
+    CHECK(gMultiSioSend.raw[16] == 3, 32);
+    CHECK(gUnknown_030010AC[1] == 0xFF, 33);
 
     // 0x6605 disconnect clears the selected player's assignment.
     memset(gUnknown_03001060, 0, sizeof(gUnknown_03001060));
@@ -175,6 +176,22 @@ int main(void) {
     gMultiSioSend.raw[16] = 4;
     CHECK(sub_80248F4() == 0, 37);
     CHECK(gMultiSioSend.raw[16] == 4, 38);
+
+    // A 0x6608 packet takes the explicit synchronization branch, which
+    // copies both the outgoing slot and local cache (unlike an ordinary
+    // packet that sends 0xFF).
+    memset(&gMultiSioSend, 0, sizeof(gMultiSioSend));
+    memset(gMultiSioRecv, 0, sizeof(gMultiSioRecv));
+    gUnknown_03001060[7] = 2;
+    gMultiSioRecv[1].raw[0] = 8;
+    gMultiSioRecv[1].raw[1] = 0x66;
+    gMultiSioRecv[1].raw[3] = 1;
+    gMultiSioRecv[1].raw[16] = 0xFF;
+    gMultiSioSend.raw[16] = 7;
+    gUnknown_030010AC[1] = 5;
+    CHECK(sub_80247D4() == 0, 48);
+    CHECK(gMultiSioSend.raw[16] == 0xFF, 49);
+    CHECK(gUnknown_030010AC[1] == 0xFF, 50);
 
     // Reset routine must clear DMA buffers, reinitialize transport, derive
     // player ID from SIOCNT bits 4..5, and start only when bit 7 is set.
