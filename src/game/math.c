@@ -58,10 +58,42 @@ bool8 SA2_LABEL(sub_8085D98)(UNK_8085DEC *thing, UNK_8085DEC *target);
 #define RAND_CONST               0x37119371;
 #define Q_6_10_MUL(qValA, qValB) ((qValA * qValB) >> 10)
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_80832FC.inc", void sa2__sub_80832FC()) { }
+// Cubic Bezier interpolation, using original Q-shift staging and signed
+// 64-bit intermediate products. The GBA ASM accepts four values in r0-r3,
+// then t and the u8 fixed-point shift on the stack.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_80832FC.inc",
+         s32 sa2__sub_80832FC(s32 p0, s32 p1, s32 p2, s32 p3, s32 t, u8 shift))
+{
+    s32 unit = 1u << shift;
+    s32 u = unit - t;
+    s32 t2 = ((s64)t * t) >> shift;
+    s32 t3 = ((s64)t2 * t) >> shift;
+    s32 u2 = ((s64)u * u) >> shift;
+    s32 u3 = ((s64)u2 * u) >> shift;
+    s32 u2t = ((s64)u2 * t) >> shift;
+    s32 ut2 = ((s64)u * t2) >> shift;
+
+    return (((s64)p0 * u3) + (3 * (s64)p1 * u2t)
+            + (3 * (s64)p2 * ut2) + ((s64)p3 * t3)) >> shift;
+}
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808343C.inc", void sa2__sub_808343C()) { }
+// Cubic Hermite interpolation with Q-format fixed-point coefficients.
+// ASM argument registers are p0, m0, m1, p1; t and shift are on the stack.
+NONMATCH("asm/non_matching/game/math/sa2__unused_sub_808343C.inc",
+         s32 sa2__sub_808343C(s32 p0, s32 m0, s32 m1, s32 p1, s32 t, u8 shift))
+{
+    s32 t2 = ((s64)t * t) >> shift;
+    s32 t3 = ((s64)t2 * t) >> shift;
+    s32 unit = 1u << shift;
+    s32 h00 = 2 * t3 - 3 * t2 + unit;
+    s32 h10 = t3 - 2 * t2 + t;
+    s32 h01 = 3 * t2 - 2 * t3;
+    s32 h11 = t3 - t2;
+
+    return (((s64)p0 * h00) + ((s64)m0 * h10)
+            + ((s64)p1 * h01) + ((s64)m1 * h11)) >> shift;
+}
 END_NONMATCH
 
 void SA2_LABEL(sub_8083504)(UNK_8085D14_2 *arg0, UNK_8085D14_2 *arg1, UNK_8085D14_2 *arg2)
