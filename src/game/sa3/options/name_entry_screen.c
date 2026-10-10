@@ -959,11 +959,12 @@ NONMATCH("asm/non_matching/game/sa3/options/nes__Task_8092A0C.inc", void Task_80
     sub_8093904(nes);
 
     for (var_r3 = 0; var_r3 < nes->unk5; var_r3++) {
-        AnimId arrAnim = gUnknown_080D7458.anim;
         Sprite *s = &nes->spr1DC[var_r3];
-        LOADED_SAVE->playerName[var_r3] = s->variant;
-        if (s->anim != arrAnim) {
-            LOADED_SAVE->playerName[var_r3] += 0x100;
+        u16 *name = &LOADED_SAVE->playerName[var_r3];
+        u8 variant = s->variant;
+        *name = variant;
+        if (s->anim != gUnknown_080D7458.anim) {
+            *name = variant + 0x100;
         }
     }
     for (var_r3_2 = nes->unk5; var_r3_2 < 6; var_r3_2++) {
