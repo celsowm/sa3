@@ -30,6 +30,8 @@ void sub_8025D48(void);
 void sub_80260F0(void);
 void sub_8025BEC(u8 value);
 void sub_8025C64(u8 value);
+void sub_8025D20(u8 value);
+void sub_8025CD8(void);
 
 NONMATCH("asm/non_matching/sio/sio__sub_8023A88.inc", void sub_8023A88(void))
 {
@@ -663,8 +665,27 @@ NONMATCH("asm/non_matching/sio/sio__sub_80259F8.inc", s16 sub_80259F8(u8 value))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025A38.inc", void sub_8025A38(void))
+// Reconstructed from the Thumb routine; not yet promoted to binary matching.
+NONMATCH("asm/non_matching/sio/sio__sub_8025A38.inc", s16 sub_8025A38(void))
 {
+    u8 connected = gUnknown_03001060[7];
+    s16 status = sub_802610C();
+    u16 receivedType;
+
+    if (status < 0) {
+        return status;
+    }
+
+    sub_8025CD8();
+    if (connected != 3 && connected != 7 && connected != 15) {
+        return 0;
+    }
+
+    receivedType = *(u16 *)&gMultiSioRecv[(connected & 8) ? 3 : 1].raw[0];
+    if (receivedType == 0x660A || receivedType == 0x660B) {
+        return 1;
+    }
+    return 0;
 }
 END_NONMATCH
 
@@ -685,8 +706,20 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025AA8.inc", void sub_8025AA8(void))
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025AFC.inc", void sub_8025AFC(void))
+// Reconstructed from the Thumb routine; not yet promoted to binary matching.
+NONMATCH("asm/non_matching/sio/sio__sub_8025AFC.inc", s16 sub_8025AFC(void))
 {
+    s16 status = sub_802610C();
+    if (status < 0) {
+        return status;
+    }
+
+    sub_8025D20(gUnknown_03001060[0x50]);
+    if ((gMultiSioStatusFlags & 1)
+        && *(u16 *)&gMultiSioRecv[0].raw[0] == 0x660D) {
+        return 1;
+    }
+    return 0;
 }
 END_NONMATCH
 
@@ -776,8 +809,20 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025C64.inc", void sub_8025C64(u8 value)
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/sio/sio__sub_8025C8C.inc", void sub_8025C8C(void))
+// Reconstructed from the Thumb routine; not yet promoted to binary matching.
+NONMATCH("asm/non_matching/sio/sio__sub_8025C8C.inc", void sub_8025C8C(u8 value))
 {
+    u8 player = (*(volatile u32 *)0x04000128 >> 4) & 3;
+    u8 target = player;
+
+    gStageData.playerIndex = player;
+    if (target <= 1 && !(gUnknown_03001060[7] & (4 << target))) {
+        target += 2;
+    }
+
+    *(u16 *)&gMultiSioSend.raw[0] = 0x6605;
+    gMultiSioSend.raw[3] = target;
+    gMultiSioSend.raw[4] = value;
 }
 END_NONMATCH
 
