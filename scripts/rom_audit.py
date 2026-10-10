@@ -121,6 +121,26 @@ def scan_lz10(data: bytes, min_output: int = 64,
     return plausible_headers, candidates
 
 
+
+def find_rom_pointer_sites(data: bytes, rom_address: int) -> list[str]:
+    """Find exact, 4-byte aligned little-endian words equal to a ROM address.
+
+    These are pointer-shaped values, not confirmed code/data references.
+    """
+    if not ROM_BASE <= rom_address < ROM_BASE + len(data):
+        return []
+    token = rom_address.to_bytes(4, "little")
+    sites = []
+    at = 0
+    while True:
+        at = data.find(token, at)
+        if at < 0:
+            return sites
+        if at % 4 == 0:
+            sites.append(f"0x{ROM_BASE + at:08X}")
+        at += 1
+
+
 def audit_rom(data: bytes, scan_lz: bool = False,
               segments: bool = False) -> dict[str, Any]:
     if len(data) < HEADER_SIZE:
@@ -148,6 +168,10 @@ def audit_rom(data: bytes, scan_lz: bool = False,
         result["mib_segments"] = _segment_summary(data)
     if scan_lz:
         headers, found = scan_lz10(data)
+        for candidate in found:
+            sites = find_rom_pointer_sites(data, int(candidate["rom_address"], 16))
+            candidate["pointer_sites"] = sites
+            candidate["pointer_site_count"] = len(sites)
         result["lz10"] = {
             "scan_alignment_bytes": 4,
             "min_decoded_bytes": 64,
