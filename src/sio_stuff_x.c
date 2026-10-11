@@ -117,24 +117,22 @@ NONMATCH("asm/non_matching/sio/sio__sub_8023FE0.inc", s16 sub_8023FE0(void))
 END_NONMATCH
 
 // Thumb-to-C reconstruction; the reference ASM remains the default matching path.
-NONMATCH("asm/non_matching/sio/sio__sub_8024040.inc", s16 sub_8024040(void))
+s16 sub_8024040(void)
 {
     s16 result = (u16)sub_8025D58();
     sub_8024304();
     gUnknown_03001060[7] = 0;
     return result;
 }
-END_NONMATCH
 
 // Reconstructed from Thumb; leave original instructions in matching builds.
-NONMATCH("asm/non_matching/sio/sio__sub_8024068.inc", void sub_8024068(void))
+void sub_8024068(void)
 {
     sub_8024334();
 }
-END_NONMATCH
 
 // Recovered from Thumb SIO status/error paths; ASM remains matching fallback.
-NONMATCH("asm/non_matching/sio/sio__sub_8024074.inc", s16 sub_8024074(u8 value))
+s16 sub_8024074(u8 value)
 {
     s16 status = sub_802610C();
     if (status < 0) {
@@ -146,10 +144,9 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024074.inc", s16 sub_8024074(u8 value))
     sub_8024354(0, value);
     return 0;
 }
-END_NONMATCH
 
 // Recovered from Thumb SIO status/error paths; ASM remains matching fallback.
-NONMATCH("asm/non_matching/sio/sio__sub_80240B4.inc", s16 sub_80240B4(u8 value))
+s16 sub_80240B4(u8 value)
 {
     s16 status = sub_802610C();
     if (status < 0) {
@@ -161,10 +158,9 @@ NONMATCH("asm/non_matching/sio/sio__sub_80240B4.inc", s16 sub_80240B4(u8 value))
     sub_8024374(0, value);
     return 0;
 }
-END_NONMATCH
 
 // Recovered from Thumb SIO status/error paths; ASM remains matching fallback.
-NONMATCH("asm/non_matching/sio/sio__sub_80240F4.inc", s16 sub_80240F4(void))
+s16 sub_80240F4(void)
 {
     s16 status = sub_802610C();
     if (status < 0) {
@@ -178,7 +174,6 @@ NONMATCH("asm/non_matching/sio/sio__sub_80240F4.inc", s16 sub_80240F4(void))
     }
     return 0;
 }
-END_NONMATCH
 
 // Recovered from Thumb SIO status/error paths; ASM remains matching fallback.
 NONMATCH("asm/non_matching/sio/sio__sub_8024130.inc", s16 sub_8024130(void))
@@ -203,7 +198,7 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024130.inc", s16 sub_8024130(void))
 END_NONMATCH
 
 // Thumb-to-C reconstruction; the reference ASM remains the default matching path.
-NONMATCH("asm/non_matching/sio/sio__sub_8024188.inc", s16 sub_8024188(u8 value))
+s16 sub_8024188(u8 value)
 {
     s16 result = sub_802610C();
     if (result >= 0) {
@@ -212,7 +207,6 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024188.inc", s16 sub_8024188(u8 value))
     }
     return result;
 }
-END_NONMATCH
 
 // Thumb-to-C reconstruction; the reference ASM remains the default matching path.
 NONMATCH("asm/non_matching/sio/sio__sub_80241AC.inc", s16 sub_80241AC(u8 value))
@@ -258,7 +252,7 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024208.inc", s16 sub_8024208(void))
 END_NONMATCH
 
 // Thumb-to-C reconstruction; the reference ASM remains the default matching path.
-NONMATCH("asm/non_matching/sio/sio__sub_8024254.inc", s16 sub_8024254(u8 value))
+s16 sub_8024254(u8 value)
 {
     s16 result = sub_802610C();
     if (result < 0) {
@@ -272,7 +266,6 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024254.inc", s16 sub_8024254(u8 value))
     }
     return 0;
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/sio/sio__sub_8024298.inc", void sub_8024298(void))
 {
@@ -934,21 +927,19 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025874.inc", void sub_8025874(u8 value)
 END_NONMATCH
 
 // Thumb-to-C reconstruction; the reference ASM remains the default matching path.
-NONMATCH("asm/non_matching/sio/sio__sub_80258D4.inc", s16 sub_80258D4(void))
+s16 sub_80258D4(void)
 {
     s16 result = (u16)sub_8025D58();
     MultiSio_SendPlayerName();
     gUnknown_03001060[7] = 0;
     return result;
 }
-END_NONMATCH
 
 // Reconstructed from Thumb; leave original instructions in matching builds.
-NONMATCH("asm/non_matching/sio/sio__sub_80258FC.inc", void sub_80258FC(void))
+void sub_80258FC(void)
 {
     sub_8025BC0();
 }
-END_NONMATCH
 
 // C reconstruction from Thumb. Leave the original ASM in matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_8025908.inc", s16 sub_8025908(u8 value))
@@ -1009,11 +1000,10 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025998.inc", s16 sub_8025998(void))
 END_NONMATCH
 
 // Reconstructed from Thumb; leave original instructions in matching builds.
-NONMATCH("asm/non_matching/sio/sio__sub_80259EC.inc", void sub_80259EC(void))
+void sub_80259EC(void)
 {
     sub_8025BC0();
 }
-END_NONMATCH
 
 // C reconstruction from Thumb. Leave the original ASM in matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_80259F8.inc", s16 sub_80259F8(u8 value))
@@ -1056,7 +1046,7 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025A38.inc", s16 sub_8025A38(void))
 END_NONMATCH
 
 // Verified against the Thumb control flow; retain ASM until agbcc/ROM matching.
-NONMATCH("asm/non_matching/sio/sio__sub_8025A90.inc", s16 sub_8025A90(void))
+s16 sub_8025A90(void)
 {
     s16 result = sub_802610C();
     if (result < 0) {
@@ -1065,7 +1055,6 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025A90.inc", s16 sub_8025A90(void))
     sub_8025D00();
     return 0;
 }
-END_NONMATCH
 
 // Reconstructed from the reference GBA Thumb instructions.
 // Keep original NONMATCH ASM for the bit-identical matching build.
@@ -1091,7 +1080,7 @@ s16 sub_8025AA8(void))
 END_NONMATCH
 
 // Reconstructed from the Thumb routine; not yet promoted to binary matching.
-NONMATCH("asm/non_matching/sio/sio__sub_8025AFC.inc", s16 sub_8025AFC(void))
+s16 sub_8025AFC(void)
 {
     s16 status = sub_802610C();
     if (status < 0) {
@@ -1105,7 +1094,6 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025AFC.inc", s16 sub_8025AFC(void))
     }
     return 0;
 }
-END_NONMATCH
 
 // Verified against the Thumb control flow; retain ASM until agbcc/ROM matching.
 NONMATCH("asm/non_matching/sio/sio__sub_8025B48.inc", s16 sub_8025B48(void))
@@ -1347,13 +1335,12 @@ NONMATCH("asm/non_matching/sio/sio__sub_8026080.inc", void sub_8026080(void))
 END_NONMATCH
 
 // Reconstructed from Thumb; leave original instructions in matching builds.
-NONMATCH("asm/non_matching/sio/sio__sub_80260F0.inc", void sub_80260F0(void))
+void sub_80260F0(void)
 {
     gMultiSioEnabled = FALSE;
     MultiSioStop();
     MultiSioInit(0);
 }
-END_NONMATCH
 
 // Thumb-to-C reconstruction; the reference ASM remains the default matching path.
 NONMATCH("asm/non_matching/sio/sio__sub_802610C.inc", s16 sub_802610C(void))
@@ -1368,19 +1355,17 @@ END_NONMATCH
 
 // A successful MultiBoot result transitions into a dedicated priority
 // 0x2000 task and releases flag 0x400. Task data size is zero in Thumb.
-NONMATCH("asm/non_matching/sio/sio__sub_802613C.inc", void sub_802613C(void))
+void sub_802613C(void)
 {
     gFlags &= ~0x400;
     TaskCreate(Task_8026178, 0, 0x2000, 0, NULL);
 }
-END_NONMATCH
 
 // Reconstructed from Thumb; leave original instructions in matching builds.
-NONMATCH("asm/non_matching/sio/sio__sub_802616C.inc", void sub_802616C(u8 value))
+void sub_802616C(u8 value)
 {
     gUnknown_03001060[4] = value;
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/sio/sio__Task_8026178.inc", void Task_8026178(void))
 {
@@ -1864,7 +1849,7 @@ END_NONMATCH
 
 // ARM MultiBoot sends four successful completion codes.
 // Preserve all other responses as false, with no transition side effect.
-NONMATCH("asm/non_matching/sio/sio__sub_8028530.inc", bool32 sub_8028530(void))
+bool32 sub_8028530(void)
 {
     s32 result = MultiBootMain(&gMultiBootParam);
     if (result == 0x50 || result == 0x60 || result == 0x70 || result == 0x71) {
@@ -1873,7 +1858,6 @@ NONMATCH("asm/non_matching/sio/sio__sub_8028530.inc", bool32 sub_8028530(void))
     }
     return FALSE;
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/sio/sio__sa2__sub_8081D70.inc", void sa2__sub_8081D70(void))
 {
@@ -1911,12 +1895,11 @@ NONMATCH("asm/non_matching/sio/sio__sub_8028770.inc", void sub_8028770(void))
 END_NONMATCH
 
 // Reconstructed from Thumb; leave original instructions in matching builds.
-NONMATCH("asm/non_matching/sio/sio__sub_80287B8.inc", void sub_80287B8(void))
+void sub_80287B8(void)
 {
     gUnknown_03001060[7] = 0;
     sub_80287CC();
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/sio/sio__sub_80287CC.inc", void sub_80287CC(void))
 {
