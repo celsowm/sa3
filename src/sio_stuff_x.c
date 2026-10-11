@@ -20,6 +20,8 @@ s16 sub_8025E24(u8 id);
 s16 sub_802610C(void);
 s16 sub_8025D58(void);
 void sub_8024304(void);
+void sub_8024354(u8 player, u8 value);
+void sub_8024374(u8 player, u8 value);
 void sub_8024394(u8 player, u8 value);
 void sub_80243C4(u8 player, u8 value);
 void sub_80243B4(void);
