@@ -287,11 +287,10 @@ void sub_8024314(void)
 }
 
 // Reconstructed from Thumb; retain the original assembly for matching builds.
-NONMATCH("asm/non_matching/sio/sio__sub_8024324.inc", void sub_8024324(void))
+void sub_8024324(void)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x6C02;
+    gMultiSioSend.pat0.unk0 = 0x6C02;
 }
-END_NONMATCH
 
 // Reconstructed from Thumb; retain the original assembly for matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_8024334.inc", void sub_8024334(void))
@@ -332,11 +331,10 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024394.inc", void sub_8024394(u8 player
 END_NONMATCH
 
 // C reconstruction from the original Thumb instructions; ASM remains the matching fallback.
-NONMATCH("asm/non_matching/sio/sio__sub_80243B4.inc", void sub_80243B4(void))
+void sub_80243B4(void)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x6C0A;
+    gMultiSioSend.pat0.unk0 = 0x6C0A;
 }
-END_NONMATCH
 
 // C reconstruction from the original Thumb instructions; ASM remains the matching fallback.
 NONMATCH("asm/non_matching/sio/sio__sub_80243C4.inc", void sub_80243C4(u8 player, u8 value))
@@ -348,20 +346,18 @@ NONMATCH("asm/non_matching/sio/sio__sub_80243C4.inc", void sub_80243C4(u8 player
 END_NONMATCH
 
 // Reconstructed from Thumb; retain the original assembly for matching builds.
-NONMATCH("asm/non_matching/sio/sio__sub_80243E4.inc", void sub_80243E4(u8 value))
+void sub_80243E4(u8 value)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x6C0B;
+    gMultiSioSend.pat0.unk0 = 0x6C0B;
     gMultiSioSend.raw[7] = value;
 }
-END_NONMATCH
 
 // Reconstructed from Thumb; retain the original assembly for matching builds.
-NONMATCH("asm/non_matching/sio/sio__sub_80243F8.inc", void sub_80243F8(u8 value))
+void sub_80243F8(u8 value)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x6C0C;
+    gMultiSioSend.pat0.unk0 = 0x6C0C;
     gMultiSioSend.raw[7] = value;
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/sio/sio__sub_802440C.inc", void sub_802440C(void))
 {
@@ -1116,18 +1112,16 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025B78.inc", void sub_8025B78(void))
 END_NONMATCH
 
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
-NONMATCH("asm/non_matching/sio/sio__sub_8025BA0.inc", void sub_8025BA0(void))
+void sub_8025BA0(void)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x6601;
+    gMultiSioSend.pat0.unk0 = 0x6601;
 }
-END_NONMATCH
 
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
-NONMATCH("asm/non_matching/sio/sio__sub_8025BB0.inc", void sub_8025BB0(void))
+void sub_8025BB0(void)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x6602;
+    gMultiSioSend.pat0.unk0 = 0x6602;
 }
-END_NONMATCH
 
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
 NONMATCH("asm/non_matching/sio/sio__sub_8025BC0.inc", void sub_8025BC0(void))
@@ -1208,41 +1202,36 @@ NONMATCH("asm/non_matching/sio/sio__sub_8025CD8.inc", void sub_8025CD8(void))
 END_NONMATCH
 
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
-NONMATCH("asm/non_matching/sio/sio__sub_8025D00.inc", void sub_8025D00(void))
+void sub_8025D00(void)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x660B;
+    gMultiSioSend.pat0.unk0 = 0x660B;
 }
-END_NONMATCH
 
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
-NONMATCH("asm/non_matching/sio/sio__sub_8025D10.inc", void sub_8025D10(void))
+void sub_8025D10(void)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x660C;
+    gMultiSioSend.pat0.unk0 = 0x660C;
 }
-END_NONMATCH
 
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
-NONMATCH("asm/non_matching/sio/sio__sub_8025D20.inc", void sub_8025D20(u8 value))
+void sub_8025D20(u8 value)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x660D;
+    gMultiSioSend.pat0.unk0 = 0x660D;
     gMultiSioSend.raw[5] = value;
 }
-END_NONMATCH
 
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
-NONMATCH("asm/non_matching/sio/sio__sub_8025D34.inc", void sub_8025D34(u8 value))
+void sub_8025D34(u8 value)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x660E;
+    gMultiSioSend.pat0.unk0 = 0x660E;
     gMultiSioSend.raw[5] = value;
 }
-END_NONMATCH
 
 // C reconstruction from the European ROM Thumb routine; matching builds retain ASM.
-NONMATCH("asm/non_matching/sio/sio__sub_8025D48.inc", void sub_8025D48(void))
+void sub_8025D48(void)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x660F;
+    gMultiSioSend.pat0.unk0 = 0x660F;
 }
-END_NONMATCH
 
 // Reset the multiplayer transport, clear the packet buffers, and negotiate
 // the local player index. Reconstructed from the European Thumb reference;
