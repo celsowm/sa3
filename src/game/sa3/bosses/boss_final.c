@@ -335,10 +335,9 @@ NONMATCH("asm/non_matching/game/bosses/boss_final__sub_8081810.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_final__sub_808183C.inc", void sub_808183C(void))
+void sub_808183C(void)
 {
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/bosses/boss_final__sub_8081840.inc", void sub_8081840(void))
 {
@@ -350,10 +349,9 @@ NONMATCH("asm/non_matching/game/bosses/boss_final__sub_808186C.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_final__PlayerCB_8081894.inc", void PlayerCB_8081894(void))
+void PlayerCB_8081894(void)
 {
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/bosses/boss_final__sub_8081898.inc", void sub_8081898(void))
 {
@@ -380,10 +378,9 @@ NONMATCH("asm/non_matching/game/bosses/boss_final__sub_8081A10.inc", void sub_80
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_final__PlayerCB_80819BC.inc", void PlayerCB_80819BC(void))
+void PlayerCB_80819BC(void)
 {
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/bosses/boss_final__sub_8081A40.inc", void sub_8081A40(void))
 {
@@ -405,20 +402,17 @@ NONMATCH("asm/non_matching/game/bosses/boss_final__UpdateHandAnimation.inc", voi
 }
 END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_final__sub_8081B18.inc", void sub_8081B18(void))
+void sub_8081B18(void)
 {
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_final__sub_8081B1C.inc", void sub_8081B1C(void))
+void sub_8081B1C(void)
 {
 }
-END_NONMATCH
 
-NONMATCH("asm/non_matching/game/bosses/boss_final__sub_8081B20.inc", void sub_8081B20(void))
+void sub_8081B20(void)
 {
 }
-END_NONMATCH
 
 NONMATCH("asm/non_matching/game/bosses/boss_final__sub_8081B24.inc", void sub_8081B24(void))
 {
