@@ -232,10 +232,10 @@ NONMATCH("asm/non_matching/sio/sio__sub_80241AC.inc", s16 sub_80241AC(u8 value))
 END_NONMATCH
 
 // Thumb-to-C reconstruction; the reference ASM remains the default matching path.
-NONMATCH("asm/non_matching/sio/sio__sub_8024208.inc", s16 sub_8024208(void))
+s16 sub_8024208(void)
 {
     s16 result = sub_802610C();
-    s16 response = 0;
+    s16 response;
 
     if (result < 0) {
         return result;
@@ -243,13 +243,13 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024208.inc", s16 sub_8024208(void))
     if (gMultiSioStatusFlags & 0x0C0C) {
         return -4;
     }
+    response = 0;
     if (*(u16 *)&gMultiSioRecv[0].raw[0] == 0x6C0A) {
         response = 0x10;
     }
     sub_80243B4();
     return response;
 }
-END_NONMATCH
 
 // Thumb-to-C reconstruction; the reference ASM remains the default matching path.
 s16 sub_8024254(u8 value)
@@ -281,11 +281,10 @@ NONMATCH("asm/non_matching/sio/sio__sub_8024304.inc", void sub_8024304(void))
 END_NONMATCH
 
 // Reconstructed from Thumb; retain the original assembly for matching builds.
-NONMATCH("asm/non_matching/sio/sio__sub_8024314.inc", void sub_8024314(void))
+void sub_8024314(void)
 {
-    *(u16 *)&gMultiSioSend.raw[0] = 0x6C01;
+    gMultiSioSend.pat0.unk0 = 0x6C01;
 }
-END_NONMATCH
 
 // Reconstructed from Thumb; retain the original assembly for matching builds.
 NONMATCH("asm/non_matching/sio/sio__sub_8024324.inc", void sub_8024324(void))
