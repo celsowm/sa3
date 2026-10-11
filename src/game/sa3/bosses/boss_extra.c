@@ -859,10 +859,10 @@ void sub_80870B0(ExtraBoss *boss)
     boss->unk8 = 0;
 }
 
-NONMATCH("asm/non_matching/game/bosses/boss_extra__sub_80870E0.inc", void sub_80870E0(void))
+s32 sub_80870E0(void)
 {
+    return 0;
 }
-END_NONMATCH
 
 void sub_80870E4(u16 value)
 {

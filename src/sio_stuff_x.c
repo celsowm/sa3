@@ -1732,11 +1732,10 @@ NONMATCH("asm/non_matching/sio/sio__sub_80278DC.inc", void sub_80278DC(void))
 END_NONMATCH
 
 // C reconstruction from the original Thumb instructions; ASM remains the matching fallback.
-NONMATCH("asm/non_matching/sio/sio__sub_80278F8.inc", void sub_80278F8(const u8 *src))
+void sub_80278F8(const u8 *src)
 {
-    *(u16 *)((u8 *)&gStageData + 0x12) = *(const u16 *)(src + 2);
+    gStageData.nextMapIndex = *(const u16 *)(src + 2);
 }
-END_NONMATCH
 
 // The original Thumb implementation is a single bx lr (followed by alignment).
 void sub_8027904(void)
