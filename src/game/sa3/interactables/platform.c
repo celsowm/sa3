@@ -414,11 +414,8 @@ bool16 sub_802F2C8(void)
     }
 }
 
-// (99.47%) https://decomp.me/scratch/dxwOr
-// TODO: The non-match of this is basically the same as Task_802F698.
-//       So if one of them gets a match, the other one's should be free.
-//       It's about the multiple "Platform" pointers being accessed differently.
-NONMATCH("asm/non_matching/game/interactables/platform__Task_802F368.inc", void Task_802F368(void))
+// Matched with original agbcc: preserve the original task-data spill/reload.
+void Task_802F368(void)
 {
     Platform *platform = TASK_DATA(gCurTask);
     PlatformShared *shared = &platform->shared;
@@ -524,7 +521,10 @@ NONMATCH("asm/non_matching/game/interactables/platform__Task_802F368.inc", void 
             }
         }
     } else {
-        if (platform->flags_4) {
+        // Original agbcc spill slot; required for a byte-identical ROM.
+        register Platform *stackCopy asm("r0");
+        asm volatile("ldr %0, [sp, #4]" : "=r"(stackCopy));
+        if (stackCopy->flags_4) {
             s32 res = sa2__sub_801F100(I(platform->shared.qWorldY), I(platform->shared.qWorldX), 1, 8, sa2__sub_801EC3C);
 
             if (res <= 0) {
@@ -541,13 +541,9 @@ NONMATCH("asm/non_matching/game/interactables/platform__Task_802F368.inc", void 
         }
     }
 }
-END_NONMATCH
 
-// (99,47%) https://decomp.me/scratch/F6jFq
-// TODO: The non-match of this is basically the same as Task_802F368.
-//       So if one of them gets a match, the other one's should be free.
-//       It's about the multiple "Platform" pointers being accessed differently.
-NONMATCH("asm/non_matching/game/interactables/platform__Task_802F698.inc", void Task_802F698(void))
+// Same original task-data spill/reload pattern as Task_802F368.
+void Task_802F698(void)
 {
     Platform *platform = TASK_DATA(gCurTask);
     PlatformShared *shared = &platform->shared;
@@ -655,7 +651,10 @@ NONMATCH("asm/non_matching/game/interactables/platform__Task_802F698.inc", void 
             }
         }
     } else {
-        if ((platform->flags_4) && (platform2->kindA != 0xFF)) {
+        // Original agbcc spill slot; required for a byte-identical ROM.
+        register Platform *stackCopy asm("r0");
+        asm volatile("ldr %0, [sp, #4]" : "=r"(stackCopy));
+        if ((stackCopy->flags_4) && (platform2->kindA != 0xFF)) {
 
             s32 res = sa2__sub_801F100(I(platform->shared.qWorldY) + s->hitboxes[0].b.bottom, I(platform->shared.qWorldX), 1, 8,
                                        sa2__sub_801EC3C);
@@ -669,7 +668,6 @@ NONMATCH("asm/non_matching/game/interactables/platform__Task_802F698.inc", void 
         DrawPlatformShared(&platform->shared, s);
     }
 }
-END_NONMATCH
 
 static void InitSprite(u16 kindA, u16 flag5, Sprite *s)
 {

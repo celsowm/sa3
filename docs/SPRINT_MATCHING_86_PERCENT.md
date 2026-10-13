@@ -220,3 +220,39 @@ Reverter a promoção que quebrar matching; fazer commits pequenos
 **A campanha de +5 pp não equivale a 100% de descompilação.**
 Ela leva de 81,4122% até ≥86,42% de **matching de código**;
 o restante do código e dos dados segue em marcos posteriores.
+
+## 7. Execution ledger — batch 1: platform pair (2026-10-13)
+
+**Proof from actual pinned agbcc and local private Europe ROM (not CI claims):**
+
+- Original cleanly reproduced baseline: **664,656 / 816,408 = 81.4122% matched**.
+- In `src/game/sa3/interactables/platform.c`, both `Task_802F368` and
+  `Task_802F698` originally differed by **one assembly instruction** each:
+  the target loaded the task pointer using `ldr r0, [sp, #4]`, whereas the
+  generated C did `adds r0, r7, #0`.
+- After trying more than 10 variants of pointer aliasing and stack constraints,
+  the pinned original `agbcc` produced exact normalized instruction streams
+  for both when an explicit single-instruction stack reload was used with a
+  register-constrained C pointer. This is a compiler/ABI-sensitive matching
+  idiom; leave the explanatory comments in source.
+- Both were changed from `NONMATCH` to C declarations, and their two obsolete
+  fallback `.inc` files were removed.
+- **Whole-ROM linker & hash test passed**:
+  `make -j4 PLATFORM=gba CPU_ARCH=arm compare` → `sa3.gba: OK`;
+  output SHA-1 `685af3a2dc0f1b3f8922e73ec42c1dc92e210e39`.
+- Progress script on the freshly generated `sa3.map`: **666,588 / 816,408
+  matched = 81.6489%**. Net improvement = **+1,932 matched bytes**
+  (+0.23665 percentage points), which may include compiler/linker
+  classification interactions beyond the two interval upper bounds.
+- Decompiled code remains **811,872 / 816,408 = 99.4444%**.
+  Data remains **4,930,806 / 14,011,012 = 35.1924%**.
+- Offline unit suite ran 72 tests with 8 **pre-existing SIO failures**
+  (tests expecting source bodies unavailable in the current SIO layout).
+  This is not a green suite; the gameplay ROM oracle is green.
+
+**M1 target:** 672,821 matched bytes. **Remaining to M1: 6,233 bytes.**
+**M5 target:** 705,540 matched bytes. **Remaining to M5: 38,952 bytes.**
+
+Next candidates: `EngineInit` (1,776 ELF bytes, 5 edits in older ranking),
+`Task_RingsMgrStage` (2,276 bytes, 7 edits). Always validate with the pinned
+agbcc and the complete European ROM, not normalized instruction score alone.
