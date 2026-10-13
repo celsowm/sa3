@@ -12,7 +12,7 @@
 	movs r1, #0xb4
 	lsls r1, r1, #3
 	adds r5, r5, r1
-	ldr r2, _0809FBAC @ =gUnknown_080D8D00
+	ldr r2, _0809FBAC @ =gTileInfo_CharSelect3_HeaderBackdrop
 	ldrh r1, [r2]
 	movs r3, #0
 	mov r8, r3
@@ -44,7 +44,7 @@
 	movs r3, #0xc8
 	lsls r3, r3, #3
 	adds r5, r5, r3
-	ldr r2, _0809FBB0 @ =gUnknown_080D8D08
+	ldr r2, _0809FBB0 @ =gTileInfo_CharSelect3_TeamDescriptions
 	ldrb r1, [r7]
 	lsls r1, r1, #6
 	adds r1, r1, r2
@@ -145,7 +145,7 @@
 	lsls r3, r3, #1
 	mov sb, r3
 	add r5, sb
-	ldr r6, _0809FBC4 @ =gUnknown_080D8E80
+	ldr r6, _0809FBC4 @ =gTileInfo_CharSelect3_NameTagNames
 	lsls r2, r2, #3
 	adds r1, r1, r2
 	lsls r1, r1, #3
@@ -283,13 +283,13 @@
 	bx r0
 	.align 2, 0
 _0809FBA8: .4byte 0x06010000
-_0809FBAC: .4byte gUnknown_080D8D00
-_0809FBB0: .4byte gUnknown_080D8D08
+_0809FBAC: .4byte gTileInfo_CharSelect3_HeaderBackdrop
+_0809FBB0: .4byte gTileInfo_CharSelect3_TeamDescriptions
 _0809FBB4: .4byte 0x00000574
 _0809FBB8: .4byte gUnknown_080D8F08
 _0809FBBC: .4byte 0x0000FFC0
 _0809FBC0: .4byte gUnknown_080D8F18
-_0809FBC4: .4byte gUnknown_080D8E80
+_0809FBC4: .4byte gTileInfo_CharSelect3_NameTagNames
 _0809FBC8: .4byte gUnknown_080D8EF8
 _0809FBCC: .4byte gUnknown_080D8F10
 

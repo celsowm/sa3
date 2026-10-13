@@ -45,7 +45,7 @@ _080A11E8:
 	movs r2, #0xaa
 	lsls r2, r2, #1
 	adds r4, r5, r2
-	ldr r2, _080A1248 @ =gUnknown_080D8E80
+	ldr r2, _080A1248 @ =gTileInfo_CharSelect3_NameTagNames
 	lsls r0, r0, #3
 	ldrb r1, [r1]
 	adds r0, r0, r1
@@ -71,6 +71,6 @@ _080A11E8:
 	.align 2, 0
 _080A1240: .4byte 0xFFFFFBFF
 _080A1244: .4byte gUnknown_080D8F18
-_080A1248: .4byte gUnknown_080D8E80
+_080A1248: .4byte gTileInfo_CharSelect3_NameTagNames
 
 .syntax divided

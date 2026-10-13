@@ -85,7 +85,7 @@ _080A0F02:
 	str r2, [r0, #0xc]
 	strh r4, [r0, #0x18]
 	strh r4, [r0, #0x1a]
-	ldr r2, _080A1018 @ =gUnknown_080D8CDC
+	ldr r2, _080A1018 @ =gCharSelect3_Tilemaps
 	mov sb, r2
 	adds r1, #0xa
 	lsls r1, r1, #1
@@ -165,7 +165,7 @@ _080A1008: .4byte gBgScrollRegs
 _080A100C: .4byte gUnknown_080D8F18
 _080A1010: .4byte 0x0600C000
 _080A1014: .4byte 0x06001800
-_080A1018: .4byte gUnknown_080D8CDC
+_080A1018: .4byte gCharSelect3_Tilemaps
 _080A101C: .4byte 0x0000025E
 _080A1020: .4byte 0x00001B89
 _080A1024: .4byte 0x06008000

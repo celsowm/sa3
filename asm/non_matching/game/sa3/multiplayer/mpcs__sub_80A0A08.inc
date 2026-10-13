@@ -92,7 +92,7 @@ _080A0AA8:
 _080A0AAC:
 	movs r4, #2
 _080A0AAE:
-	ldr r1, _080A0AD8 @ =gUnknown_080D8D08
+	ldr r1, _080A0AD8 @ =gTileInfo_CharSelect3_TeamDescriptions
 	ldrb r0, [r6]
 	lsls r0, r0, #3
 	adds r0, r4, r0
@@ -113,6 +113,6 @@ _080A0AAE:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_080A0AD8: .4byte gUnknown_080D8D08
+_080A0AD8: .4byte gTileInfo_CharSelect3_TeamDescriptions
 
 .syntax divided

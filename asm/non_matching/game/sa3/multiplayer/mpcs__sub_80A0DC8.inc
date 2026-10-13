@@ -19,7 +19,7 @@
 	str r1, [r0, #0xc]
 	strh r5, [r0, #0x18]
 	strh r5, [r0, #0x1a]
-	ldr r2, _080A0E54 @ =gUnknown_080D8CDC
+	ldr r2, _080A0E54 @ =gCharSelect3_Tilemaps
 	adds r1, r6, #5
 	lsls r1, r1, #1
 	adds r1, r1, r2
@@ -66,7 +66,7 @@ _080A0E28:
 _080A0E48: .4byte gUnknown_080D8F18
 _080A0E4C: .4byte 0x06008000
 _080A0E50: .4byte 0x0600D800
-_080A0E54: .4byte gUnknown_080D8CDC
+_080A0E54: .4byte gCharSelect3_Tilemaps
 _080A0E58: .4byte 0x0000029E
 _080A0E5C: .4byte gFlags
 _080A0E60: .4byte gUnknown_08E2EE50
