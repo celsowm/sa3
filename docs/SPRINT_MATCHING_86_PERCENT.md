@@ -256,3 +256,39 @@ o restante do código e dos dados segue em marcos posteriores.
 Next candidates: `EngineInit` (1,776 ELF bytes, 5 edits in older ranking),
 `Task_RingsMgrStage` (2,276 bytes, 7 edits). Always validate with the pinned
 agbcc and the complete European ROM, not normalized instruction score alone.
+
+
+## 8. Execution ledger — batch 2: background animation (2026-10-13)
+
+**ROM-matched C promotion:** \`UpdateBgAnimationTiles\`, source
+\`src/background.c\`, old fallback
+\`asm/non_matching/engine/UpdateBgAnimationTiles.inc\`.
+
+- Previous mismatch: only two Thumb instructions in the animation branch.
+  The reference uses \`mov r4, ip; ldr r1, [r4, #4]\`; the C fallback
+  candidate used \`mov r0, ip; ldr r1, [r0, #4]\`.
+- Solution: keep the original C implementation, with an SA3-only
+  \`r1\`-bound pointer output from a two-instruction inline ASM fragment
+  selecting the original \`r4\` base. Use the existing expression for
+  SA1/SA2 instead of changing those engines' register allocation.
+- Tested multiple alternatives with the pinned original agbcc. The
+  reconstructed C produced **0 normalized instruction edits**.
+- Removed the obsolete fallback and rebuilt the **full private European
+  ROM** with \`make -j4 compare\`; \`sa3.gba: OK\`, and a separate
+  \`sha1sum -c sa3.sha1\` also passed.
+- Official \`scripts/progress.py text -m\` algorithm on the new
+  \`sa3.map\`: **666,780 / 816,408 = 81.6724% matched**.
+  Previous batch: 666,588; **net +192 bytes** (+0.02352 pp).
+- Total gain since the verified baseline: **+2,124 matched bytes**.
+  The decompiled fraction remains 811,872 / 816,408 = 99.4444%.
+- In the offline environment without GitPython, the unused import
+  \`git\` was stubbed only at runtime for the text-mode reporter;
+  the map parser was run unchanged.
+
+**Remaining:** M1 (672,821) needs **6,041 bytes**, and M5
+(705,540) needs **38,760 bytes**.
+
+**Engineering caveat:** the single machine-instruction fragment is
+intentionally assembler/compiler-specific; it is *not* a generic C
+portability solution. The full ROM comparison, not the triage diff,
+is the acceptance gate. Keep all reference ROM bytes private.

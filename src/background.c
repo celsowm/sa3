@@ -662,10 +662,13 @@ END_NONMATCH
 
 // Matches in SA2!
 // (99.89%) https://decomp.me/scratch/renVB
-NONMATCH("asm/non_matching/engine/UpdateBgAnimationTiles.inc", void UpdateBgAnimationTiles(Background *bg))
+void UpdateBgAnimationTiles(Background *bg)
 {
     Tilemap *tilemap = (Tilemap *)gTilemapsRef[bg->tilemapId];
     const u8 *tiles;
+#if (ENGINE == ENGINE_3)
+    register u8 *tileDest asm("r1");
+#endif
 
     if (tilemap->animFrameCount > 0) {
         if (tilemap->animDelay <= ++bg->animDelayCounter) {
@@ -691,7 +694,14 @@ NONMATCH("asm/non_matching/engine/UpdateBgAnimationTiles.inc", void UpdateBgAnim
 
                 ADD_TO_GRAPHICS_QUEUE(tiles, bg->graphics.dest, animTileSize);
             } else {
-                u8 *_tiles = bg->graphics.dest;
+                u8 *_tiles;
+#if (ENGINE == ENGINE_3)
+                // SA3 agbcc: the original reads graphics.dest through r4, not r0.
+                asm volatile(".syntax unified\n mov r4, ip\n ldr r1, [r4, #4]\n .syntax divided" : "=r"(tileDest));
+                _tiles = tileDest;
+#else
+                _tiles = bg->graphics.dest;
+#endif
                 _tiles += tilemap->tilesSize;
                 tiles = _tiles + (bg->animFrameCounter * animTileSize);
                 ADD_TO_GRAPHICS_QUEUE(tiles, bg->graphics.dest, animTileSize);
@@ -699,7 +709,6 @@ NONMATCH("asm/non_matching/engine/UpdateBgAnimationTiles.inc", void UpdateBgAnim
         }
     }
 }
-END_NONMATCH
 
 // Differences to UpdateSpriteAnimation:
 // - SPRITE_INIT_ANIM_IF_CHANGED gets executed *after* the if, in SA1|SA2.
