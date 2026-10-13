@@ -1,3 +1,8 @@
+> **Plano vigente para +5 pp após o build real com agbcc (2026-10-13):**
+> [SPRINT_MATCHING_86_PERCENT.md](SPRINT_MATCHING_86_PERCENT.md).
+> O restante deste arquivo preserva o histórico de estimativas e avanços de
+> 2026-10-10; suas porcentagens e filas antigas não são o baseline atual.
+
 # Plano: +5 pontos percentuais de código matched
 
 ## Checkpoint — SIO control-flow verification (subsequent main commits)
