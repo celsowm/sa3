@@ -38,6 +38,8 @@ jobs:
           persist-credentials: false
       - name: Run local, ROM-free Python tests
         run: python3 -m unittest discover -s scripts/tests -v
+      - name: Summarize matching backlog (no ROM required)
+        run: python3 scripts/matching_audit.py --limit 12 >> "$GITHUB_STEP_SUMMARY"
 
   build:
     # Do not fetch private ROMs or use secrets for untrusted pull requests.
@@ -85,10 +87,15 @@ jobs:
           curl --fail --show-error --silent --location \
             --user "$STORAGE_USERNAME:$STORAGE_PASSWORD" \
             --output baserom_sa3.gba "$STORAGE_URL/baserom.gba"
-          sha1sum -c sa3.sha1
+          # sha1sum -c sa3.sha1 checks the generated sa3.gba, which does
+          # not exist yet. Validate the separately supplied original here.
+          awk '{print $1 "  baserom_sa3.gba"}' sa3.sha1 | sha1sum -c -
 
       - name: Compare
-        run: make -j"$(nproc)" compare
+        run: |
+          make -j"$(nproc)" compare
+          # Verify the generated ROM only after the build has produced it.
+          sha1sum -c sa3.sha1
 
       - name: Progress
         run: |
@@ -101,15 +108,13 @@ jobs:
           python3 scripts/progress.py csv >> gh-pages/reports/progress-sa3-nonmatching.csv
           python3 scripts/progress.py csv -m >> gh-pages/reports/progress-sa3-matching.csv
           python3 scripts/progress.py shield-json > gh-pages/reports/progress-sa3-shield.json
-          echo "REPORTS_COMMIT_MSG=$( git log --format=%s ${GITHUB_SHA} )" >> $GITHUB_ENV
           cp sa3.map gh-pages/maps/${GITHUB_SHA}.map
           
       - name: Upload progress
-        if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
         uses: actions/upload-artifact@v7
         with:
-          path: |
-            gh-pages
+          name: progress-reports
+          path: gh-pages
 
   publish-progress:
     name: Publish progress
@@ -117,7 +122,7 @@ jobs:
     needs: [build]
     # Only able to run from repo pull requests (by maintainers, for debugging)
     # or on the main branch via push
-    if: ${{ github.event_name == 'push' && vars.ENABLE_ROM_BUILD == 'true' }}
+    if: ${{ github.event_name == 'push' && vars.ENABLE_ROM_BUILD == 'true' && vars.ENABLE_PROGRESS_PUBLISH == 'true' }}
     permissions:
       contents: write
     steps:
@@ -129,8 +134,8 @@ jobs:
       - name: Download progress
         uses: actions/download-artifact@v7
         with:
-          path: |
-            gh-pages
+          name: progress-reports
+          path: gh-pages
       - run: |
           cd gh-pages
           git status
@@ -141,4 +146,4 @@ jobs:
           branch: gh-pages
           cwd: "./gh-pages"
           add: "reports maps"
-          message: ${{ env.REPORTS_COMMIT_MSG }}
+          message: Progress for ${{ github.sha }}

@@ -91,3 +91,17 @@ python3 -m unittest scripts.tests.test_platform_reference_oracle -v
 **These are original-reference fingerprints, not compiler matching results.**
 Only the pinned agbcc output and full `make compare` can turn a candidate
 into verified matched C; the source fallbacks remain in place.
+
+## Trusted GitHub Actions ROM-compare pipeline (2026-10-13)
+
+The CI configuration was audited and corrected:
+
+- **Before** the build: check the private `baserom_sa3.gba` using the original SHA-1 recorded in `sa3.sha1`. A previous workflow ran `sha1sum -c sa3.sha1` at this stage, accidentally checking nonexistent **output** `sa3.gba` and failing before compilation.
+- **After** the build: `make compare` **and** `sha1sum -c sa3.sha1` check the newly generated `sa3.gba`.
+- ROM-free tests and the current backlog summary run without secrets on normal pushes and pull requests (if repository Actions are enabled).
+- The build job remains **opt-in** behind repository variable `ENABLE_ROM_BUILD=true` and private secrets `STORAGE_URL`, `STORAGE_USERNAME`, and `STORAGE_PASSWORD`. The source must be a trusted private endpoint containing `baserom.gba`.
+- Progress publishing is independently **opt-in** behind `ENABLE_PROGRESS_PUBLISH=true`. First create/configure the fork's `gh-pages` branch if publishing is desired. Reports are transferred through the named `progress-reports` artifact and the publication commit refers to `github.sha`.
+- No copyrighted ROM is committed, uploaded as an Actions artifact, or included in the repository. Generated reports are metadata only.
+- Synthetic unit tests `scripts/tests/test_ci_rom_compare.py` verify that input validation runs before generated output exists and rejects wrong bytes; a source-level workflow assertion verifies the check order.
+
+**CI limitations:** As of this change, GitHub Actions for this fork reported **zero workflow runs**. This is a configuration and test improvement, **not** proof that the actual GBA build passes. Re-check Actions settings/runs and private variables before treating the result as validated matching code.
