@@ -1,0 +1,49 @@
+name: Prepare offline SA3 build kit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/sa3-offline-kit.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  package-offline-kit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout public fork source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Prepare ARM tool packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          mkdir -p offline/debs
+          (cd offline/debs && apt-get download binutils-arm-none-eabi gcc-arm-none-eabi)
+          ls -lh offline/debs/*.deb
+      - name: Archive tracked source (never ROM)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git archive --format=tar HEAD | gzip -1 > offline/sa3-source.tar.gz
+          printf '%s\n' "${GITHUB_SHA}" > offline/SA3_COMMIT
+          sha256sum offline/sa3-source.tar.gz offline/debs/*.deb > offline/SHA256SUMS
+          cat offline/SHA256SUMS
+      - name: Package offline toolchain dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -C offline -czf sa3-offline-kit.tar.gz sa3-source.tar.gz SA3_COMMIT SHA256SUMS debs
+          ls -lh sa3-offline-kit.tar.gz
+      - name: Upload offline kit
+        uses: actions/upload-artifact@v4
+        with:
+          name: sa3-offline-kit
+          path: sa3-offline-kit.tar.gz
+          retention-days: 7
+          if-no-files-found: error
