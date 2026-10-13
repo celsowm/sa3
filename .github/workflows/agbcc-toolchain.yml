@@ -1,0 +1,61 @@
+name: Build pinned agbcc toolchain
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/agbcc-toolchain.yml'
+      - 'scripts/bootstrap_agbcc.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  build-agbcc-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout sa3
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install ARM and host build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git python3 gcc-arm-none-eabi binutils-arm-none-eabi
+
+      - name: Build official SAT-R/agbcc at pinned SHA
+        run: |
+          bash scripts/bootstrap_agbcc.sh
+          test -x tools/agbcc/bin/agbcc
+          test -x tools/agbcc/bin/old_agbcc
+          test -x tools/agbcc/bin/agbcc_arm
+          test -s tools/agbcc/lib/libc.a
+          test -s tools/agbcc/lib/libgcc.a
+          test "$(cat tools/agbcc/COMPILER_COMMIT)" = '57a5b3e21157ffa5490deebfa4d6dcf0b3052d28'
+
+      - name: Compile and assemble a smoke test with real agbcc
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'int agbcc_smoke(int value) { return value * 42 + 1; }\n' > "$RUNNER_TEMP/agbcc_smoke.c"
+          arm-none-eabi-cpp -nostdinc -P "$RUNNER_TEMP/agbcc_smoke.c" > "$RUNNER_TEMP/agbcc_smoke.i"
+          tools/agbcc/bin/agbcc -O2 -fshort-enums -o "$RUNNER_TEMP/agbcc_smoke.s" "$RUNNER_TEMP/agbcc_smoke.i"
+          arm-none-eabi-as -mcpu=arm7tdmi -mthumb-interwork "$RUNNER_TEMP/agbcc_smoke.s" -o "$RUNNER_TEMP/agbcc_smoke.o"
+          arm-none-eabi-nm "$RUNNER_TEMP/agbcc_smoke.o" | grep agbcc_smoke
+          echo 'Original agbcc + ARM assembler smoke test OK' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Package compiler binaries (no game ROM)
+        run: |
+          tar -C tools/agbcc -czf agbcc-linux-x86_64.tar.gz bin include lib COMPILER_COMMIT
+          sha256sum agbcc-linux-x86_64.tar.gz
+
+      - name: Upload compiler bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: agbcc-linux-x86_64
+          path: agbcc-linux-x86_64.tar.gz
+          if-no-files-found: error
+          retention-days: 30
