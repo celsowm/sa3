@@ -3,7 +3,7 @@
 #include "lib/m4a/m4a.h"
 #include "game/save.h"
 #include "game/stage.h"
-#include "game/character_select.h"
+#include "game/sa3/character_select.h"
 #include "code_0_1.h"
 #include "constants/tilemaps.h"
 
@@ -161,7 +161,7 @@ void Task_TimeRecordScreenInit(void)
 }
 
 // (89.54%) https://decomp.me/scratch/AVVy9
-void sub_80947EC(TimeRecordScreen *trs)
+NONMATCH("asm/non_matching/game/sa3/options/trs__sub_80947EC.inc", void sub_80947EC(TimeRecordScreen *trs))
 {
     u8 i;
 
@@ -180,8 +180,8 @@ void sub_80947EC(TimeRecordScreen *trs)
     trs->unk4 = 0;
 
     for (i = 0; i < ARRAY_COUNT(trs->unk78); i++) {
-        trs->unk78[i].x = Q(i * 64 + 240);
-        trs->unk78[i].y = Q(i * 16 + 16);
+        trs->unk78[i].x = (i * 0x4000) + 0xF000;
+        trs->unk78[i].y = (i * 0x1000) + (0x80 << 5);
         trs->unkF[i] = 0;
     }
 
@@ -223,6 +223,7 @@ void sub_80947EC(TimeRecordScreen *trs)
 
     trs->vramA0 = OBJ_VRAM0;
 }
+END_NONMATCH
 
 // (99.82%) https://decomp.me/scratch/sBH4x
 NONMATCH("asm/non_matching/game/sa3/options/trs__sub_8094924.inc", void sub_8094924(TimeRecordScreen *trs))

@@ -150,11 +150,11 @@ bool32 sub_80A17FC(MpCharSelect *mcs);
 bool32 sub_80A1908(MpCharSelect *mcs);
 void Task_CallDestroy_80A1498(void);
 extern void *CreateSomeTask_809BF3C(void *param0, void *param1, void *param2, void *param3, void *tiles);
-extern const u16 gUnknown_080D8CDC[];
+extern const u16 gCharSelect3_Tilemaps[];
 
-extern const TileInfo2 gUnknown_080D8D00;
-extern const TileInfo2 gUnknown_080D8D08[][8];
-extern const TileInfo2 gUnknown_080D8E80[];
+extern const TileInfo2 gTileInfo_CharSelect3_HeaderBackdrop;
+extern const TileInfo2 gTileInfo_CharSelect3_TeamDescriptions[][8];
+extern const TileInfo2 gTileInfo_CharSelect3_NameTagNames[];
 extern const TileInfo2 gUnknown_080D8EF8;
 extern const TileInfo2 gUnknown_080D8F08;
 extern const TileInfo2 gUnknown_080D8F10;
@@ -220,8 +220,8 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_809F964.inc", void sub
         Sprite *s = &mcs->sDC;
         s->tiles = tiles;
         tiles += 45 * TILE_SIZE_4BPP;
-        s->anim = gUnknown_080D8D00.anim;
-        s->variant = gUnknown_080D8D00.variant;
+        s->anim = gTileInfo_CharSelect3_HeaderBackdrop.anim;
+        s->variant = gTileInfo_CharSelect3_HeaderBackdrop.variant;
         s->prevVariant = -1;
         s->x = I(mcs->unk3C);
         s->y = I(mcs->unk40);
@@ -238,8 +238,8 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_809F964.inc", void sub
         Sprite *s = &mcs->sB4;
         s->tiles = tiles;
         tiles += 50 * TILE_SIZE_4BPP;
-        s->anim = gUnknown_080D8D08[mcs->language][0].anim;
-        s->variant = gUnknown_080D8D08[mcs->language][0].variant;
+        s->anim = gTileInfo_CharSelect3_TeamDescriptions[mcs->language][0].anim;
+        s->variant = gTileInfo_CharSelect3_TeamDescriptions[mcs->language][0].variant;
         s->prevVariant = -1;
         s->x = I(mcs->unk34);
         s->y = I(mcs->unk38);
@@ -293,8 +293,8 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_809F964.inc", void sub
         u32 idx = gUnknown_080D8F18[mcs->unk1] + (mcs->language != 0) * 8;
         s->tiles = tiles;
         tiles += 14 * TILE_SIZE_4BPP;
-        s->anim = gUnknown_080D8E80[idx].anim;
-        s->variant = gUnknown_080D8E80[idx].variant;
+        s->anim = gTileInfo_CharSelect3_NameTagNames[idx].anim;
+        s->variant = gTileInfo_CharSelect3_NameTagNames[idx].variant;
         s->prevVariant = -1;
         s->x = I(mcs->unk5C);
         s->y = I(mcs->unk60);
@@ -312,8 +312,8 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_809F964.inc", void sub
         u32 idx = gUnknown_080D8F18[mcs->unk1] + (mcs->language != 0) * 8;
         s->tiles = tiles;
         tiles += 14 * TILE_SIZE_4BPP;
-        s->anim = gUnknown_080D8E80[idx].anim;
-        s->variant = gUnknown_080D8E80[idx].variant;
+        s->anim = gTileInfo_CharSelect3_NameTagNames[idx].anim;
+        s->variant = gTileInfo_CharSelect3_NameTagNames[idx].variant;
         s->prevVariant = -1;
         s->x = I(mcs->unk64);
         s->y = I(mcs->unk68);
@@ -379,7 +379,7 @@ void sub_809FBD0(MpCharSelect *mcs)
         bg->layoutVram = BG_SCREEN_ADDR(14);
         bg->unk18 = 0;
         bg->unk1A = 0;
-        bg->tilemapId = gUnknown_080D8CDC[0];
+        bg->tilemapId = gCharSelect3_Tilemaps[0];
         bg->unk1E = 0;
         bg->unk20 = 0;
         bg->unk22 = 0;
@@ -402,7 +402,7 @@ void sub_809FBD0(MpCharSelect *mcs)
         bg->layoutVram = BG_SCREEN_ADDR(3);
         bg->unk18 = 0;
         bg->unk1A = 0;
-        bg->tilemapId = gUnknown_080D8CDC[11];
+        bg->tilemapId = gCharSelect3_Tilemaps[11];
         bg->unk1E = 0;
         bg->unk20 = 0;
         bg->unk22 = 0;
@@ -425,7 +425,7 @@ void sub_809FBD0(MpCharSelect *mcs)
         bg->layoutVram = BG_SCREEN_ADDR(27);
         bg->unk18 = 0;
         bg->unk1A = 0;
-        bg->tilemapId = gUnknown_080D8CDC[mcs->unk1 + 5];
+        bg->tilemapId = gCharSelect3_Tilemaps[mcs->unk1 + 5];
         bg->unk1E = 0;
         bg->unk20 = 0;
         bg->unk22 = 0;
@@ -659,8 +659,8 @@ void sub_80A021C(void)
         gCurTask->main = Task_80A14AC;
     } else if (*mcs->unk18 == 13) {
         Sprite *s = &mcs->sB4;
-        s->anim = gUnknown_080D8D08[0][mcs->language * 8 + 1].anim;
-        s->variant = gUnknown_080D8D08[0][mcs->language * 8 + 1].variant;
+        s->anim = gTileInfo_CharSelect3_TeamDescriptions[0][mcs->language * 8 + 1].anim;
+        s->variant = gTileInfo_CharSelect3_TeamDescriptions[0][mcs->language * 8 + 1].variant;
         UpdateSpriteAnimation(s);
         mcs->unk6C = Q(300);
         mcs->unk4C = Q(300);
@@ -912,7 +912,7 @@ void sub_80A06E8(void)
             bg->layoutVram = BG_SCREEN_ADDR(27);
             bg->unk18 = 0;
             bg->unk1A = 0;
-            bg->tilemapId = gUnknown_080D8CDC[character + 10];
+            bg->tilemapId = gCharSelect3_Tilemaps[character + 10];
             bg->unk1E = 0;
             bg->unk20 = 0;
             bg->unk22 = 0;
@@ -1027,7 +1027,7 @@ void sub_80A094C(void)
             bg->layoutVram = BG_SCREEN_ADDR(27);
             bg->unk18 = 0;
             bg->unk1A = 0;
-            bg->tilemapId = gUnknown_080D8CDC[15];
+            bg->tilemapId = gCharSelect3_Tilemaps[15];
             bg->unk1E = 0;
             bg->unk20 = 0;
             bg->unk22 = 0;
@@ -1089,8 +1089,8 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0A08.inc", void sub
         a = 2;
     }
 
-    s->anim = gUnknown_080D8D08[0][a + mcs->language * 8].anim;
-    s->variant = gUnknown_080D8D08[0][a + mcs->language * 8].variant;
+    s->anim = gTileInfo_CharSelect3_TeamDescriptions[0][a + mcs->language * 8].anim;
+    s->variant = gTileInfo_CharSelect3_TeamDescriptions[0][a + mcs->language * 8].variant;
     UpdateSpriteAnimation(s);
 }
 END_NONMATCH
@@ -1232,7 +1232,7 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0DC8.inc", void sub
         bg->layoutVram = BG_SCREEN_ADDR(27);
         bg->unk18 = 0;
         bg->unk1A = 0;
-        bg->tilemapId = gUnknown_080D8CDC[character + 5];
+        bg->tilemapId = gCharSelect3_Tilemaps[character + 5];
         bg->unk1E = 0;
         bg->unk20 = 0;
         bg->unk22 = 0;
@@ -1290,7 +1290,7 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0EA8.inc", void sub
         bg->layoutVram = BG_SCREEN_ADDR(3);
         bg->unk18 = 0;
         bg->unk1A = 0;
-        bg->tilemapId = gUnknown_080D8CDC[gUnknown_080D8F18[mcs->unk2] + 10];
+        bg->tilemapId = gCharSelect3_Tilemaps[gUnknown_080D8F18[mcs->unk2] + 10];
         bg->unk1E = 0;
         bg->unk20 = 0;
         bg->unk22 = 0;
@@ -1313,7 +1313,7 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A0EA8.inc", void sub
         bg->layoutVram = BG_SCREEN_ADDR(27);
         bg->unk18 = 0;
         bg->unk1A = 0;
-        bg->tilemapId = gUnknown_080D8CDC[gUnknown_080D8F18[mcs->unk1] + 5];
+        bg->tilemapId = gCharSelect3_Tilemaps[gUnknown_080D8F18[mcs->unk1] + 5];
         bg->unk1E = 0;
         bg->unk20 = 0;
         bg->unk22 = 0;
@@ -1406,8 +1406,8 @@ void sub_80A1110(MpCharSelect *mcs)
 
     s = &mcs->s104;
     {
-        s->anim = gUnknown_080D8E80[character + lang * 8].anim;
-        s->variant = gUnknown_080D8E80[character + lang * 8].variant;
+        s->anim = gTileInfo_CharSelect3_NameTagNames[character + lang * 8].anim;
+        s->variant = gTileInfo_CharSelect3_NameTagNames[character + lang * 8].variant;
     }
     s->x = I(mcs->unk5C);
     s->y = I(mcs->unk60);
@@ -1438,7 +1438,7 @@ NONMATCH("asm/non_matching/game/sa3/multiplayer/mpcs__sub_80A11B8.inc", void sub
     {
         u8 idx = gUnknown_080D8F18[mcs->unk1];
         Sprite *s2 = &mcs->s154;
-        const TileInfo2 *ti = &gUnknown_080D8E80[lang * 8 + idx];
+        const TileInfo2 *ti = &gTileInfo_CharSelect3_NameTagNames[lang * 8 + idx];
         s2->anim = ti->anim;
         s2->variant = ti->variant;
         s2->x = I(mcs->unk64);
