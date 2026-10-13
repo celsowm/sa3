@@ -68,3 +68,26 @@ Fix only the specific compiler-generated differences and preserve the original e
 Matching success is **the generated European ROM with SHA-1 `685af3a2dc0f1b3f8922e73ec42c1dc92e210e39`** plus a sound map-derived increase in matched code bytes. Do not count source-level C recovery, instruction similarity, or `.inc` removals as binary matching without the full-ROM validation.
 
 Keep the European ROM private. SAT-R upstream explicitly rejects AI-generated submissions; this plan is intended for `celsowm/sa3` only.
+
+
+## Private EU ROM reference fingerprints — platform pair
+
+A read-only reference check was performed against the user-provided Europe rev-0
+ROM with the expected SHA-1. The code intervals are derived from the original
+named source entry labels, and include any literal pools/padding within them:
+
+| Symbol | Start | End exclusive | Upper-bound span | SHA-256 of ROM interval |
+|---|---|---|---:|---|
+| `Task_802F368` | `0x0802F368` | `0x0802F698` | 816 bytes | `bc14b09a54e89b28a67b6cab0e55f5fb4d16a8e768caa9ae50f1303da7a3648a` |
+| `Task_802F698` | `0x0802F698` | `0x0802F9C4` | 812 bytes | `548a349bb6842f5939b294cf1a9757e4095095f770d56e8665c5e8d11a884689` |
+
+To reproduce locally (the tool emits hashes and metadata **only**, not ROM bytes):
+
+```bash
+python3 scripts/platform_reference_oracle.py /private/path/baserom_sa3.gba
+python3 -m unittest scripts.tests.test_platform_reference_oracle -v
+```
+
+**These are original-reference fingerprints, not compiler matching results.**
+Only the pinned agbcc output and full `make compare` can turn a candidate
+into verified matched C; the source fallbacks remain in place.
