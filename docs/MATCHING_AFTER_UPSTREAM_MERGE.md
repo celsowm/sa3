@@ -105,3 +105,31 @@ The CI configuration was audited and corrected:
 - Synthetic unit tests `scripts/tests/test_ci_rom_compare.py` verify that input validation runs before generated output exists and rejects wrong bytes; a source-level workflow assertion verifies the check order.
 
 **CI limitations:** As of this change, GitHub Actions for this fork reported **zero workflow runs**. This is a configuration and test improvement, **not** proof that the actual GBA build passes. Re-check Actions settings/runs and private variables before treating the result as validated matching code.
+
+## Exact local ROM difference report
+
+The new \`scripts/rom_matching_diff.py\` performs a read-only byte comparison
+between the SHA-verified private European base ROM and an actual locally
+produced \`sa3.gba\`. It reports SHA-1 digests, the first differing ROM address,
+and mismatch counts **without dumping copyrighted bytes**. The two priority
+platform intervals are included by default. Use custom windows to analyze
+additional functions after their original address boundaries are confirmed:
+
+\`\`\`bash
+# Run only once the pinned agbcc toolchain has generated sa3.gba.
+python3 scripts/rom_matching_diff.py baserom_sa3.gba sa3.gba
+python3 scripts/rom_matching_diff.py baserom_sa3.gba sa3.gba \
+    --window Boss7:0x08078BAC:0x08078C20
+\`\`\`
+
+For a custom-only report, add \`--only-windows\`; when the *full* ROM differs,
+the program exits with status 1. Invalid reference ROMs fail before comparison.
+The tool is useful for debugging the placement and size of differences during
+matching experiments; reporting an identical original window alone is **not**
+proof that its source has been converted from ASM fallback to C.
+
+Locally the tool was exercised using the user's European reference ROM as both
+inputs (0 differences) and an altered temporary copy (2 differences at the
+two platform entry points). Synthetic tests exercise input validation,
+address-to-offset mapping, extra/truncated files, and duplicate windows.
+Neither source code nor CI stores the original ROM.
