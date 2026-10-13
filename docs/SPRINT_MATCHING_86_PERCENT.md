@@ -292,3 +292,35 @@ agbcc and the complete European ROM, not normalized instruction score alone.
 intentionally assembler/compiler-specific; it is *not* a generic C
 portability solution. The full ROM comparison, not the triage diff,
 is the acceptance gate. Keep all reference ROM bytes private.
+
+
+## 9. Execution ledger — batch 3: enemy slot task (2026-10-13)
+
+**ROM-matched C promotion:** \`Task_14_805C03C\`, source
+\`src/game/sa3/enemies/enemy_unknown_code.c\`, original
+\`asm/non_matching/game/enemies/euc__Task_14_805C03C.inc\`.
+
+- Prior C version differed by two Thumb instructions, selecting \`r0\`
+  rather than \`r1\` as the destination of the three-bit slot mask.
+- Pinned original agbcc showed that a narrowly scoped SA3-specific inline
+  Thumb fragment can reproduce the original four-instruction mask/store.
+  A second, register-constrained fragment preserves the original
+  \`gCurTask\` load before \`TaskDestroy\`. It is *not* a new game mechanic.
+- Compiled C disassembly compared with the original ASM produced
+  **0 normalized instruction edits**; the old fallback was deleted.
+- An actual \`make -j4 compare\` against the private European rev-0 ROM
+  passed: \`sa3.gba: OK\`. Rechecked separately with
+  \`sha1sum -c sa3.sha1\`: \`sa3.gba: OK\`.
+- \`scripts/progress.py text -m\` map algorithm reports **667,032 /
+  816,408 = 81.7033% matched**, a net **+252 bytes** from batch 2.
+- Combined increase in this execution turn: **444 matched bytes**,
+  combining 192 bytes from background animation plus this 252-byte task.
+- Total verified campaign increase since baseline (664,656):
+  **+2,376 matched bytes**.
+- Remaining to M1 (672,821): **5,789** bytes.
+  Remaining to M5 (705,540): **38,508** bytes.
+
+The compiler/assembler-specific inline instructions are a matching
+expedient. They remain isolated, with the original C computation
+around them; both the ROM oracle and instruction diffs must pass before
+further refactoring.

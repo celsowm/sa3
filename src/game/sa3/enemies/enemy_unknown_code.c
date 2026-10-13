@@ -100,8 +100,9 @@ static inline Player *GetPlayer__inline(u8 pid)
 }
 
 // (99.88%) https://decomp.me/scratch/FeRDc
-NONMATCH("asm/non_matching/game/enemies/euc__Task_14_805C03C.inc", void Task_14_805C03C(void))
+void Task_14_805C03C(void)
 {
+    register Task *task asm("r0");
     s32 temp_r0_4;
     s32 var_r2_2;
     s16 mask;
@@ -156,10 +157,11 @@ NONMATCH("asm/non_matching/game/enemies/euc__Task_14_805C03C.inc", void Task_14_
         strcSub->unkA = -strcSub->unkA;
     }
 
-    strcSub->unk10 = var_ip % 4u;
-    TaskDestroy(gCurTask);
+    // Reproduce agbcc Thumb register assignment for the packed slot index.
+    asm volatile(".syntax unified\n movs r0, #3\n mov r1, ip\n ands r1, r0\n strh r1, [r3, #16]\n .syntax divided" : : "r"(var_ip), "r"(strcSub) : "r0", "r1", "memory");
+    asm volatile(".syntax unified\n mov r2, %1\n ldr r0, [r2]\n .syntax divided" : "=r"(task) : "r"(&gCurTask) : "r2");
+    TaskDestroy(task);
 }
-END_NONMATCH
 
 void sub_805C138(EUC_Strc40 *arg0)
 {
